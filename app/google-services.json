@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "436310790892",
+    "project_id": "connect-avantika",
+    "storage_bucket": "connect-avantika.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:436310790892:android:523cd71160bf7ddc960bc9",
+        "android_client_info": {
+          "package_name": "Connect.Avantika.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "436310790892-h7cmpllh4seimc2ub0p0d6rv3oip04gq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "Connect.Avantika.com",
+            "certificate_hash": "8f763f8b669dce5fb9aa0c9bc600a6b1571be0f7"
+          }
+        },
+        {
+          "client_id": "436310790892-equdtc1pmen3brt8400a2q34oqsa2jrp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTARhgeYiMJIXWBbs_76J_6Ad-JaOJWSQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "436310790892-equdtc1pmen3brt8400a2q34oqsa2jrp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

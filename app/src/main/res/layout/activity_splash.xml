@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/splash_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/splash_gradient_bg">
+
+    <!-- Glowing Background Ring 1 -->
+    <ImageView
+        android:id="@+id/ring1"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:alpha="0"
+        android:src="@drawable/splash_ring"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Glowing Background Ring 2 -->
+    <ImageView
+        android:id="@+id/ring2"
+        android:layout_width="280dp"
+        android:layout_height="280dp"
+        android:alpha="0"
+        android:src="@drawable/splash_ring"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Main App Logo -->
+    <ImageView
+        android:id="@+id/app_logo"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:alpha="0"
+        android:scaleX="0.4"
+        android:scaleY="0.4"
+        android:src="@drawable/start_icon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Progress indicator at bottom -->
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/loader"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="64dp"
+        android:indeterminate="true"
+        android:alpha="0"
+        app:indicatorColor="@color/neon_accent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:trackColor="#33FFFFFF"
+        app:trackThickness="3dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

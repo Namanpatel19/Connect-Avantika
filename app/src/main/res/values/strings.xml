@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">Connect Avantika</string>
+    <string name="welcome_student">Welcome, Student!</string>
+    <string name="dashboard_title">Avantika University Dashboard</string>
+    <string name="upcoming_classes">Upcoming Classes</string>
+    <string name="announcements">Announcements</string>
+    <string name="upcoming_events">Upcoming Events</string>
+    <string name="campus_events">Campus Events</string>
+    <string name="student_clubs">Student Clubs</string>
+    <string name="notice_board">Notice Board</string>
+    <string name="profile">Profile</string>
+    <string name="login">Login</string>
+    <string name="login_with_email">Login with University Email</string>
+    <string name="register_now">Register Now</string>
+    <string name="join">Join</string>
+    <string name="urgent">URGENT</string>
+    <string name="my_activity">My Activity</string>
+    <string name="account">Account</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="logout">Logout</string>
+    <string name="error_fragment_message">An error occurred. Please try again later.</string>
+    <string name="dismiss_error">Dismiss</string>
+    <string name="browse_title">Browse Videos</string>
+    <string name="grid_view">Grid View</string>
+    <string name="error_fragment">Error Fragment</string>
+    <string name="personal_settings">Personal Settings</string>
+    <string name="watch_trailer_1">Watch Trailer</string>
+    <string name="watch_trailer_2">Watch trailer on YouTube</string>
+    <string name="rent_1">Rent</string>
+    <string name="rent_2">Rent movie</string>
+    <string name="buy_1">Buy</string>
+    <string name="buy_2">Buy movie</string>
+    <string name="related_movies">Related Movies</string>
+    <string name="movie">Movie</string>
+</resources>
