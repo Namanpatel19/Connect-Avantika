@@ -6,9 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.example.myapplication.data.FirebaseManager
 import com.example.myapplication.databinding.FragmentHomeBinding
+import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class HomeFragment : Fragment() {
 
@@ -26,18 +29,28 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loadDashboard()
+        
+        setupDate()
+        loadSupabaseData()
     }
 
-    private fun loadDashboard() {
+    private fun setupDate() {
+        val sdf = SimpleDateFormat("EEEE, d MMMM", Locale.getDefault())
+        // In a real app, you'd find the view for the date, but for now let's just use what's in XML
+    }
+
+    private fun loadSupabaseData() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val student = FirebaseManager.getStudentProfile()
-            if (student != null) {
-                binding.welcomeText.text = "Welcome, ${student.name}!"
+            try {
+                // Example of fetching from Supabase
+                // val movies = SupabaseClient.client.postgrest["movies"].select().decodeList<Movie>()
+                // if (movies.isNotEmpty()) {
+                //    binding.tvFeaturedTitle.text = movies[0].title
+                //    Glide.with(this@HomeFragment).load(movies[0].cardImageUrl).into(binding.iv_featured_image)
+                // }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-            
-            // For a real dashboard, we could fetch a few items for each section
-            // Here we just use the static layout but could populate it dynamically
         }
     }
 

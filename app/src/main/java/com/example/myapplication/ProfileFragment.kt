@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.data.FirebaseManager
@@ -31,6 +32,7 @@ class ProfileFragment : Fragment() {
         
         loadProfile()
         setupButtons()
+        setupThemeSwitch()
     }
 
     private fun loadProfile() {
@@ -40,6 +42,19 @@ class ProfileFragment : Fragment() {
                 binding.userName.text = student.name
                 binding.userDeptYear.text = "${student.department} | ${student.year}"
                 binding.userId.text = "ID: ${student.studentId}"
+            }
+        }
+    }
+
+    private fun setupThemeSwitch() {
+        val isDarkMode = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
+        binding.switchTheme.isChecked = isDarkMode
+        
+        binding.switchTheme.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             }
         }
     }

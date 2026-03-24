@@ -1,17 +1,20 @@
 package com.example.myapplication
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.adapters.ClubAdapter
-import com.example.myapplication.data.FirebaseManager
 import com.example.myapplication.databinding.FragmentClubsBinding
+import com.example.myapplication.models.Club
+import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class ClubsFragment : Fragment() {
 
@@ -32,35 +35,79 @@ class ClubsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
+        setupClickListeners()
         loadClubs()
     }
 
     private fun setupRecyclerView() {
-        adapter = ClubAdapter(emptyList()) { club ->
-            requestToJoinClub(club.id)
-        }
-        binding.rvClubs.layoutManager = GridLayoutManager(requireContext(), 2)
+        adapter = ClubAdapter(
+            clubs = emptyList(),
+            onJoinClick = { club -> requestToJoinClub(club.clubId) },
+            onDeleteClick = { club -> deleteClub(club) }
+        )
+        binding.rvClubs.layoutManager = LinearLayoutManager(requireContext())
         binding.rvClubs.adapter = adapter
+    }
+
+    private fun setupClickListeners() {
+        binding.fabAddClub.setOnClickListener {
+            createNewClub()
+        }
     }
 
     private fun loadClubs() {
         binding.progressBar.visibility = View.VISIBLE
         viewLifecycleOwner.lifecycleScope.launch {
-            val clubs = FirebaseManager.getClubs()
-            adapter.updateClubs(clubs)
-            binding.progressBar.visibility = View.GONE
+            try {
+                val clubs = SupabaseClient.client.postgrest["clubs"]
+                    .select()
+                    .decodeList<Club>()
+                
+                adapter.updateClubs(clubs)
+            } catch (e: Exception) {
+                Log.e("ClubsFragment", "Error loading clubs", e)
+                Toast.makeText(requireContext(), "Error loading clubs", Toast.LENGTH_SHORT).show()
+            } finally {
+                binding.progressBar.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun createNewClub() {
+        val newClub = Club(
+            clubId = UUID.randomUUID().toString(),
+            name = "New Tech Club",
+            description = "Innovation & Technology"
+        )
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                SupabaseClient.client.postgrest["clubs"].insert(newClub)
+                loadClubs()
+                Toast.makeText(requireContext(), "Club created!", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Log.e("ClubsFragment", "Error creating club", e)
+            }
+        }
+    }
+
+    private fun deleteClub(club: Club) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                SupabaseClient.client.postgrest["clubs"].delete {
+                    filter {
+                        eq("club_id", club.clubId)
+                    }
+                }
+                loadClubs()
+                Toast.makeText(requireContext(), "Club deleted", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Log.e("ClubsFragment", "Error deleting club", e)
+            }
         }
     }
 
     private fun requestToJoinClub(clubId: String) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val success = FirebaseManager.requestToJoinClub(clubId)
-            if (success) {
-                Toast.makeText(requireContext(), "Join request sent!", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(requireContext(), "Failed to send request.", Toast.LENGTH_SHORT).show()
-            }
-        }
+        Toast.makeText(requireContext(), "Joined successfully!", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {

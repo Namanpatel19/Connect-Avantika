@@ -58,12 +58,21 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            // For testing: allow dummy login
+            if (email == "naman.patel@avantika.edu.in" && password == "12345678") {
+                startMainActivity()
+                return@setOnClickListener
+            }
+
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
                         startMainActivity()
                     } else {
-                        Toast.makeText(this, "Login failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                        // If Firebase fails, we still allow entry for UI testing as requested
+                        Log.e("LoginActivity", "Login failed", task.exception)
+                        Toast.makeText(this, "Firebase Login failed. Entering as guest...", Toast.LENGTH_SHORT).show()
+                        startMainActivity()
                     }
                 }
         }
@@ -82,8 +91,12 @@ class LoginActivity : AppCompatActivity() {
                     firebaseAuthWithGoogle(account.idToken!!)
                 } catch (e: ApiException) {
                     Log.e("LoginActivity", "Google sign in failed", e)
-                    Toast.makeText(this, "Google sign in failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Google sign in failed. Entering as guest...", Toast.LENGTH_SHORT).show()
+                    startMainActivity()
                 }
+            } else {
+                // If user cancels or it fails, allow entering for UI testing
+                startMainActivity()
             }
         }
 
@@ -99,7 +112,8 @@ class LoginActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     startMainActivity()
                 } else {
-                    Toast.makeText(this, "Authentication Failed.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Auth Failed. Entering as guest...", Toast.LENGTH_SHORT).show()
+                    startMainActivity()
                 }
             }
     }

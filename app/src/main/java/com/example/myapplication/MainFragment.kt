@@ -30,10 +30,13 @@ import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import io.github.jan.supabase.postgrest.postgrest
+import kotlinx.coroutines.launch
 
 /**
  * Loads a grid of cards with movies to browse.
@@ -88,25 +91,58 @@ class MainFragment : BrowseSupportFragment() {
     }
 
     private fun loadRows() {
-        val list = MovieList.list
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val movies = SupabaseClient.client.postgrest["movies"].select().decodeList<Movie>()
+                
+                val rowsAdapter = ArrayObjectAdapter(ListRowPresenter())
+                val cardPresenter = CardPresenter()
 
+                if (movies.isNotEmpty()) {
+                    for (i in 0 until NUM_ROWS) {
+                        val listRowAdapter = ArrayObjectAdapter(cardPresenter)
+                        val shuffledMovies = movies.shuffled()
+                        for (j in 0 until NUM_COLS) {
+                            listRowAdapter.add(shuffledMovies[j % shuffledMovies.size])
+                        }
+                        val header = HeaderItem(i.toLong(), MovieList.MOVIE_CATEGORY[i % MovieList.MOVIE_CATEGORY.size])
+                        rowsAdapter.add(ListRow(header, listRowAdapter))
+                    }
+                }
+
+                val gridHeader = HeaderItem(NUM_ROWS.toLong(), "PREFERENCES")
+                val mGridPresenter = GridItemPresenter()
+                val gridRowAdapter = ArrayObjectAdapter(mGridPresenter)
+                gridRowAdapter.add(resources.getString(R.string.grid_view))
+                gridRowAdapter.add(getString(R.string.error_fragment))
+                gridRowAdapter.add(resources.getString(R.string.personal_settings))
+                rowsAdapter.add(ListRow(gridHeader, gridRowAdapter))
+
+                adapter = rowsAdapter
+            } catch (e: Exception) {
+                Log.e(TAG, "Error fetching movies from Supabase", e)
+                // Fallback to local list if database is empty or error occurs
+                loadLocalRows()
+            }
+        }
+    }
+
+    private fun loadLocalRows() {
+        val list = MovieList.list
         val rowsAdapter = ArrayObjectAdapter(ListRowPresenter())
         val cardPresenter = CardPresenter()
 
         for (i in 0 until NUM_ROWS) {
-            if (i != 0) {
-                Collections.shuffle(list)
-            }
             val listRowAdapter = ArrayObjectAdapter(cardPresenter)
+            val shuffledList = list.shuffled()
             for (j in 0 until NUM_COLS) {
-                listRowAdapter.add(list[j % 5])
+                listRowAdapter.add(shuffledList[j % shuffledList.size])
             }
-            val header = HeaderItem(i.toLong(), MovieList.MOVIE_CATEGORY[i])
+            val header = HeaderItem(i.toLong(), MovieList.MOVIE_CATEGORY[i % MovieList.MOVIE_CATEGORY.size])
             rowsAdapter.add(ListRow(header, listRowAdapter))
         }
 
         val gridHeader = HeaderItem(NUM_ROWS.toLong(), "PREFERENCES")
-
         val mGridPresenter = GridItemPresenter()
         val gridRowAdapter = ArrayObjectAdapter(mGridPresenter)
         gridRowAdapter.add(resources.getString(R.string.grid_view))

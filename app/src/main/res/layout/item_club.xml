@@ -1,42 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/Widget.App.Card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp">
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="5dp"
+    app:cardBackgroundColor="@color/bg_card"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/separator"
+    app:strokeWidth="1dp">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
+        android:gravity="center_vertical"
         android:padding="16dp">
 
-        <ImageView
-            android:id="@+id/club_logo"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:src="@android:drawable/ic_menu_compass"
-            app:tint="@color/primary" />
+        <!-- Club icon background circle -->
+        <FrameLayout
+            android:id="@+id/club_icon_bg"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/bg_club_icon_circle">
 
-        <TextView
-            android:id="@+id/club_name"
-            android:layout_width="wrap_content"
+            <ImageView
+                android:id="@+id/club_logo"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:src="@android:drawable/ic_menu_compass"
+                app:tint="@color/primary_light" />
+        </FrameLayout>
+
+        <!-- Club info -->
+        <LinearLayout
+            android:id="@+id/club_info"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:layout_toEndOf="@id/club_icon_bg"
+            android:layout_toStartOf="@id/btn_join"
+            android:layout_marginHorizontal="12dp"
+            android:layout_centerVertical="true"
+            android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/club_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/club_members"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="42 members"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- Join / Joined button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_join"
-            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:backgroundTint="@color/primary"
             android:text="@string/join"
-            android:textSize="12sp"
-            app:cornerRadius="12dp" />
-    </LinearLayout>
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            app:cornerRadius="16dp" />
+
+        <!-- Delete button top right -->
+        <ImageButton
+            android:id="@+id/btn_delete"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_delete"
+            android:visibility="gone"
+            app:tint="@color/error_red" />
+    </RelativeLayout>
 </com.google.android.material.card.MaterialCardView>

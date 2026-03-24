@@ -8,7 +8,8 @@ import com.example.myapplication.models.Club
 
 class ClubAdapter(
     private var clubs: List<Club>,
-    private val onJoinClick: (Club) -> Unit
+    private val onJoinClick: (Club) -> Unit,
+    private val onDeleteClick: (Club) -> Unit
 ) : RecyclerView.Adapter<ClubAdapter.ClubViewHolder>() {
 
     class ClubViewHolder(val binding: ItemClubBinding) : RecyclerView.ViewHolder(binding.root)
@@ -24,6 +25,10 @@ class ClubAdapter(
         
         holder.binding.btnJoin.setOnClickListener {
             onJoinClick(club)
+        }
+
+        holder.binding.btnDelete.setOnClickListener {
+            onDeleteClick(club)
         }
     }
 
