@@ -1,117 +1,78 @@
 package com.example.myapplication
 
 import android.os.Bundle
-import android.util.Log
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.adapters.ClubAdapter
 import com.example.myapplication.databinding.FragmentClubsBinding
-import com.example.myapplication.models.Club
-import io.github.jan.supabase.postgrest.postgrest
-import kotlinx.coroutines.launch
-import java.util.UUID
+import com.example.myapplication.ui.viewmodel.AppViewModel
+import com.example.myapplication.data.Club
+import com.google.android.material.tabs.TabLayout
 
 class ClubsFragment : Fragment() {
-
     private var _binding: FragmentClubsBinding? = null
     private val binding get() = _binding!!
-    private lateinit var adapter: ClubAdapter
+    private lateinit var vm: AppViewModel
+    private var allClubs: List<Club> = emptyList()
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentClubsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        vm = ViewModelProvider(requireActivity())[AppViewModel::class.java]
 
-        setupRecyclerView()
-        setupClickListeners()
-        loadClubs()
-    }
+        binding.rvClubs.layoutManager = LinearLayoutManager(context)
 
-    private fun setupRecyclerView() {
-        adapter = ClubAdapter(
-            clubs = emptyList(),
-            onJoinClick = { club -> requestToJoinClub(club.clubId) },
-            onDeleteClick = { club -> deleteClub(club) }
-        )
-        binding.rvClubs.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvClubs.adapter = adapter
-    }
-
-    private fun setupClickListeners() {
-        binding.fabAddClub.setOnClickListener {
-            createNewClub()
+        vm.clubs.observe(viewLifecycleOwner) { clubs ->
+            allClubs = clubs
+            filterClubs("All")
         }
-    }
 
-    private fun loadClubs() {
-        binding.progressBar.visibility = View.VISIBLE
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val clubs = SupabaseClient.client.postgrest["clubs"]
-                    .select()
-                    .decodeList<Club>()
-                
-                adapter.updateClubs(clubs)
-            } catch (e: Exception) {
-                Log.e("ClubsFragment", "Error loading clubs", e)
-                Toast.makeText(requireContext(), "Error loading clubs", Toast.LENGTH_SHORT).show()
-            } finally {
-                binding.progressBar.visibility = View.GONE
-            }
+        vm.isLoading.observe(viewLifecycleOwner) { loading ->
+            binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
         }
-    }
 
-    private fun createNewClub() {
-        val newClub = Club(
-            clubId = UUID.randomUUID().toString(),
-            name = "New Tech Club",
-            description = "Innovation & Technology"
-        )
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                SupabaseClient.client.postgrest["clubs"].insert(newClub)
-                loadClubs()
-                Toast.makeText(requireContext(), "Club created!", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                Log.e("ClubsFragment", "Error creating club", e)
-            }
-        }
-    }
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) { filterClubs(tab.text.toString()) }
+            override fun onTabUnselected(tab: TabLayout.Tab) {}
+            override fun onTabReselected(tab: TabLayout.Tab) {}
+        })
 
-    private fun deleteClub(club: Club) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                SupabaseClient.client.postgrest["clubs"].delete {
-                    filter {
-                        eq("club_id", club.clubId)
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val query = s.toString().lowercase()
+                val filtered = allClubs.filter { it.name.lowercase().contains(query) }
+                binding.rvClubs.adapter = ClubAdapter(filtered) { club ->
+                    vm.joinClub(club.id ?: "") { success ->
+                        android.widget.Toast.makeText(context, if (success) "Join request sent!" else "Error", android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
-                loadClubs()
-                Toast.makeText(requireContext(), "Club deleted", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                Log.e("ClubsFragment", "Error deleting club", e)
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        vm.loadClubs()
+    }
+
+    private fun filterClubs(category: String) {
+        val filtered = if (category == "All") allClubs
+        else allClubs.filter { it.name.lowercase().contains(category.lowercase()) }
+        binding.rvClubs.adapter = ClubAdapter(filtered) { club ->
+            vm.joinClub(club.id ?: "") { success ->
+                android.widget.Toast.makeText(context, if (success) "Join request sent!" else "Error", android.widget.Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun requestToJoinClub(clubId: String) {
-        Toast.makeText(requireContext(), "Joined successfully!", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+    override fun onDestroyView() { super.onDestroyView(); _binding = null }
 }

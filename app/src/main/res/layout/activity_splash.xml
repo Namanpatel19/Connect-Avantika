@@ -1,94 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/splash_container"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/splash_gradient_bg">
+    android:background="#05010A">
 
-    <!-- Animated rings background -->
-    <com.example.myapplication.MagicRingsView
-        android:id="@+id/magic_rings_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <!-- Removed missing Lottie animation to prevent crash -->
 
-    <!-- Subtle dark overlay -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#22000000" />
-
-    <!-- Glow ring behind logo -->
-    <View
-        android:id="@+id/glow_ring"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
-        android:alpha="0"
-        android:background="@drawable/splash_ring"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Logo -->
+    <!-- App Logo -->
     <ImageView
-        android:id="@+id/app_logo"
+        android:id="@+id/logo"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:alpha="0"
-        android:scaleX="0.5"
-        android:scaleY="0.5"
         android:src="@drawable/start_icon"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_gravity="center"
+        android:alpha="0" />
 
-    <!-- App Name -->
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:alpha="0"
-        android:fontFamily="sans-serif-medium"
-        android:letterSpacing="0.05"
-        android:text="Connect Avantika"
-        android:textColor="#FFFFFF"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/app_logo" />
-
-    <!-- Tagline -->
-    <TextView
-        android:id="@+id/tv_tagline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:alpha="0"
-        android:letterSpacing="0.1"
-        android:text="YOUR CAMPUS COMPANION"
-        android:textColor="#80FFFFFF"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_title" />
-
-    <!-- Loading -->
-    <TextView
-        android:id="@+id/tv_loading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="56dp"
-        android:alpha="0"
-        android:text="Initializing Experience..."
-        android:textColor="#60FFFFFF"
-        android:textSize="13sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

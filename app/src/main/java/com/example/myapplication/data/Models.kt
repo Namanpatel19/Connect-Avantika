@@ -5,91 +5,86 @@ import kotlinx.serialization.SerialName
 
 @Serializable
 data class User(
-    @SerialName("user_id") val userId: String,
-    val name: String,
+    val id: String,
     val email: String,
+    val password: String? = null,
     val role: String,
-    @SerialName("department_id") val departmentId: Int? = null,
-    @SerialName("profile_image_url") val profileImageUrl: String? = null
+    @SerialName("created_at") val createdAt: String? = null
 )
 
 @Serializable
 data class Student(
-    @SerialName("student_id") val studentId: Int,
     @SerialName("user_id") val userId: String,
-    @SerialName("enrollment_no") val enrollmentNo: String,
-    val year: Int
+    val name: String,
+    val enrollment: String,
+    val department: String? = null,
+    val contact: String? = null,
+    val batch: String? = null,
+    @SerialName("photo_url") val photoUrl: String? = null
 )
 
 @Serializable
 data class Faculty(
-    @SerialName("faculty_id") val facultyId: Int,
     @SerialName("user_id") val userId: String,
-    val designation: String
-)
-
-@Serializable
-data class Department(
-    @SerialName("department_id") val departmentId: Int,
-    @SerialName("department_name") val departmentName: String,
-    @SerialName("hod_id") val hodId: Int? = null
+    val name: String,
+    val department: String? = null,
+    val contact: String? = null,
+    @SerialName("photo_url") val photoUrl: String? = null
 )
 
 @Serializable
 data class Event(
-    @SerialName("event_id") val eventId: Int? = null,
+    val id: String? = null,
     val title: String,
-    val description: String,
-    @SerialName("event_date") val eventDate: String,
-    val location: String
-)
-
-@Serializable
-data class EventRegistration(
-    @SerialName("reg_id") val regId: Int? = null,
-    @SerialName("event_id") val eventId: Int,
-    @SerialName("student_id") val studentId: Int,
-    val status: String = "Registered"
+    val description: String? = null,
+    @SerialName("club_id") val clubId: String? = null,
+    @SerialName("created_by") val createdBy: String? = null,
+    val status: String = "pending",
+    @SerialName("event_date") val eventDate: String? = null,
+    @SerialName("created_at") val createdAt: String? = null
 )
 
 @Serializable
 data class Club(
-    @SerialName("club_id") val clubId: Int? = null,
+    val id: String? = null,
     val name: String,
-    val description: String,
-    @SerialName("club_head_id") val clubHeadId: Int? = null
-)
-
-@Serializable
-data class ClubMember(
-    val id: Int? = null,
-    @SerialName("club_id") val clubId: Int,
-    @SerialName("student_id") val studentId: Int,
-    val role: String = "Member"
+    val description: String? = null,
+    @SerialName("club_head_id") val clubHeadId: String? = null,
+    @SerialName("created_at") val createdAt: String? = null
 )
 
 @Serializable
 data class Announcement(
-    @SerialName("announcement_id") val announcementId: Int? = null,
+    val id: String? = null,
     val title: String,
-    val message: String,
-    @SerialName("target_role") val targetRole: String
-)
-
-@Serializable
-data class Academic(
-    @SerialName("academic_id") val academicId: Int? = null,
-    @SerialName("student_id") val studentId: Int,
-    val subject: String,
-    @SerialName("attendance_percentage") val attendancePercentage: Double,
-    val marks: Int
+    val content: String? = null,
+    @SerialName("created_by") val createdBy: String? = null,
+    @SerialName("created_at") val createdAt: String? = null
 )
 
 @Serializable
 data class StudyMaterial(
-    @SerialName("material_id") val materialId: Int? = null,
+    val id: String? = null,
+    @SerialName("faculty_id") val facultyId: String? = null,
     val title: String,
     @SerialName("file_url") val fileUrl: String,
-    val subject: String,
-    @SerialName("faculty_id") val facultyId: Int
+    val subject: String? = null,
+    @SerialName("created_at") val createdAt: String? = null
+)
+
+@Serializable
+data class ClubRequest(
+    val id: String? = null,
+    @SerialName("club_id") val clubId: String,
+    @SerialName("student_id") val studentId: String,
+    val status: String = "pending",
+    @SerialName("requested_at") val requestedAt: String? = null
+)
+
+@Serializable
+data class EventRegistration(
+    val id: String? = null,
+    @SerialName("event_id") val eventId: String,
+    @SerialName("student_id") val studentId: String,
+    @SerialName("registered_at") val registeredAt: String? = null
 )

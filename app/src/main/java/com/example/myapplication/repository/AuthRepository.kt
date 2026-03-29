@@ -2,6 +2,7 @@ package com.example.myapplication.repository
 
 import com.example.myapplication.SupabaseClient
 import com.example.myapplication.data.User
+import com.example.myapplication.data.Student
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.postgrest.postgrest
@@ -19,16 +20,25 @@ class AuthRepository {
                 this.password = password
             }
             
-            // Create user profile in 'users' table
             val currentUser = auth.currentUserOrNull()
             if (currentUser != null) {
+                // 1. Create entry in 'users' table
                 val userProfile = User(
-                    userId = currentUser.id,
-                    name = name,
+                    id = currentUser.id,
                     email = email,
                     role = role
                 )
                 db.from("users").insert(userProfile)
+
+                // 2. If student, create entry in 'students' table to store the name
+                if (role == "student") {
+                    val studentProfile = Student(
+                        userId = currentUser.id,
+                        name = name,
+                        enrollment = "PENDING" // Default value or collect from UI
+                    )
+                    db.from("students").insert(studentProfile)
+                }
             }
             Result.success(Unit)
         } catch (e: Exception) {
@@ -47,7 +57,7 @@ class AuthRepository {
                 val profile = db.from("users")
                     .select {
                         filter {
-                            eq("user_id", userId)
+                            eq("id", userId)
                         }
                     }.decodeSingle<User>()
                 Result.success(profile)

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="16dp" app:cardElevation="2dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="16dp">
+        <TextView android:id="@+id/tvStudentId" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:text="Student"
+            android:textColor="@color/text_primary" android:textSize="14sp" android:textStyle="bold"/>
+        <TextView android:id="@+id/tvStatus" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:text="Pending"
+            android:textColor="@color/text_secondary" android:textSize="12sp"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="10dp" android:weightSum="3">
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnAccept"
+                android:layout_width="0dp" android:layout_height="36dp"
+                android:layout_weight="1" android:text="Accept"
+                android:layout_marginEnd="4dp" android:backgroundTint="@color/secondary" android:textSize="12sp"/>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnReject"
+                android:layout_width="0dp" android:layout_height="36dp"
+                android:layout_weight="1" android:text="Reject"
+                android:layout_marginEnd="4dp" android:backgroundTint="@color/accent_rose" android:textSize="12sp"/>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnInterview"
+                android:layout_width="0dp" android:layout_height="36dp"
+                android:layout_weight="1" android:text="Interview"
+                android:backgroundTint="@color/accent" android:textSize="12sp"/>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

@@ -163,7 +163,7 @@ fun LoginScreen(
                         modifier = Modifier.clickable { /* TODO */ }
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }

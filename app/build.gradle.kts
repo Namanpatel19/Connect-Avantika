@@ -53,6 +53,9 @@ dependencies {
     implementation(libs.androidx.leanback)
     implementation(libs.glide)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.lottie)
+    implementation(libs.navigation.fragment.ktx)
+    implementation(libs.navigation.ui.ktx)
 
     // Jetpack Compose
     val composeBom = platform(libs.androidx.compose.bom)

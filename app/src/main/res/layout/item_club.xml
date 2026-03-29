@@ -4,92 +4,163 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="8dp"
-    android:layout_marginVertical="5dp"
+    android:layout_marginVertical="6dp"
     app:cardBackgroundColor="@color/bg_card"
     app:cardCornerRadius="20dp"
     app:cardElevation="0dp"
     app:strokeColor="@color/separator"
     app:strokeWidth="1dp">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
+        android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Club icon background circle -->
-        <FrameLayout
-            android:id="@+id/club_icon_bg"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:background="@drawable/bg_club_icon_circle">
-
-            <ImageView
-                android:id="@+id/club_logo"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center"
-                android:src="@android:drawable/ic_menu_compass"
-                app:tint="@color/primary_light" />
-        </FrameLayout>
-
-        <!-- Club info -->
+        <!-- Club header row: icon + name/tags + join status -->
         <LinearLayout
-            android:id="@+id/club_info"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/club_icon_bg"
-            android:layout_toStartOf="@id/btn_join"
-            android:layout_marginHorizontal="12dp"
-            android:layout_centerVertical="true"
-            android:orientation="vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
+            <!-- Club Icon Circle -->
+            <FrameLayout
+                android:id="@+id/club_icon_bg"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_club_icon_circle">
+                <ImageView
+                    android:id="@+id/club_logo"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:src="@android:drawable/ic_menu_compass"
+                    app:tint="@color/primary" />
+            </FrameLayout>
+
+            <!-- Club name + tags -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="12dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/club_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/text_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <!-- Category chips row -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/tv_club_category"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_badge_points"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="2dp"
+                        android:text="Technology"
+                        android:textColor="@color/badge_points_text"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/club_members"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- Joined status chip (top right) -->
             <TextView
-                android:id="@+id/club_name"
+                android:id="@+id/tv_joined_chip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textColor="@color/text_primary"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:background="@drawable/bg_badge_beginner"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:text="Joined"
+                android:textColor="@color/badge_beginner_text"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/club_members"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="42 members"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp" />
         </LinearLayout>
 
-        <!-- Join / Joined button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_join"
-            android:layout_width="wrap_content"
+        <!-- Description -->
+        <TextView
+            android:id="@+id/club_description"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:backgroundTint="@color/primary"
-            android:text="@string/join"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="13sp"
-            app:cornerRadius="16dp" />
+            android:layout_marginTop="10dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
 
-        <!-- Delete button top right -->
-        <ImageButton
-            android:id="@+id/btn_delete"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_delete"
-            android:visibility="gone"
-            app:tint="@color/error_red" />
-    </RelativeLayout>
+        <!-- Action buttons row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- Join / Joined Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_join"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="Join Club"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/secondary"
+                app:cornerRadius="20dp" />
+
+            <!-- View Club Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_view_club"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:text="View Club"
+                android:textAllCaps="false"
+                android:textColor="@color/primary"
+                android:textSize="13sp"
+                app:strokeColor="@color/primary"
+                app:strokeWidth="1.5dp"
+                app:cornerRadius="20dp" />
+
+            <!-- Delete button (admin only) -->
+            <ImageButton
+                android:id="@+id/btn_delete"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="6dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_delete"
+                android:visibility="gone"
+                app:tint="@color/error_red" />
+        </LinearLayout>
+
+    </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

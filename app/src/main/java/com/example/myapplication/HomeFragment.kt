@@ -4,58 +4,66 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.myapplication.adapters.EventAdapter
+import com.example.myapplication.adapters.AnnouncementAdapter
 import com.example.myapplication.databinding.FragmentHomeBinding
-import io.github.jan.supabase.postgrest.postgrest
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.example.myapplication.ui.viewmodel.AppViewModel
 
 class HomeFragment : Fragment() {
-
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+    private lateinit var vm: AppViewModel
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
-        setupDate()
-        loadSupabaseData()
-    }
+        vm = ViewModelProvider(requireActivity())[AppViewModel::class.java]
 
-    private fun setupDate() {
-        val sdf = SimpleDateFormat("EEEE, d MMMM", Locale.getDefault())
-        // In a real app, you'd find the view for the date, but for now let's just use what's in XML
-    }
+        // Setup recyclers
+        binding.rvUpcomingEvents.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        binding.rvAnnouncements.layoutManager  = LinearLayoutManager(context)
 
-    private fun loadSupabaseData() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                // Example of fetching from Supabase
-                // val movies = SupabaseClient.client.postgrest["movies"].select().decodeList<Movie>()
-                // if (movies.isNotEmpty()) {
-                //    binding.tvFeaturedTitle.text = movies[0].title
-                //    Glide.with(this@HomeFragment).load(movies[0].cardImageUrl).into(binding.iv_featured_image)
-                // }
-            } catch (e: Exception) {
-                e.printStackTrace()
+        // Observe
+        vm.events.observe(viewLifecycleOwner) { events ->
+            binding.rvUpcomingEvents.adapter = EventAdapter(events.take(5)) { event ->
+                vm.registerForEvent(event.id ?: "") { success ->
+                    Toast.makeText(context, if (success) "Registered!" else "Already registered or error", Toast.LENGTH_SHORT).show()
+                }
             }
         }
+
+        vm.announcements.observe(viewLifecycleOwner) { list ->
+            binding.rvAnnouncements.adapter = AnnouncementAdapter(list)
+        }
+
+        vm.currentStudent.observe(viewLifecycleOwner) { student ->
+            student?.let {
+                binding.tvGreeting.text = "Hi, ${it.name.split(" ").first()}! 👋"
+                binding.tvSubGreeting.text = "${it.department} • ${it.batch}"
+            }
+        }
+
+        // Quick actions
+        binding.cardEvents.setOnClickListener {
+            (requireActivity() as MainActivity).navigateTo(R.id.navigation_events)
+        }
+        binding.cardClubs.setOnClickListener {
+            (requireActivity() as MainActivity).navigateTo(R.id.navigation_clubs)
+        }
+
+        // Load data
+        vm.loadApprovedEvents()
+        vm.loadAnnouncements()
+        vm.loadCurrentStudent()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+    override fun onDestroyView() { super.onDestroyView(); _binding = null }
 }

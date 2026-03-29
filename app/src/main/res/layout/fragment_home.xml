@@ -1,383 +1,153 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/bg_deep"
+    android:fillViewport="true">
 
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
+        <!-- Teal Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_teal_header"
+            android:padding="20dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvGreeting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hi, Student! 👋"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvSubGreeting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Welcome back to Connect Avantika"
+                android:textColor="#CCffffff"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- Quick Actions -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="100dp">
+            android:padding="16dp">
 
-            <!-- ====== HEADER ====== -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="22dp"
-                android:paddingTop="52dp"
-                android:paddingBottom="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="CAMPUS PULSE"
-                    android:textAllCaps="true"
-                    android:letterSpacing="0.12"
-                    android:textColor="@color/primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp">
-
-                    <TextView
-                        android:id="@+id/tv_greeting"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-medium"
-                        android:text="For You"
-                        android:textColor="@color/text_primary"
-                        android:textSize="34sp"
-                        android:textStyle="bold" />
-
-                    <!-- Avatar -->
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/iv_user_avatar"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:src="@android:drawable/ic_menu_myplaces"
-                        android:background="@color/bg_card"
-                        app:shapeAppearanceOverlay="@style/CircleImage"
-                        app:strokeColor="@color/primary"
-                        app:strokeWidth="2dp"
-                        app:tint="@color/primary_light" />
-                </RelativeLayout>
-            </LinearLayout>
-
-            <!-- ====== FEATURED HERO CARD ====== -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="360dp"
-                android:layout_marginHorizontal="16dp"
-                app:cardCornerRadius="28dp"
-                app:cardElevation="8dp"
-                app:strokeWidth="0dp">
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <ImageView
-                        android:id="@+id/iv_featured_image"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/movie" />
-
-                    <!-- Strong dark overlay -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/bg_bubble_gradient" />
-
-                    <!-- Accent top strip -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="4dp"
-                        android:background="@color/primary"
-                        android:layout_gravity="top" />
-
-                    <!-- Content -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom"
-                        android:orientation="vertical"
-                        android:padding="24dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="#33276C84"
-                            android:paddingHorizontal="10dp"
-                            android:paddingVertical="4dp"
-                            android:text="FEATURED"
-                            android:textColor="#FFFFFFFF"
-                            android:textSize="10sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tv_featured_title"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:fontFamily="sans-serif-medium"
-                            android:text="Discover New Perspectives"
-                            android:textColor="@color/white"
-                            android:textSize="26sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:text="Join the upcoming tech symposium and explore the future of AI."
-                            android:textColor="#CCEEF0FF"
-                            android:textSize="14sp"
-                            android:maxLines="2"
-                            android:ellipsize="end" />
-                    </LinearLayout>
-                </FrameLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- ====== QUICK ACCESS SECTION ====== -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="22dp"
-                android:layout_marginTop="28dp"
-                android:layout_marginBottom="4dp"
                 android:text="Quick Access"
                 android:textColor="@color/text_primary"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
 
-            <GridLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="12dp"
-                android:layout_marginTop="12dp"
-                android:columnCount="2"
-                android:rowCount="2">
+                android:orientation="horizontal"
+                android:weightSum="4">
 
-                <!-- Events – Violet -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="155dp"
-                    android:layout_columnWeight="1"
-                    android:layout_margin="6dp"
-                    app:cardCornerRadius="26dp"
-                    app:cardElevation="4dp"
-                    app:strokeWidth="0dp"
-                    app:cardBackgroundColor="#EDE9FE">
+                <LinearLayout android:id="@+id/cardEvents"
+                    android:layout_width="0dp" android:layout_height="80dp"
+                    android:layout_weight="1" android:layout_margin="4dp"
+                    android:background="@drawable/bg_qa_events"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="📅" android:textSize="22sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Events" android:textSize="11sp" android:textColor="@color/text_primary"/>
+                </LinearLayout>
 
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                <LinearLayout android:id="@+id/cardClubs"
+                    android:layout_width="0dp" android:layout_height="80dp"
+                    android:layout_weight="1" android:layout_margin="4dp"
+                    android:background="@drawable/bg_qa_clubs"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="🎭" android:textSize="22sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Clubs" android:textSize="11sp" android:textColor="@color/text_primary"/>
+                </LinearLayout>
 
-                        <!-- Gradient overlay -->
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="#00FFFFFF" />
+                <LinearLayout
+                    android:layout_width="0dp" android:layout_height="80dp"
+                    android:layout_weight="1" android:layout_margin="4dp"
+                    android:background="@drawable/bg_qa_calendar"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="📢" android:textSize="22sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Notices" android:textSize="11sp" android:textColor="@color/text_primary"/>
+                </LinearLayout>
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="12dp">
-
-                            <ImageView
-                                android:layout_width="44dp"
-                                android:layout_height="44dp"
-                                android:src="@android:drawable/ic_menu_my_calendar"
-                                app:tint="#6D28D9" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="10dp"
-                                android:text="Events"
-                                android:textColor="@color/text_primary"
-                                android:textSize="16sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="Campus news"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="11sp" />
-                        </LinearLayout>
-                    </FrameLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Clubs – Cyan -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="155dp"
-                    android:layout_columnWeight="1"
-                    android:layout_margin="6dp"
-                    app:cardCornerRadius="26dp"
-                    app:cardElevation="4dp"
-                    app:strokeWidth="0dp"
-                    app:cardBackgroundColor="#DCFCE7">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="#00FFFFFF" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="12dp">
-
-                            <ImageView
-                                android:layout_width="44dp"
-                                android:layout_height="44dp"
-                                android:src="@android:drawable/ic_menu_share"
-                                app:tint="#15803D" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="10dp"
-                                android:text="Clubs"
-                                android:textColor="@color/text_primary"
-                                android:textSize="16sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="Join &amp; explore"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="11sp" />
-                        </LinearLayout>
-                    </FrameLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Notices – Amber -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="155dp"
-                    android:layout_columnWeight="1"
-                    android:layout_margin="6dp"
-                    app:cardCornerRadius="26dp"
-                    app:cardElevation="4dp"
-                    app:strokeWidth="0dp"
-                    app:cardBackgroundColor="#FEF3C7">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="#00FFFFFF" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="12dp">
-
-                            <ImageView
-                                android:layout_width="44dp"
-                                android:layout_height="44dp"
-                                android:src="@android:drawable/ic_menu_info_details"
-                                app:tint="#B45309" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="10dp"
-                                android:text="Notices"
-                                android:textColor="@color/text_primary"
-                                android:textSize="16sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="Stay updated"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="11sp" />
-                        </LinearLayout>
-                    </FrameLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Profile – Rose -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="155dp"
-                    android:layout_columnWeight="1"
-                    android:layout_margin="6dp"
-                    app:cardCornerRadius="26dp"
-                    app:cardElevation="4dp"
-                    app:strokeWidth="0dp"
-                    app:cardBackgroundColor="#FCE7F3">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="#00FFFFFF" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="12dp">
-
-                            <ImageView
-                                android:layout_width="44dp"
-                                android:layout_height="44dp"
-                                android:src="@android:drawable/ic_menu_manage"
-                                app:tint="#BE185D" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="10dp"
-                                android:text="Profile"
-                                android:textColor="@color/text_primary"
-                                android:textSize="16sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="Your account"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="11sp" />
-                        </LinearLayout>
-                    </FrameLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-            </GridLayout>
-
+                <LinearLayout
+                    android:layout_width="0dp" android:layout_height="80dp"
+                    android:layout_weight="1" android:layout_margin="4dp"
+                    android:background="@drawable/bg_qa_transport"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="🏆" android:textSize="22sp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Profile" android:textSize="11sp" android:textColor="@color/text_primary"/>
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <!-- Upcoming Events -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Upcoming Events"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvUpcomingEvents"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- Announcements -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Announcements"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvAnnouncements"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
