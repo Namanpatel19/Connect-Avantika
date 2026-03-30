@@ -91,8 +91,10 @@ class ProfileFragment : Fragment() {
             val stream = requireContext().contentResolver.openInputStream(uri) ?: return
             val file = File(requireContext().cacheDir, "profile_${System.currentTimeMillis()}.jpg")
             file.outputStream().use { stream.copyTo(it) }
-            vm.uploadPhoto(file) { url ->
-                if (!url.isNullOrEmpty()) Glide.with(this).load(url).circleCrop().into(binding.ivAvatar)
+            vm.uploadPhoto(file, "student") { success ->
+                if (success) {
+                    Toast.makeText(context, "Photo updated!", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

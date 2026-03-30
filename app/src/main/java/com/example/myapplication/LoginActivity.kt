@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
-    private var selectedRole: String = "faculty" // Based on image, faculty is selected
+    private var selectedRole: String = "faculty"
     private val repository = MainRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,10 +39,10 @@ class LoginActivity : AppCompatActivity() {
 
     private fun setupRoleSelection() {
         val roles = mapOf(
-            binding.roleStudent to "student",
-            binding.roleFaculty to "faculty",
+            binding.roleAdmin to "dean",
             binding.roleClubLead to "club_head",
-            binding.roleAdmin to "dean"
+            binding.roleFaculty to "faculty",
+            binding.roleStudent to "student"
         )
 
         roles.forEach { (view, role) ->
@@ -106,8 +106,8 @@ class LoginActivity : AppCompatActivity() {
                 if (userId != null) {
                     val role = repository.getUserRole(userId)
 
-                    if (role == selectedRole) {
-                        navigateToDashboard(role, userId)
+                    if (role == selectedRole || (selectedRole == "dean" && role == "super_admin")) {
+                        navigateToDashboard(role ?: selectedRole, userId)
                     } else {
                         Toast.makeText(this@LoginActivity, "Incorrect role selected: expected $selectedRole, found $role", Toast.LENGTH_SHORT).show()
                         SupabaseClient.client.auth.signOut()

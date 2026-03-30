@@ -50,6 +50,7 @@ data class Club(
     val name: String,
     val description: String? = null,
     @SerialName("club_head_id") val clubHeadId: String? = null,
+    @SerialName("banner_url") val bannerUrl: String? = null,
     @SerialName("created_at") val createdAt: String? = null
 )
 

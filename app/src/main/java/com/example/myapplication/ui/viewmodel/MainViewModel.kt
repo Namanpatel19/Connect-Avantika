@@ -95,7 +95,7 @@ class MainViewModel(private val repository: MainRepository = MainRepository()) :
 
     fun uploadStudyMaterial(userId: String, file: File, title: String, subject: String) {
         viewModelScope.launch {
-git add .            repository.uploadStudyMaterial(title, subject, file, userId)
+            repository.uploadStudyMaterial(title, subject, file, userId)
             fetchStudyMaterials()
         }
     }

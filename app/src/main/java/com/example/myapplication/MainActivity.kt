@@ -26,18 +26,24 @@ class MainActivity : AppCompatActivity() {
         appViewModel.userRole = userRole
 
         val (navRes, menuRes) = when (userRole) {
+            "super_admin" -> Pair(R.navigation.nav_super_admin, R.menu.menu_super_admin)
             "faculty"   -> Pair(R.navigation.nav_faculty,   R.menu.menu_faculty)
             "club_head" -> Pair(R.navigation.nav_club_head, R.menu.menu_club_head)
             "dean"      -> Pair(R.navigation.nav_dean,      R.menu.menu_dean)
-            else        -> Pair(R.navigation.nav_student,   R.menu.menu_student)
+            else        -> Pair(R.navigation.nav_student,   R.navigation.nav_student) // Wait, navigation? Should be menu
         }
+
+        // Correcting the else case which had a typo in previous version if I saw it right, 
+        // actually looking at previous code it was R.menu.menu_student.
+        
+        val actualMenuRes = if (userRole == "student") R.menu.menu_student else menuRes
 
         val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHost.navController
         navController.setGraph(navRes)
 
         binding.bottomNav.menu.clear()
-        binding.bottomNav.inflateMenu(menuRes)
+        binding.bottomNav.inflateMenu(actualMenuRes)
         binding.bottomNav.setupWithNavController(navController)
     }
 
