@@ -175,6 +175,14 @@ class AppViewModel : ViewModel() {
         loadAllClubs()
     }
 
+    fun addClub(club: Club, callback: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val result = repository.createClub(club)
+            callback(result.isSuccess)
+            if (result.isSuccess) loadAllClubs()
+        }
+    }
+
     fun updateClub(club: Club, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
             val result = repository.updateClub(club)
@@ -253,7 +261,10 @@ class AppViewModel : ViewModel() {
         viewModelScope.launch {
             val result = repository.updateEventStatus(eventId, status)
             callback(result.isSuccess)
-            if (result.isSuccess) loadPendingEvents()
+            if (result.isSuccess) {
+                loadPendingEvents()
+                loadAllEvents()
+            }
         }
     }
 
@@ -261,7 +272,10 @@ class AppViewModel : ViewModel() {
         viewModelScope.launch {
             val result = repository.createEvent(event)
             callback(result.isSuccess)
-            if (result.isSuccess) loadMyClub()
+            if (result.isSuccess) {
+                loadMyClub()
+                loadAllEvents()
+            }
         }
     }
 

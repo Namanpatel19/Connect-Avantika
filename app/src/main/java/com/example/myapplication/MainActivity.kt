@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -25,30 +26,37 @@ class MainActivity : AppCompatActivity() {
         appViewModel.userId   = userId
         appViewModel.userRole = userRole
 
-        val (navRes, menuRes) = when (userRole) {
+        setupNavigation(userRole)
+    }
+
+    private fun setupNavigation(role: String) {
+        val (navRes, menuRes) = when (role) {
             "super_admin" -> Pair(R.navigation.nav_super_admin, R.menu.menu_super_admin)
             "faculty"   -> Pair(R.navigation.nav_faculty,   R.menu.menu_faculty)
             "club_head" -> Pair(R.navigation.nav_club_head, R.menu.menu_club_head)
             "dean"      -> Pair(R.navigation.nav_dean,      R.menu.menu_dean)
-            else        -> Pair(R.navigation.nav_student,   R.navigation.nav_student) // Wait, navigation? Should be menu
+            else        -> Pair(R.navigation.nav_student,   R.menu.menu_student)
         }
-
-        // Correcting the else case which had a typo in previous version if I saw it right, 
-        // actually looking at previous code it was R.menu.menu_student.
-        
-        val actualMenuRes = if (userRole == "student") R.menu.menu_student else menuRes
 
         val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHost.navController
         navController.setGraph(navRes)
 
         binding.bottomNav.menu.clear()
-        binding.bottomNav.inflateMenu(actualMenuRes)
+        binding.bottomNav.inflateMenu(menuRes)
         binding.bottomNav.setupWithNavController(navController)
     }
 
     fun navigateTo(destinationId: Int) {
         val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         try { navHost.navController.navigate(destinationId) } catch (_: Exception) {}
+    }
+    
+    fun navigateToDeanView() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.putExtra("USER_ROLE", "dean")
+        intent.putExtra("USER_ID", appViewModel.userId)
+        startActivity(intent)
+        finish()
     }
 }

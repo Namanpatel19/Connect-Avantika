@@ -29,6 +29,10 @@ class SuperAdminHomeFragment : Fragment() {
         binding.btnManageAll.setOnClickListener {
             (activity as? MainActivity)?.navigateTo(R.id.navigation_manage_all)
         }
+        
+        binding.btnDeanView.setOnClickListener {
+            (activity as? MainActivity)?.navigateToDeanView()
+        }
 
         vm.loadAllStudents()
         vm.loadAllFaculty()

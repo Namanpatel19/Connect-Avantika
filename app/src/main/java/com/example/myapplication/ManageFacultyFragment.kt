@@ -16,7 +16,6 @@ import com.example.myapplication.data.Faculty
 import com.example.myapplication.data.User
 import com.example.myapplication.databinding.FragmentManageStudentsDeanBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
-import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 
@@ -33,9 +32,6 @@ class ManageFacultyFragment : Fragment() {
         vm = ViewModelProvider(requireActivity())[AppViewModel::class.java]
 
         binding.rvStudents.layoutManager = LinearLayoutManager(context)
-        
-        // We can reuse the same layout, just change the title
-        // binding.tvTitle.text = "Manage Faculty" // If we had a title view in XML
 
         vm.faculty.observe(viewLifecycleOwner) { faculty ->
             binding.tvCount.text = "All Faculty (${faculty.size})"
@@ -48,12 +44,12 @@ class ManageFacultyFragment : Fragment() {
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // To be implemented in VM if needed, for now just load all
                 if (s.isNullOrBlank()) vm.loadAllFaculty()
             }
             override fun afterTextChanged(s: Editable?) {}
         })
 
+        binding.btnAddStudent.visibility = View.VISIBLE
         binding.btnAddStudent.text = "+ Add Faculty"
         binding.btnAddStudent.setOnClickListener { showAddDialog() }
         vm.loadAllFaculty()
@@ -86,8 +82,12 @@ class ManageFacultyFragment : Fragment() {
                     Toast.makeText(context, "Fill required fields", Toast.LENGTH_SHORT).show(); return@setPositiveButton
                 }
                 
-                // You would need a vm.addFaculty similar to addStudent
-                // For now, assuming it exists or adding it to VM
+                val user = User(id = "", email = email, password = password, role = "faculty")
+                val faculty = Faculty(userId = "", name = name, department = dept)
+                
+                vm.addFaculty(user, faculty) { success ->
+                    Toast.makeText(context, if (success) "Faculty added!" else "Error adding faculty", Toast.LENGTH_SHORT).show()
+                }
             }
             .setNegativeButton("Cancel", null).show()
     }

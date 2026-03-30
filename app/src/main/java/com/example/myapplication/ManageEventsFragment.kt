@@ -29,8 +29,6 @@ class ManageEventsFragment : Fragment() {
         binding.rvStudents.layoutManager = LinearLayoutManager(context)
         vm.events.observe(viewLifecycleOwner) { events ->
             binding.tvCount.text = "All Events (${events.size})"
-            // Reusing EventAdapter or creating a specific one for management if needed
-            // For now, let's use a simple list or custom adapter if EventAdapter doesn't support delete
             binding.rvStudents.adapter = EventAdapter(events) { event ->
                 showDeleteDialog(event)
             }
@@ -40,7 +38,13 @@ class ManageEventsFragment : Fragment() {
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
         }
 
-        binding.btnAddStudent.visibility = View.GONE
+        binding.btnAddStudent.visibility = View.VISIBLE
+        binding.btnAddStudent.text = "+ Add Event"
+        binding.btnAddStudent.setOnClickListener {
+            // Reusing CreateEventDialog for adding events
+            CreateEventDialog().show(parentFragmentManager, "CreateEvent")
+        }
+
         vm.loadAllEvents()
     }
 

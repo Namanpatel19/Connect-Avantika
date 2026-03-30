@@ -137,7 +137,9 @@ class LoginActivity : AppCompatActivity() {
 
     private fun navigateToDashboard(role: String, userId: String) {
         val intent = Intent(this, MainActivity::class.java)
-        intent.putExtra("USER_ROLE", role)
+        // If super_admin selects "dean", pass "dean" to MainActivity so the Dean UI loads
+        val roleToPass = if (role == "super_admin" && selectedRole == "dean") "dean" else role
+        intent.putExtra("USER_ROLE", roleToPass)
         intent.putExtra("USER_ID", userId)
         startActivity(intent)
         finish()
