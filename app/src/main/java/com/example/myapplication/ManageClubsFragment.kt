@@ -13,6 +13,8 @@ import com.example.myapplication.adapters.ClubAdapter
 import com.example.myapplication.data.Club
 import com.example.myapplication.databinding.FragmentManageStudentsDeanBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 
 class ManageClubsFragment : Fragment() {
     private var _binding: FragmentManageStudentsDeanBinding? = null
@@ -38,7 +40,9 @@ class ManageClubsFragment : Fragment() {
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
         }
 
+        binding.btnAddStudent.visibility = View.VISIBLE
         binding.btnAddStudent.text = "+ Add Club"
+        binding.btnAddStudent.setOnClickListener { showAddDialog() }
         vm.loadAllClubs()
     }
 
@@ -49,6 +53,29 @@ class ManageClubsFragment : Fragment() {
             .setPositiveButton("Delete") { _, _ ->
                 vm.deleteClub(club.id ?: "") { success ->
                     Toast.makeText(context, if (success) "Deleted" else "Error", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null).show()
+    }
+
+    private fun showAddDialog() {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_club, null)
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Create New Club")
+            .setView(dialogView)
+            .setPositiveButton("Create") { _, _ ->
+                val name = dialogView.findViewById<TextInputEditText>(R.id.etName).text.toString().trim()
+                val desc = dialogView.findViewById<TextInputEditText>(R.id.etDescription).text.toString().trim()
+                val headId = dialogView.findViewById<TextInputEditText>(R.id.etHeadId).text.toString().trim()
+
+                if (name.isEmpty()) {
+                    Toast.makeText(context, "Club name is required", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                val club = Club(name = name, description = desc, clubHeadId = if (headId.isEmpty()) null else headId)
+                vm.addClub(club) { success ->
+                    Toast.makeText(context, if (success) "Club created!" else "Error creating club", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel", null).show()

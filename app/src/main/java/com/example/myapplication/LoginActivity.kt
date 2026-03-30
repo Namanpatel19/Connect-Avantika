@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -22,6 +23,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private var selectedRole: String = "faculty"
     private val repository = MainRepository()
+    private var adminClickCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +49,18 @@ class LoginActivity : AppCompatActivity() {
 
         roles.forEach { (view, role) ->
             view.setOnClickListener {
+                if (role == "dean") {
+                    adminClickCount++
+                    if (adminClickCount >= 5) {
+                        selectedRole = "super_admin"
+                        Toast.makeText(this, "Super Admin Mode Enabled", Toast.LENGTH_SHORT).show()
+                        updateRoleUI(view)
+                        return@setOnClickListener
+                    }
+                } else {
+                    adminClickCount = 0
+                }
+                
                 selectedRole = role
                 updateRoleUI(view)
             }
@@ -61,19 +75,26 @@ class LoginActivity : AppCompatActivity() {
             Triple(binding.roleStudent, binding.ivStudent, binding.tvStudent)
         )
 
-        val unselectedColor = "#4D5D78".toColorInt()
+        val defaultIconColor = "#4D5D78".toColorInt()
+        val defaultTextColor = "#4D5D78".toColorInt()
         val selectedIconColor = ContextCompat.getColor(this, R.color.primary)
         val selectedTextColor = Color.BLACK
 
         roleViews.forEach { (layout, icon, text) ->
             if (layout == selectedView) {
-                layout.setBackgroundResource(R.drawable.bg_role_selector_selected)
+                layout.setBackgroundResource(R.drawable.bg_role_tile_selected)
                 ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(selectedIconColor))
                 text.setTextColor(selectedTextColor)
+                if (selectedRole == "super_admin") {
+                    text.text = "Super Admin"
+                } else if (layout == binding.roleAdmin) {
+                    text.text = "Admin"
+                }
             } else {
-                layout.setBackgroundResource(R.drawable.bg_role_selector)
-                ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(unselectedColor))
-                text.setTextColor(unselectedColor)
+                layout.setBackgroundResource(R.drawable.bg_role_tile_default)
+                ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(defaultIconColor))
+                text.setTextColor(defaultTextColor)
+                if (layout == binding.roleAdmin) text.text = "Admin"
             }
         }
     }
@@ -103,17 +124,23 @@ class LoginActivity : AppCompatActivity() {
                 }
 
                 val userId = SupabaseClient.client.auth.currentUserOrNull()?.id
+                Log.d("LoginActivity", "Logged in userId: $userId")
+                
                 if (userId != null) {
                     val role = repository.getUserRole(userId)
+                    Log.d("LoginActivity", "Database role for $userId: $role")
 
-                    if (role == selectedRole || (selectedRole == "dean" && role == "super_admin")) {
+                    if (role == selectedRole || (selectedRole == "dean" && role == "super_admin") || (selectedRole == "super_admin" && role == "super_admin")) {
                         navigateToDashboard(role ?: selectedRole, userId)
                     } else {
                         Toast.makeText(this@LoginActivity, "Incorrect role selected: expected $selectedRole, found $role", Toast.LENGTH_SHORT).show()
                         SupabaseClient.client.auth.signOut()
                     }
+                } else {
+                    Toast.makeText(this@LoginActivity, "User ID is null after login", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
+                Log.e("LoginActivity", "Login Error: ${e.message}", e)
                 Toast.makeText(this@LoginActivity, "Login Failed: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
                 binding.btnLogin.isEnabled = true
@@ -137,9 +164,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun navigateToDashboard(role: String, userId: String) {
         val intent = Intent(this, MainActivity::class.java)
-        // If super_admin selects "dean", pass "dean" to MainActivity so the Dean UI loads
-        val roleToPass = if (role == "super_admin" && selectedRole == "dean") "dean" else role
-        intent.putExtra("USER_ROLE", roleToPass)
+        intent.putExtra("USER_ROLE", role)
         intent.putExtra("USER_ID", userId)
         startActivity(intent)
         finish()
