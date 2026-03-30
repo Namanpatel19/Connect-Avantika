@@ -1,50 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/bg_deep">
 
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_teal_header"
-        android:padding="16dp"
+        android:padding="20dp"
         android:orientation="vertical">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="← Clubs"
+            android:text="Clubs"
             android:textColor="@color/white"
-            android:textSize="20sp"
+            android:textSize="24sp"
             android:textStyle="bold" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Join and connect with communities"
             android:textColor="#CCffffff"
-            android:textSize="13sp" />
+            android:textSize="14sp" />
     </LinearLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
+    <!-- Search -->
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etSearch"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Search clubs..."
-            android:imeOptions="actionSearch"
-            android:inputType="text" />
-    </com.google.android.material.textfield.TextInputLayout>
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:paddingHorizontal="16dp">
+            <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@android:drawable/ic_menu_search" app:tint="@color/text_hint"/>
+            <EditText android:id="@+id/etSearch" android:layout_width="match_parent" android:layout_height="48dp" android:hint="Search clubs..." android:background="@null" android:layout_marginStart="12dp" android:textSize="14sp" android:imeOptions="actionSearch" android:inputType="text"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
+    <!-- Categories Tabs -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="8dp">
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:color/transparent"
+        app:tabMode="scrollable"
+        app:tabSelectedTextColor="@color/primary"
+        app:tabTextColor="@color/text_secondary"
+        app:tabIndicatorColor="@color/primary"
+        app:tabIndicatorHeight="3dp"
+        app:tabRippleColor="@null">
         <com.google.android.material.tabs.TabItem android:text="All" />
         <com.google.android.material.tabs.TabItem android:text="Technical" />
         <com.google.android.material.tabs.TabItem android:text="Culture" />
@@ -64,6 +74,6 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="16dp"
+        android:paddingHorizontal="16dp"
         android:clipToPadding="false" />
 </LinearLayout>

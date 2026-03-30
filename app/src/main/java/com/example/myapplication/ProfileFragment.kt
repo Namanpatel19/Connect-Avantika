@@ -40,15 +40,13 @@ class ProfileFragment : Fragment() {
         }
 
         vm.isLoading.observe(viewLifecycleOwner) { loading ->
-            binding.btnSave.isEnabled = !loading
+            // Update UI loading state if needed
         }
 
         binding.ivAvatar.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             startActivityForResult(intent, PICK_IMAGE)
         }
-
-        binding.btnSave.setOnClickListener { saveProfile() }
 
         binding.btnLogout.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
@@ -57,30 +55,19 @@ class ProfileFragment : Fragment() {
                 requireActivity().finish()
             }
         }
+        
+        binding.btnLeaderboard.setOnClickListener {
+            (activity as? MainActivity)?.navigateTo(R.id.navigation_rank)
+        }
 
         vm.loadCurrentStudent()
     }
 
     private fun bind(s: Student) {
-        binding.etName.setText(s.name)
-        binding.etDepartment.setText(s.department ?: "")
-        binding.etContact.setText(s.contact ?: "")
-        binding.etBatch.setText(s.batch ?: "")
-        binding.tvEnrollment.text = s.enrollment
+        binding.tvName.text = s.name
+        binding.tvRole.text = "${s.department ?: "Student"} | ${s.batch ?: ""}"
+        binding.tvEmail.text = "Connect Profile" // You can add email to Student model if needed
         if (!s.photoUrl.isNullOrEmpty()) Glide.with(this).load(s.photoUrl).circleCrop().into(binding.ivAvatar)
-    }
-
-    private fun saveProfile() {
-        val current = vm.currentStudent.value ?: return
-        val updated = current.copy(
-            name       = binding.etName.text.toString().trim(),
-            department = binding.etDepartment.text.toString().trim(),
-            contact    = binding.etContact.text.toString().trim(),
-            batch      = binding.etBatch.text.toString().trim()
-        )
-        vm.updateStudentProfile(updated) { success ->
-            Toast.makeText(context, if (success) "Profile updated!" else "Update failed", Toast.LENGTH_SHORT).show()
-        }
     }
 
     @Deprecated("Deprecated in Java")
@@ -92,9 +79,7 @@ class ProfileFragment : Fragment() {
             val file = File(requireContext().cacheDir, "profile_${System.currentTimeMillis()}.jpg")
             file.outputStream().use { stream.copyTo(it) }
             vm.uploadPhoto(file, "student") { success ->
-                if (success) {
-                    Toast.makeText(context, "Photo updated!", Toast.LENGTH_SHORT).show()
-                }
+                if (success) Toast.makeText(context, "Photo updated!", Toast.LENGTH_SHORT).show()
             }
         }
     }

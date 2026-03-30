@@ -47,16 +47,25 @@ class HomeFragment : Fragment() {
         vm.currentStudent.observe(viewLifecycleOwner) { student ->
             student?.let {
                 binding.tvGreeting.text = "Hi, ${it.name.split(" ").first()}! 👋"
-                binding.tvSubGreeting.text = "${it.department} • ${it.batch}"
             }
         }
 
         // Quick actions
-        binding.cardEvents.setOnClickListener {
+        binding.qaEvents.setOnClickListener {
             (requireActivity() as MainActivity).navigateTo(R.id.navigation_events)
         }
-        binding.cardClubs.setOnClickListener {
+        binding.qaClubs.setOnClickListener {
             (requireActivity() as MainActivity).navigateTo(R.id.navigation_clubs)
+        }
+        binding.qaAcademics.setOnClickListener {
+             Toast.makeText(context, "Academics coming soon", Toast.LENGTH_SHORT).show()
+        }
+        binding.qaTransport.setOnClickListener {
+             Toast.makeText(context, "Transport tracking coming soon", Toast.LENGTH_SHORT).show()
+        }
+        
+        binding.btnNotifications.setOnClickListener {
+             Toast.makeText(context, "No new notifications", Toast.LENGTH_SHORT).show()
         }
 
         // Load data

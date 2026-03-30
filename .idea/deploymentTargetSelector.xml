@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="Avantika Connect">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-03-30T06:54:07.251871200Z">
+        <DropdownSelection timestamp="2026-03-30T08:14:46.765309300Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="PhysicalDevice" identifier="serial=WSGEDM8P75VOR4MF" />

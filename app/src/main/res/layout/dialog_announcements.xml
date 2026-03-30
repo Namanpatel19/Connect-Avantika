@@ -20,10 +20,15 @@
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:minLines="2" android:gravity="top"/>
     </com.google.android.material.textfield.TextInputLayout>
-    <com.google.android.material.button.MaterialButton android:id="@+id/btnCreate"
-        android:layout_width="match_parent" android:layout_height="48dp"
-        android:text="+ Create New Announcement" android:backgroundTint="@color/primary"
-        android:layout_marginBottom="16dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCreate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/primary"
+        android:text="+ Create New Announcement" />
+
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:text="My Announcements" android:textColor="@color/text_primary"
         android:textSize="15sp" android:textStyle="bold" android:layout_marginBottom="8dp"/>
