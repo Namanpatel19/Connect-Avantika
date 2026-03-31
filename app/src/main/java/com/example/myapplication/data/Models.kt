@@ -2,12 +2,13 @@ package com.example.myapplication.data
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Transient
 
 @Serializable
 data class User(
     val id: String,
     val email: String,
-    val password: String? = null,
+    @Transient val password: String? = null,
     val role: String,
     @SerialName("created_at") val createdAt: String? = null
 )

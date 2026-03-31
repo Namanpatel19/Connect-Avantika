@@ -83,19 +83,29 @@
 
     </GridLayout>
 
-    <Button
-        android:id="@+id/btnManageAll"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Manage All Data" />
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/btnDeanView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="Open Dean Dashboard"
-        android:backgroundTint="@color/secondary"/>
+        <Button
+            android:id="@+id/btnManageAll"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:text="Manage All" />
+
+        <Button
+            android:id="@+id/btnDeanView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:text="Dean View"
+            android:backgroundTint="@color/secondary"/>
+
+    </LinearLayout>
 
 </LinearLayout>
