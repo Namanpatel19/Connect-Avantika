@@ -1,8 +1,10 @@
 package com.example.myapplication
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -18,6 +20,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Handle edge-to-edge and system bars overlapping
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updatePadding(top = systemBars.top)
+            // We don't update bottom padding here because BottomNavigationView handles it or we want it at the very bottom
+            insets
+        }
 
         val userRole = intent.getStringExtra("USER_ROLE") ?: "student"
         val userId   = intent.getStringExtra("USER_ID")   ?: ""
@@ -49,14 +59,10 @@ class MainActivity : AppCompatActivity() {
 
     fun navigateTo(destinationId: Int) {
         val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        try { navHost.navController.navigate(destinationId) } catch (_: Exception) {}
+        navHost.navController.navigate(destinationId)
     }
-    
+
     fun navigateToDeanView() {
-        val intent = Intent(this, MainActivity::class.java)
-        intent.putExtra("USER_ROLE", "dean")
-        intent.putExtra("USER_ID", appViewModel.userId)
-        startActivity(intent)
-        finish()
+        setupNavigation("dean")
     }
 }

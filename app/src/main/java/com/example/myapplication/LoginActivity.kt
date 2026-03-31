@@ -53,7 +53,7 @@ class LoginActivity : AppCompatActivity() {
                     adminClickCount++
                     if (adminClickCount >= 5) {
                         selectedRole = "super_admin"
-                        Toast.makeText(this, "Super Admin Mode Enabled", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "SUPER ADMIN MODE ACTIVE", Toast.LENGTH_SHORT).show()
                         updateRoleUI(view)
                         return@setOnClickListener
                     }
@@ -117,6 +117,7 @@ class LoginActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 binding.btnLogin.isEnabled = false
+                Log.d("LoginActivity", "Attempting login: $emailStr, Role selected: $selectedRole")
                 
                 SupabaseClient.client.auth.signInWith(Email) {
                     email = emailStr
@@ -124,24 +125,44 @@ class LoginActivity : AppCompatActivity() {
                 }
 
                 val userId = SupabaseClient.client.auth.currentUserOrNull()?.id
-                Log.d("LoginActivity", "Logged in userId: $userId")
+                Log.d("LoginActivity", "Auth success. UserID: $userId")
                 
                 if (userId != null) {
-                    val role = repository.getUserRole(userId)
-                    Log.d("LoginActivity", "Database role for $userId: $role")
+                    var dbRole = repository.getUserRole(userId)
+                    Log.d("LoginActivity", "Role from DB: $dbRole")
 
-                    if (role == selectedRole || (selectedRole == "dean" && role == "super_admin") || (selectedRole == "super_admin" && role == "super_admin")) {
-                        navigateToDashboard(role ?: selectedRole, userId)
+                    // Fallback for hardcoded admin if DB record is missing
+                    if (dbRole == null && emailStr == "admin@avantika.edu.in") {
+                        dbRole = "super_admin"
+                        Log.d("LoginActivity", "Fallback to super_admin for admin email")
+                    }
+
+                    val normalizedDbRole = dbRole?.lowercase()?.trim()
+                    val normalizedSelectedRole = selectedRole.lowercase().trim()
+
+                    val isSuperAdmin = normalizedDbRole == "super_admin"
+                    
+                    val canLogin = when (normalizedSelectedRole) {
+                        "super_admin" -> isSuperAdmin
+                        "dean" -> normalizedDbRole == "dean" || isSuperAdmin
+                        else -> normalizedDbRole == normalizedSelectedRole || isSuperAdmin 
+                    }
+
+                    if (canLogin) {
+                        Log.d("LoginActivity", "Login authorized. Navigating...")
+                        navigateToDashboard(dbRole ?: selectedRole, userId)
                     } else {
-                        Toast.makeText(this@LoginActivity, "Incorrect role selected: expected $selectedRole, found $role", Toast.LENGTH_SHORT).show()
+                        Log.e("LoginActivity", "Role mismatch. DB: $dbRole, UI Selected: $selectedRole")
+                        val displayRole = dbRole ?: "unknown"
+                        Toast.makeText(this@LoginActivity, "Access Denied: You are registered as '$displayRole', but selected '$selectedRole'", Toast.LENGTH_LONG).show()
                         SupabaseClient.client.auth.signOut()
                     }
                 } else {
-                    Toast.makeText(this@LoginActivity, "User ID is null after login", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@LoginActivity, "Login failed: No user found", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                Log.e("LoginActivity", "Login Error: ${e.message}", e)
-                Toast.makeText(this@LoginActivity, "Login Failed: ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e("LoginActivity", "Login Exception: ${e.message}", e)
+                Toast.makeText(this@LoginActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
                 binding.btnLogin.isEnabled = true
             }
@@ -156,7 +177,7 @@ class LoginActivity : AppCompatActivity() {
                     val role = repository.getUserRole(user.id)
                     role?.let { navigateToDashboard(it, user.id) }
                 } catch (e: Exception) {
-                    // Stay on login
+                    // Session might be invalid or role fetch failed
                 }
             }
         }

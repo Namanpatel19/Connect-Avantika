@@ -19,20 +19,27 @@ class MainRepository {
 
     // --- Auth & User ---
     suspend fun getUserRole(userId: String): String? = withContext(Dispatchers.IO) {
-        try {
+        // Try public DB first
+        val roleFromPublic = try {
             val user = db.from("users").select {
                 filter { eq("id", userId) }
             }.decodeSingleOrNull<User>()
-            
-            if (user != null) return@withContext user.role
+            user?.role
+        } catch (e: Exception) {
+            Log.e("MainRepository", "Public DB role fetch failed: ${e.message}")
+            null
+        }
+        
+        if (roleFromPublic != null) return@withContext roleFromPublic
 
-            val adminUser = adminDb.from("users").select {
+        // Try admin DB as fallback
+        try {
+            val user = adminDb.from("users").select {
                 filter { eq("id", userId) }
             }.decodeSingleOrNull<User>()
-            
-            adminUser?.role
+            user?.role
         } catch (e: Exception) {
-            Log.e("MainRepository", "Error fetching user role for $userId: ${e.message}")
+            Log.e("MainRepository", "Admin DB role fetch failed: ${e.message}")
             null
         }
     }
@@ -68,6 +75,8 @@ class MainRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun createEventRequest(event: Event): Result<Unit> = createEvent(event.copy(status = "pending"))
 
     suspend fun updateEventStatus(eventId: String, status: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
@@ -187,6 +196,24 @@ class MainRepository {
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    // --- Study Materials ---
+    suspend fun getStudyMaterials(): List<StudyMaterial> = withContext(Dispatchers.IO) {
+        try {
+            db.from("study_materials").select().decodeList<StudyMaterial>()
+        } catch (e: Exception) { emptyList() }
+    }
+
+    suspend fun uploadStudyMaterial(title: String, subject: String, file: File, facultyId: String): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val path = "study_materials/${facultyId}_${System.currentTimeMillis()}.${file.extension}"
+            storage.from("study_materials").upload(path, file.readBytes())
+            val publicUrl = storage.from("study_materials").publicUrl(path)
+            val material = StudyMaterial(title = title, subject = subject, fileUrl = publicUrl, facultyId = facultyId)
+            db.from("study_materials").insert(material)
+            Result.success(publicUrl)
+        } catch (e: Exception) { Result.failure(e) }
     }
 
     // --- Students ---

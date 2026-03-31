@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
-import com.example.myapplication.data.Faculty
 import com.example.myapplication.databinding.FragmentFacultyProfileBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
 import io.github.jan.supabase.auth.auth
@@ -50,9 +50,18 @@ class FacultyProfileFragment : Fragment() {
 
         binding.btnLogout.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
-                try { SupabaseClient.client.auth.signOut() } catch (_: Exception) {}
-                startActivity(android.content.Intent(requireContext(), LoginActivity::class.java))
-                requireActivity().finish()
+                try {
+                    SupabaseClient.client.auth.signOut()
+                    val intent = Intent(requireContext(), LoginActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    requireActivity().finish()
+                } catch (e: Exception) {
+                    val intent = Intent(requireContext(), LoginActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    requireActivity().finish()
+                }
             }
         }
         vm.loadCurrentFaculty()
