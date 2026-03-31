@@ -22,7 +22,7 @@
                 android:id="@+id/ivAvatar"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:src="@drawable/ic_ranks"
+                android:src="@drawable/ic_person"
                 android:background="@drawable/bg_circle_white"
                 android:padding="4dp"
                 android:scaleType="centerCrop" />
@@ -67,7 +67,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_alignParentEnd="true"
-                android:src="@android:drawable/ic_menu_edit"
+                android:src="@drawable/ic_edit"
                 app:tint="@color/white" />
         </RelativeLayout>
 
@@ -119,8 +119,7 @@
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_width="0dp" android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
                 app:cardCornerRadius="12dp"
@@ -144,17 +143,17 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Contact Information" android:textStyle="bold" android:textSize="16sp" android:layout_marginBottom="12dp"/>
 
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="8dp">
-                    <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@android:drawable/ic_dialog_email" app:tint="@color/text_secondary"/>
+                    <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/ic_email" app:tint="@color/text_secondary"/>
                     <TextView android:id="@+id/tvEmail" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="jane.email@university.edu" android:layout_marginStart="12dp" android:textSize="13sp" android:textColor="@color/text_primary"/>
                 </LinearLayout>
 
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="8dp">
-                    <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@android:drawable/stat_sys_phone_call" app:tint="@color/text_secondary"/>
+                    <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/ic_phone" app:tint="@color/text_secondary"/>
                     <TextView android:id="@+id/tvPhone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="+91 98765 43210" android:layout_marginStart="12dp" android:textSize="13sp" android:textColor="@color/text_primary"/>
                 </LinearLayout>
 
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
-                    <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@android:drawable/ic_dialog_map" app:tint="@color/text_secondary"/>
+                    <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/ic_location" app:tint="@color/text_secondary"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Main Campus, Avantika" android:layout_marginStart="12dp" android:textSize="13sp" android:textColor="@color/text_primary"/>
                 </LinearLayout>
             </LinearLayout>
@@ -175,9 +174,9 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
 
                     <LinearLayout android:id="@+id/btnSettings" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:background="?selectableItemBackground">
-                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_manage" app:tint="@color/accent_orange"/>
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_shield" app:tint="@color/accent_orange"/>
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Settings" android:layout_marginStart="16dp" android:textStyle="bold"/>
-                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@android:drawable/ic_media_play" app:tint="@color/text_hint" android:rotation="0"/>
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_chevron_right" app:tint="@color/text_hint" android:rotation="0"/>
                     </LinearLayout>
 
                     <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/bg_deep" android:layout_marginHorizontal="16dp"/>
@@ -185,15 +184,15 @@
                     <LinearLayout android:id="@+id/btnLeaderboard" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:background="?selectableItemBackground">
                         <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_ranks" app:tint="@color/accent"/>
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Leaderboard" android:layout_marginStart="16dp" android:textStyle="bold"/>
-                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@android:drawable/ic_media_play" app:tint="@color/text_hint"/>
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_chevron_right" app:tint="@color/text_hint"/>
                     </LinearLayout>
 
                     <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/bg_deep" android:layout_marginHorizontal="16dp"/>
 
                     <LinearLayout android:id="@+id/btnLogout" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:background="?selectableItemBackground">
-                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_lock_power_off" app:tint="@color/accent_rose"/>
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_lock" app:tint="@color/accent_rose"/>
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Logout" android:layout_marginStart="16dp" android:textStyle="bold"/>
-                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@android:drawable/ic_media_play" app:tint="@color/text_hint"/>
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_chevron_right" app:tint="@color/text_hint"/>
                     </LinearLayout>
 
                 </LinearLayout>

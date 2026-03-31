@@ -20,7 +20,7 @@
         <ImageButton android:id="@+id/btnEditBanner" android:layout_width="40dp"
             android:layout_height="40dp" android:layout_gravity="top|end"
             android:layout_margin="12dp" android:background="@drawable/bg_circle_white"
-            android:src="@android:drawable/ic_menu_camera" android:padding="8dp"
+            android:src="@drawable/ic_camera" android:padding="8dp"
             app:tint="@color/primary"/>
     </FrameLayout>
     <!-- Stats Row -->
@@ -59,9 +59,10 @@
             android:layout_weight="1" android:layout_margin="4dp" app:cardCornerRadius="14dp">
             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                 android:orientation="vertical" android:gravity="center">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp"
+                    android:src="@drawable/ic_add" app:tint="@color/primary"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="➕" android:textSize="24sp"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
                     android:text="Create Event" android:textColor="@color/text_primary" android:textSize="12sp"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -70,9 +71,10 @@
             android:layout_weight="1" android:layout_margin="4dp" app:cardCornerRadius="14dp">
             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                 android:orientation="vertical" android:gravity="center">
+                <ImageView android:layout_width="28dp" android:layout_height="28dp"
+                    android:src="@drawable/ic_group" app:tint="@color/secondary"/>
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:text="👥" android:textSize="24sp"/>
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
                     android:text="Members" android:textColor="@color/text_primary" android:textSize="12sp"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>

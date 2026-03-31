@@ -87,7 +87,7 @@
                 app:boxStrokeWidth="1dp"
                 app:boxBackgroundColor="@color/bg_card"
                 app:hintEnabled="false"
-                app:startIconDrawable="@android:drawable/ic_dialog_email"
+                app:startIconDrawable="@drawable/ic_email"
                 app:startIconTint="@color/text_hint">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -124,7 +124,7 @@
                 app:boxStrokeWidth="1dp"
                 app:boxBackgroundColor="@color/bg_card"
                 app:hintEnabled="false"
-                app:startIconDrawable="@drawable/ic_ranks"
+                app:startIconDrawable="@drawable/ic_lock"
                 app:startIconTint="@color/text_hint"
                 app:passwordToggleEnabled="true">
 
@@ -174,7 +174,7 @@
                         android:id="@+id/iv_admin"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@android:drawable/ic_secure"
+                        android:src="@drawable/ic_shield"
                         app:tint="#4D5D78" />
                     <TextView
                         android:id="@+id/tv_admin"
@@ -203,7 +203,7 @@
                         android:id="@+id/iv_club_lead"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_share"
+                        android:src="@drawable/ic_clubs"
                         app:tint="#4D5D78" />
                     <TextView
                         android:id="@+id/tv_club_lead"
@@ -232,7 +232,7 @@
                         android:id="@+id/iv_faculty"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_agenda"
+                        android:src="@drawable/ic_academics"
                         app:tint="@color/primary" />
                     <TextView
                         android:id="@+id/tv_faculty"
@@ -261,7 +261,7 @@
                         android:id="@+id/iv_student"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_myplaces"
+                        android:src="@drawable/ic_person"
                         app:tint="#4D5D78" />
                     <TextView
                         android:id="@+id/tv_student"

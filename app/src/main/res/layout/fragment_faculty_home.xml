@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_deep">
@@ -32,13 +33,13 @@
             <androidx.cardview.widget.CardView android:id="@+id/cardManageStudents"
                 android:layout_width="0dp" android:layout_height="100dp"
                 android:layout_weight="1" android:layout_margin="6dp"
-                app:cardCornerRadius="16dp" app:cardElevation="2dp"
-                xmlns:app="http://schemas.android.com/apk/res-auto">
+                app:cardCornerRadius="16dp" app:cardElevation="2dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
                     android:orientation="vertical" android:gravity="center">
+                    <ImageView android:layout_width="32dp" android:layout_height="32dp"
+                        android:src="@drawable/ic_group" app:tint="@color/primary"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="👥" android:textSize="28sp"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
                         android:text="Manage Students" android:textColor="@color/text_primary" android:textSize="12sp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

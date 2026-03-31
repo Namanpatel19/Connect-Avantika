@@ -51,7 +51,7 @@
                 android:layout_centerVertical="true"
                 android:background="@drawable/bg_circle_white"
                 android:padding="8dp"
-                android:src="@android:drawable/ic_popup_reminder"
+                android:src="@drawable/ic_notifications"
                 app:tint="@color/primary" />
         </RelativeLayout>
 
@@ -146,7 +146,7 @@
                     android:layout_columnWeight="1" android:orientation="vertical" android:gravity="center">
                     <ImageView android:layout_width="56dp" android:layout_height="56dp"
                         android:background="@drawable/bg_circle_white"
-                        android:padding="14dp" android:src="@drawable/ic_dashboard"
+                        android:padding="14dp" android:src="@drawable/ic_academics"
                         app:tint="@color/accent" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="Academics" android:layout_marginTop="8dp" android:textSize="12sp" android:textColor="@color/text_secondary"/>
@@ -157,7 +157,7 @@
                     android:layout_columnWeight="1" android:orientation="vertical" android:gravity="center">
                     <ImageView android:layout_width="56dp" android:layout_height="56dp"
                         android:background="@drawable/bg_circle_white"
-                        android:padding="14dp" android:src="@android:drawable/ic_menu_directions"
+                        android:padding="14dp" android:src="@drawable/ic_transport"
                         app:tint="@color/accent_rose" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="Transport" android:layout_marginTop="8dp" android:textSize="12sp" android:textColor="@color/text_secondary"/>
