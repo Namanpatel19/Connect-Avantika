@@ -156,9 +156,13 @@ class MainRepository {
         } catch (e: Exception) { emptyList() }
     }
 
-    suspend fun updateClubRequest(requestId: String, status: String): Result<Unit> = withContext(Dispatchers.IO) {
+    suspend fun updateClubRequest(requestId: String, status: String, interviewDate: String? = null, interviewTime: String? = null): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            adminDb.from("club_requests").update({ set("status", status) }) { filter { eq("id", requestId) } }
+            adminDb.from("club_requests").update({
+                set("status", status)
+                interviewDate?.let { set("interview_date", it) }
+                interviewTime?.let { set("interview_time", it) }
+            }) { filter { eq("id", requestId) } }
             Result.success(Unit)
         } catch (e: Exception) { Result.failure(e) }
     }

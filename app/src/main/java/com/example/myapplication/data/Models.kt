@@ -52,6 +52,7 @@ data class Club(
     val description: String? = null,
     @SerialName("club_head_id") val clubHeadId: String? = null,
     @SerialName("banner_url") val bannerUrl: String? = null,
+    val category: String? = "Other",
     @SerialName("created_at") val createdAt: String? = null
 )
 
@@ -80,6 +81,8 @@ data class ClubRequest(
     @SerialName("club_id") val clubId: String,
     @SerialName("student_id") val studentId: String,
     val status: String = "pending",
+    @SerialName("interview_date") val interviewDate: String? = null,
+    @SerialName("interview_time") val interviewTime: String? = null,
     @SerialName("requested_at") val requestedAt: String? = null
 )
 

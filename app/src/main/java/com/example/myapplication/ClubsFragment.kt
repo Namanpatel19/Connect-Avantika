@@ -6,6 +6,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -50,13 +51,7 @@ class ClubsFragment : Fragment() {
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val query = s.toString().lowercase()
-                val filtered = allClubs.filter { it.name.lowercase().contains(query) }
-                binding.rvClubs.adapter = ClubAdapter(filtered) { club ->
-                    vm.joinClub(club.id ?: "") { success ->
-                        android.widget.Toast.makeText(context, if (success) "Join request sent!" else "Error", android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                }
+                filterClubs(binding.tabLayout.getTabAt(binding.tabLayout.selectedTabPosition)?.text.toString(), s.toString())
             }
             override fun afterTextChanged(s: Editable?) {}
         })
@@ -64,14 +59,23 @@ class ClubsFragment : Fragment() {
         vm.loadClubs()
     }
 
-    private fun filterClubs(category: String) {
-        val filtered = if (category == "All") allClubs
-        else allClubs.filter { it.name.lowercase().contains(category.lowercase()) }
-        binding.rvClubs.adapter = ClubAdapter(filtered) { club ->
-            vm.joinClub(club.id ?: "") { success ->
-                android.widget.Toast.makeText(context, if (success) "Join request sent!" else "Error", android.widget.Toast.LENGTH_SHORT).show()
-            }
+    private fun filterClubs(category: String, query: String = "") {
+        var filtered = if (category == "All") allClubs
+        else allClubs.filter { (it.category ?: "").equals(category, ignoreCase = true) }
+        
+        if (query.isNotEmpty()) {
+            filtered = filtered.filter { it.name.contains(query, ignoreCase = true) }
         }
+
+        binding.rvClubs.adapter = ClubAdapter(
+            clubs = filtered,
+            onJoinClick = { club ->
+                vm.joinClub(club.id ?: "") { success ->
+                    Toast.makeText(context, if (success) "Join request sent!" else "Failed to send request", Toast.LENGTH_SHORT).show()
+                }
+            },
+            onDeleteClick = { /* SuperAdmin only */ }
+        )
     }
 
     override fun onDestroyView() { super.onDestroyView(); _binding = null }

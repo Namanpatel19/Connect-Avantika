@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -60,6 +62,13 @@ class ManageClubsFragment : Fragment() {
 
     private fun showAddDialog() {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_club, null)
+        
+        // Setup Category Spinner
+        val categories = arrayOf("Technical", "Cultural", "Sports", "Social", "Academic", "Other")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, categories)
+        val spinner = dialogView.findViewById<AutoCompleteTextView>(R.id.spinnerCategory)
+        spinner.setAdapter(adapter)
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Create New Club")
             .setView(dialogView)
@@ -67,13 +76,19 @@ class ManageClubsFragment : Fragment() {
                 val name = dialogView.findViewById<TextInputEditText>(R.id.etName).text.toString().trim()
                 val desc = dialogView.findViewById<TextInputEditText>(R.id.etDescription).text.toString().trim()
                 val headId = dialogView.findViewById<TextInputEditText>(R.id.etHeadId).text.toString().trim()
+                val category = spinner.text.toString()
 
                 if (name.isEmpty()) {
                     Toast.makeText(context, "Club name is required", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
-                val club = Club(name = name, description = desc, clubHeadId = if (headId.isEmpty()) null else headId)
+                val club = Club(
+                    name = name, 
+                    description = desc, 
+                    clubHeadId = if (headId.isEmpty()) null else headId,
+                    category = category
+                )
                 vm.addClub(club) { success ->
                     Toast.makeText(context, if (success) "Club created!" else "Error creating club", Toast.LENGTH_SHORT).show()
                 }

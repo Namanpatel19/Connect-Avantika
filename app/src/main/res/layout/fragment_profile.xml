@@ -119,7 +119,8 @@
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
-                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
                 app:cardCornerRadius="12dp"
@@ -173,24 +174,24 @@
                 app:cardCornerRadius="12dp" app:cardElevation="0dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
 
-                    <LinearLayout android:id="@+id/btnSettings" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:background="?selectableItemBackground">
-                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_shield" app:tint="@color/accent_orange"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Settings" android:layout_marginStart="16dp" android:textStyle="bold"/>
-                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_chevron_right" app:tint="@color/text_hint" android:rotation="0"/>
-                    </LinearLayout>
-
-                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/bg_deep" android:layout_marginHorizontal="16dp"/>
-
-                    <LinearLayout android:id="@+id/btnLeaderboard" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:background="?selectableItemBackground">
-                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_ranks" app:tint="@color/accent"/>
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Leaderboard" android:layout_marginStart="16dp" android:textStyle="bold"/>
+                    <LinearLayout android:id="@+id/btnChangePassword" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:background="?selectableItemBackground">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_lock" app:tint="@color/accent_orange"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Change Password" android:layout_marginStart="16dp" android:textStyle="bold"/>
                         <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_chevron_right" app:tint="@color/text_hint"/>
                     </LinearLayout>
 
                     <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/bg_deep" android:layout_marginHorizontal="16dp"/>
 
+                    <LinearLayout android:id="@+id/btnSettings" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:background="?selectableItemBackground">
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_shield" app:tint="@color/primary"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Privacy Settings" android:layout_marginStart="16dp" android:textStyle="bold"/>
+                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_chevron_right" app:tint="@color/text_hint" android:rotation="0"/>
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/bg_deep" android:layout_marginHorizontal="16dp"/>
+
                     <LinearLayout android:id="@+id/btnLogout" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:background="?selectableItemBackground">
-                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_lock" app:tint="@color/accent_rose"/>
+                        <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_close_clear_cancel" app:tint="@color/accent_rose"/>
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Logout" android:layout_marginStart="16dp" android:textStyle="bold"/>
                         <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_chevron_right" app:tint="@color/text_hint"/>
                     </LinearLayout>
