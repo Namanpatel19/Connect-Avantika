@@ -20,16 +20,12 @@ class MainRepository {
     // --- Auth & User ---
     suspend fun getUserRole(userId: String): String? = withContext(Dispatchers.IO) {
         try {
-            // First try using the standard client (anon key)
-            // This works if RLS allows users to read their own profile
             val user = db.from("users").select {
                 filter { eq("id", userId) }
             }.decodeSingleOrNull<User>()
             
             if (user != null) return@withContext user.role
 
-            // Fallback: try using adminDb if the first one returned null
-            // This helps if the service role key is valid but the anon key isn't enough
             val adminUser = adminDb.from("users").select {
                 filter { eq("id", userId) }
             }.decodeSingleOrNull<User>()
@@ -37,21 +33,6 @@ class MainRepository {
             adminUser?.role
         } catch (e: Exception) {
             Log.e("MainRepository", "Error fetching user role for $userId: ${e.message}")
-            
-            // Final attempt: if UUID lookup fails, try fetching by email if we can get it from Auth
-            try {
-                val currentUser = SupabaseClient.client.auth.currentUserOrNull()
-                val email = currentUser?.email
-                if (email != null) {
-                    val userByEmail = db.from("users").select {
-                        filter { eq("email", email) }
-                    }.decodeSingleOrNull<User>()
-                    return@withContext userByEmail?.role
-                }
-            } catch (e2: Exception) {
-                Log.e("MainRepository", "Final fallback failed: ${e2.message}")
-            }
-            
             null
         }
     }
@@ -79,16 +60,14 @@ class MainRepository {
 
     suspend fun createEvent(event: Event): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            // Use adminDb for creation if status is already approved (admin action)
             val database = if (event.status == "approved") adminDb else db
             database.from("events").insert(event)
             Result.success(Unit)
         } catch (e: Exception) {
+            Log.e("MainRepository", "Error creating event: ${e.message}", e)
             Result.failure(e)
         }
     }
-
-    suspend fun createEventRequest(event: Event): Result<Unit> = createEvent(event)
 
     suspend fun updateEventStatus(eventId: String, status: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
@@ -228,6 +207,7 @@ class MainRepository {
             adminDb.from("students").insert(student.copy(userId = userId))
             Result.success(Unit)
         } catch (e: Exception) {
+            Log.e("MainRepository", "Error creating student user: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -274,6 +254,7 @@ class MainRepository {
             adminDb.from("faculty").insert(faculty.copy(userId = userId))
             Result.success(Unit)
         } catch (e: Exception) {
+            Log.e("MainRepository", "Error adding faculty: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -283,28 +264,6 @@ class MainRepository {
             adminDb.from("faculty").delete { filter { eq("user_id", userId) } }
             adminDb.from("users").delete { filter { eq("id", userId) } }
             try { adminAuth.deleteUser(userId) } catch (e: Exception) {}
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    // --- Study Materials ---
-    suspend fun getStudyMaterials(): List<StudyMaterial> = withContext(Dispatchers.IO) {
-        try {
-            db.from("study_materials").select().decodeList<StudyMaterial>()
-        } catch (e: Exception) { emptyList() }
-    }
-
-    suspend fun uploadStudyMaterial(title: String, subject: String, file: File, uploaderId: String): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            val fileName = "${System.currentTimeMillis()}_${file.name}"
-            val path = "materials/$fileName"
-            storage.from("study-materials").upload(path, file.readBytes())
-            val publicUrl = storage.from("study-materials").publicUrl(path)
-            
-            val material = StudyMaterial(title = title, subject = subject, fileUrl = publicUrl, facultyId = uploaderId)
-            db.from("study_materials").insert(material)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

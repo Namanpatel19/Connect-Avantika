@@ -42,13 +42,13 @@ class CreateEventDialog : DialogFragment() {
             val desc  = binding.etDescription.text.toString().trim()
             val date  = binding.tvDate.text.toString()
             
-            // For admins, clubId can be null. For club leads, it should be their club.
-            val clubId = vm.myClub.value?.id 
-
             if (title.isEmpty()) { 
                 Toast.makeText(context, "Enter event title", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener 
             }
+
+            // If it's a club lead, use their club ID. If it's a dean, it might be a general event (null clubId)
+            val clubId = vm.myClub.value?.id 
 
             val event = Event(
                 title       = title,
@@ -59,9 +59,15 @@ class CreateEventDialog : DialogFragment() {
                 eventDate   = if (date.isNotEmpty()) "${date}T00:00:00" else null
             )
             
+            binding.btnSubmit.isEnabled = false
             vm.submitEventRequest(event) { success ->
-                Toast.makeText(context, if (success) "Event created/submitted!" else "Operation failed", Toast.LENGTH_SHORT).show()
-                if (success) dismiss()
+                binding.btnSubmit.isEnabled = true
+                if (success) {
+                    Toast.makeText(context, "Event submitted successfully!", Toast.LENGTH_SHORT).show()
+                    dismiss()
+                } else {
+                    Toast.makeText(context, "Failed to create event. Check logs.", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
