@@ -176,12 +176,13 @@
                         android:layout_height="24dp"
                         android:src="@drawable/ic_shield"
                         app:tint="#4D5D78" />
+
                     <TextView
                         android:id="@+id/tv_admin"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="Admin"
+                        android:text="Dean"
                         android:textColor="#4D5D78"
                         android:textSize="12sp"
                         android:textStyle="bold" />

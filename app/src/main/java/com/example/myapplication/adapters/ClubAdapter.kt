@@ -1,8 +1,13 @@
 package com.example.myapplication.adapters
 
+import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.example.myapplication.R
 import com.example.myapplication.databinding.ItemClubBinding
 import com.example.myapplication.data.Club
 
@@ -26,48 +31,32 @@ class ClubAdapter(
 
         b.clubName.text = club.name
         b.clubDescription.text = club.description ?: ""
+        b.tvClubCategory.text = club.category ?: "General"
 
-        // Member count placeholder (real count needs join query)
-        b.clubMembers.text = "Members"
-
-        // Category chip from description (first word or custom field)
-        val category = when {
-            club.description?.contains("Tech", ignoreCase = true) == true -> "Technology"
-            club.description?.contains("Sport", ignoreCase = true) == true -> "Sports"
-            club.description?.contains("Art", ignoreCase = true) == true -> "Arts & Culture"
-            club.description?.contains("Music", ignoreCase = true) == true -> "Music"
-            club.description?.contains("Business", ignoreCase = true) == true -> "Business"
-            else -> "General"
-        }
-        b.tvClubCategory.text = category
-
-        // Joined chip visibility
+        // Joined status UI
         val isJoined = joinedClubIds.contains(club.id)
-        b.tvJoinedChip.visibility = if (isJoined) android.view.View.VISIBLE else android.view.View.GONE
         b.btnJoin.text = if (isJoined) "Joined ✓" else "Join Club"
+        
         if (isJoined) {
-            b.btnJoin.backgroundTintList = androidx.core.content.ContextCompat.getColorStateList(
-                holder.itemView.context, com.example.myapplication.R.color.separator
-            )
-            b.btnJoin.setTextColor(
-                androidx.core.content.ContextCompat.getColor(
-                    holder.itemView.context, com.example.myapplication.R.color.text_secondary
-                )
-            )
+            b.btnJoin.backgroundTintList = ContextCompat.getColorStateList(holder.itemView.context, R.color.separator)
+            b.btnJoin.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.text_secondary))
+            b.btnJoin.isEnabled = false
         } else {
-            b.btnJoin.backgroundTintList = androidx.core.content.ContextCompat.getColorStateList(
-                holder.itemView.context, com.example.myapplication.R.color.secondary
-            )
-            b.btnJoin.setTextColor(
-                androidx.core.content.ContextCompat.getColor(
-                    holder.itemView.context, android.R.color.white
-                )
-            )
+            b.btnJoin.backgroundTintList = ContextCompat.getColorStateList(holder.itemView.context, R.color.secondary)
+            b.btnJoin.setTextColor(ContextCompat.getColor(holder.itemView.context, android.R.color.white))
+            b.btnJoin.isEnabled = true
         }
 
         b.btnJoin.setOnClickListener { onJoinClick(club) }
         b.btnDelete.setOnClickListener { onDeleteClick(club) }
-        b.btnViewClub.setOnClickListener { /* navigate to club detail */ }
+        
+        // Fix for "View Info" navigation
+        b.btnViewClub.setOnClickListener {
+            val bundle = Bundle().apply {
+                putString("club_id", club.id)
+            }
+            holder.itemView.findNavController().navigate(R.id.navigation_club_details, bundle)
+        }
     }
 
     override fun getItemCount() = clubs.size

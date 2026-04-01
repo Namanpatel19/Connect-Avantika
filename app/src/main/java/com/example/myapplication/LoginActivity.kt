@@ -88,13 +88,13 @@ class LoginActivity : AppCompatActivity() {
                 if (selectedRole == "super_admin") {
                     text.text = "Super Admin"
                 } else if (layout == binding.roleAdmin) {
-                    text.text = "Admin"
+                    text.text = "Dean"
                 }
             } else {
                 layout.setBackgroundResource(R.drawable.bg_role_tile_default)
                 ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(defaultIconColor))
                 text.setTextColor(defaultTextColor)
-                if (layout == binding.roleAdmin) text.text = "Admin"
+                if (layout == binding.roleAdmin) text.text = "Dean"
             }
         }
     }
