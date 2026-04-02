@@ -6,10 +6,13 @@
     <item android:id="@+id/navigation_manage_students_dean"
         android:icon="@drawable/ic_ranks"
         android:title="Students" />
+    <item android:id="@+id/navigation_manage_faculty"
+        android:icon="@drawable/ic_clubs"
+        android:title="Faculty" />
     <item android:id="@+id/navigation_event_approvals"
         android:icon="@drawable/ic_calendar"
         android:title="Events" />
-    <item android:id="@+id/navigation_dean_profile"
-        android:icon="@drawable/ic_notices"
-        android:title="Profile" />
+    <item android:id="@+id/navigation_manage_announcements"
+        android:icon="@drawable/ic_announcement"
+        android:title="Notices" />
 </menu>

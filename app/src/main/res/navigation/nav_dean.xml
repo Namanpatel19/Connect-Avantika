@@ -18,10 +18,22 @@
         tools:layout="@layout/fragment_manage_students_dean" />
 
     <fragment
+        android:id="@+id/navigation_manage_faculty"
+        android:name="com.example.myapplication.ManageFacultyFragment"
+        android:label="Faculty"
+        tools:layout="@layout/fragment_manage_students_dean" />
+
+    <fragment
         android:id="@+id/navigation_event_approvals"
         android:name="com.example.myapplication.EventApprovalsFragment"
         android:label="Events"
         tools:layout="@layout/fragment_event_approvals" />
+
+    <fragment
+        android:id="@+id/navigation_manage_announcements"
+        android:name="com.example.myapplication.ManageAnnouncementsFragment"
+        android:label="Announcements"
+        tools:layout="@layout/fragment_manage_announcements" />
 
     <fragment
         android:id="@+id/navigation_club_details"

@@ -39,5 +39,6 @@ object SupabaseClient {
                 encodeDefaults = false
             })
         }
+        install(Storage)
     }
 }

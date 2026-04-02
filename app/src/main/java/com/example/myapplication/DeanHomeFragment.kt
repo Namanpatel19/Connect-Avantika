@@ -33,14 +33,18 @@ class DeanHomeFragment : Fragment() {
             binding.rvActivity.adapter = AnnouncementAdapter(list.take(5))
         }
 
+        // Quick action cards
         binding.cardManageStudents.setOnClickListener {
             (requireActivity() as MainActivity).navigateTo(R.id.navigation_manage_students_dean)
+        }
+        binding.cardManageFaculty.setOnClickListener {
+            (requireActivity() as MainActivity).navigateTo(R.id.navigation_manage_faculty)
         }
         binding.cardEventApprovals.setOnClickListener {
             (requireActivity() as MainActivity).navigateTo(R.id.navigation_event_approvals)
         }
         binding.cardAnnouncements.setOnClickListener {
-            AnnouncementsDeanDialog().show(parentFragmentManager, "Announcements")
+            (requireActivity() as MainActivity).navigateTo(R.id.navigation_manage_announcements)
         }
 
         vm.loadSystemStats()

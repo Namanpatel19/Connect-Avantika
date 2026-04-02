@@ -54,7 +54,7 @@
             android:layout_height="wrap_content"
             android:text="Auto Confirm User?"
             android:checked="true"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:layout_marginBottom="4dp"/>
 
         <TextView
@@ -75,19 +75,35 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEnrollment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:inputType="textCapCharacters"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilDepartment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Department *"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_marginBottom="8dp">
+            <AutoCompleteTextView
+                android:id="@+id/actvDepartment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Department"
+            android:hint="Year *"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="8dp">
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etDepartment"
+                android:id="@+id/etYear"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:inputType="number"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout

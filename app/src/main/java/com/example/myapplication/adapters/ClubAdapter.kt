@@ -1,11 +1,8 @@
 package com.example.myapplication.adapters
 
-import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.R
 import com.example.myapplication.databinding.ItemClubBinding
@@ -15,7 +12,8 @@ class ClubAdapter(
     private var clubs: List<Club>,
     private val joinedClubIds: Set<String> = emptySet(),
     private val onDeleteClick: (Club) -> Unit = {},
-    private val onJoinClick: (Club) -> Unit = {}
+    private val onJoinClick: (Club) -> Unit = {},
+    private val onViewInfoClick: (Club) -> Unit = {}
 ) : RecyclerView.Adapter<ClubAdapter.ClubViewHolder>() {
 
     class ClubViewHolder(val binding: ItemClubBinding) : RecyclerView.ViewHolder(binding.root)
@@ -49,14 +47,7 @@ class ClubAdapter(
 
         b.btnJoin.setOnClickListener { onJoinClick(club) }
         b.btnDelete.setOnClickListener { onDeleteClick(club) }
-        
-        // Fix for "View Info" navigation
-        b.btnViewClub.setOnClickListener {
-            val bundle = Bundle().apply {
-                putString("club_id", club.id)
-            }
-            holder.itemView.findNavController().navigate(R.id.navigation_club_details, bundle)
-        }
+        b.btnViewClub.setOnClickListener { onViewInfoClick(club) }
     }
 
     override fun getItemCount() = clubs.size

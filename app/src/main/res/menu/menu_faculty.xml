@@ -6,6 +6,9 @@
     <item android:id="@+id/navigation_manage_students"
         android:icon="@drawable/ic_clubs"
         android:title="Students" />
+    <item android:id="@+id/navigation_upload_material"
+        android:icon="@drawable/ic_upload"
+        android:title="Materials" />
     <item android:id="@+id/navigation_faculty_events"
         android:icon="@drawable/ic_calendar"
         android:title="Events" />

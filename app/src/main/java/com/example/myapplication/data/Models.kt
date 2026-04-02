@@ -72,6 +72,9 @@ data class StudyMaterial(
     val title: String,
     @SerialName("file_url") val fileUrl: String,
     val subject: String? = null,
+    val batch: String? = null,
+    val department: String? = null,
+    @SerialName("file_name") val fileName: String? = null,
     @SerialName("created_at") val createdAt: String? = null
 )
 

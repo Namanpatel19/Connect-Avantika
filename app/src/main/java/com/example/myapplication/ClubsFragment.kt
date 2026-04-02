@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.adapters.ClubAdapter
 import com.example.myapplication.databinding.FragmentClubsBinding
@@ -35,7 +36,7 @@ class ClubsFragment : Fragment() {
 
         vm.clubs.observe(viewLifecycleOwner) { clubs ->
             allClubs = clubs
-            filterClubs("All")
+            filterClubs(binding.tabLayout.getTabAt(binding.tabLayout.selectedTabPosition)?.text.toString())
         }
 
         vm.isLoading.observe(viewLifecycleOwner) { loading ->
@@ -73,6 +74,12 @@ class ClubsFragment : Fragment() {
                 vm.joinClub(club.id ?: "") { success ->
                     Toast.makeText(context, if (success) "Join request sent!" else "Failed to send request", Toast.LENGTH_SHORT).show()
                 }
+            },
+            onViewInfoClick = { club ->
+                val bundle = Bundle().apply {
+                    putString("club_id", club.id)
+                }
+                findNavController().navigate(R.id.navigation_club_details, bundle)
             },
             onDeleteClick = { /* SuperAdmin only */ }
         )

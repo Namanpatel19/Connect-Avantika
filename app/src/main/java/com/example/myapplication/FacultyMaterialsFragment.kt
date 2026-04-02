@@ -1,0 +1,155 @@
+package com.example.myapplication
+
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.myapplication.adapters.StudyMaterialAdapter
+import com.example.myapplication.databinding.FragmentFacultyUploadBinding
+import com.example.myapplication.ui.viewmodel.AppViewModel
+import java.io.File
+import java.io.FileOutputStream
+
+class FacultyMaterialsFragment : Fragment() {
+
+    private var _binding: FragmentFacultyUploadBinding? = null
+    private val binding get() = _binding!!
+    private lateinit var vm: AppViewModel
+    private var selectedFileUri: Uri? = null
+    private var selectedFile: File? = null
+    private lateinit var materialsAdapter: StudyMaterialAdapter
+
+    private val pickFile = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            selectedFileUri = it
+            selectedFile = uriToFile(it)
+            val name = selectedFile?.name ?: "file"
+            binding.chipFileName.text = name
+            binding.chipFileName.visibility = View.VISIBLE
+            binding.tvPickFile.text = "File selected ✓"
+        }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ) = FragmentFacultyUploadBinding.inflate(inflater, container, false)
+        .also { _binding = it }.root
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        vm = ViewModelProvider(requireActivity())[AppViewModel::class.java]
+
+        setupDropdowns()
+        setupRecycler()
+
+        // File picker card click
+        binding.cardPickFile.setOnClickListener {
+            pickFile.launch("*/*")
+        }
+
+        // Upload button
+        binding.btnUpload.setOnClickListener { handleUpload() }
+
+        // Upload progress observer
+        vm.uploadProgress.observe(viewLifecycleOwner) { uploading ->
+            binding.progressUpload.visibility = if (uploading) View.VISIBLE else View.GONE
+            binding.btnUpload.isEnabled = !uploading
+            binding.btnUpload.text = if (uploading) "Uploading…" else "Upload Material"
+        }
+
+        // Previously uploaded materials
+        vm.studyMaterials.observe(viewLifecycleOwner) { list ->
+            materialsAdapter.update(list)
+        }
+
+        vm.loadStudyMaterials()
+    }
+
+    private fun setupDropdowns() {
+        val batches = listOf("1st Year", "2nd Year", "3rd Year", "4th Year")
+        val batchAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, batches)
+        binding.actvBatch.setAdapter(batchAdapter)
+
+        val departments = listOf("Computer Science", "Information Technology", "Electronics", "Mechanical", "Civil", "Chemical")
+        val deptAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, departments)
+        binding.actvDepartment.setAdapter(deptAdapter)
+    }
+
+    private fun setupRecycler() {
+        materialsAdapter = StudyMaterialAdapter(emptyList())
+        binding.rvMaterials.layoutManager = LinearLayoutManager(context)
+        binding.rvMaterials.adapter = materialsAdapter
+    }
+
+    private fun handleUpload() {
+        val title = binding.etTitle.text?.toString()?.trim() ?: ""
+        val subject = binding.etSubject.text?.toString()?.trim() ?: ""
+        val batch = binding.actvBatch.text?.toString()?.trim() ?: ""
+        val dept = binding.actvDepartment.text?.toString()?.trim() ?: ""
+        val file = selectedFile
+
+        when {
+            title.isEmpty() -> { binding.tilTitle.error = "Title is required"; return }
+            subject.isEmpty() -> { binding.tilSubject.error = "Subject is required"; return }
+            batch.isEmpty() -> { binding.tilBatch.error = "Select a batch"; return }
+            dept.isEmpty() -> { binding.tilDepartment.error = "Select a department"; return }
+            file == null -> { Toast.makeText(context, "Please pick a file first", Toast.LENGTH_SHORT).show(); return }
+        }
+
+        // Clear errors
+        binding.tilTitle.error = null
+        binding.tilSubject.error = null
+        binding.tilBatch.error = null
+        binding.tilDepartment.error = null
+
+        vm.uploadStudyMaterial(title, subject, batch!!, dept!!, file!!) { success, message ->
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+            if (success) {
+                binding.etTitle.text?.clear()
+                binding.etSubject.text?.clear()
+                binding.actvBatch.text.clear()
+                binding.actvDepartment.text.clear()
+                binding.chipFileName.visibility = View.GONE
+                binding.tvPickFile.text = "Tap to choose file (PDF, DOC, PPT…)"
+                selectedFile = null
+                selectedFileUri = null
+            }
+        }
+    }
+
+    private fun uriToFile(uri: Uri): File {
+        val contentResolver = requireContext().contentResolver
+        val fileName = getFileNameFromUri(uri) ?: "upload_${System.currentTimeMillis()}"
+        val file = File(requireContext().cacheDir, fileName)
+        val inputStream = contentResolver.openInputStream(uri)
+        val outputStream = FileOutputStream(file)
+        inputStream?.copyTo(outputStream)
+        inputStream?.close()
+        outputStream.close()
+        return file
+    }
+
+    private fun getFileNameFromUri(uri: Uri): String? {
+        var name: String? = null
+        requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val idx = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                if (idx >= 0) name = cursor.getString(idx)
+            }
+        }
+        return name
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}

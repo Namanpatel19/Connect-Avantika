@@ -18,10 +18,26 @@
         tools:layout="@layout/fragment_manage_students" />
 
     <fragment
+        android:id="@+id/navigation_upload_material"
+        android:name="com.example.myapplication.FacultyMaterialsFragment"
+        android:label="Upload Material"
+        tools:layout="@layout/fragment_faculty_upload" />
+
+    <fragment
         android:id="@+id/navigation_faculty_events"
         android:name="com.example.myapplication.FacultyEventsFragment"
         android:label="Events"
-        tools:layout="@layout/fragment_faculty_events" />
+        tools:layout="@layout/fragment_events" />
+
+    <fragment
+        android:id="@+id/navigation_club_details"
+        android:name="com.example.myapplication.ClubDetailsFragment"
+        android:label="Club Info"
+        tools:layout="@layout/fragment_club_details">
+        <argument
+            android:name="club_id"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_faculty_profile"

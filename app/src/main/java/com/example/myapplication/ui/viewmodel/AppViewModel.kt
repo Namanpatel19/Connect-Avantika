@@ -63,6 +63,12 @@ class AppViewModel : ViewModel() {
     private val _eventCount = MutableLiveData<Int>()
     val eventCount: LiveData<Int> get() = _eventCount
 
+    private val _studyMaterials = MutableLiveData<List<StudyMaterial>>()
+    val studyMaterials: LiveData<List<StudyMaterial>> get() = _studyMaterials
+
+    private val _uploadProgress = MutableLiveData<Boolean>(false)
+    val uploadProgress: LiveData<Boolean> get() = _uploadProgress
+
     fun loadSystemStats() {
         viewModelScope.launch {
             val students = repository.getAllStudents()
@@ -201,6 +207,7 @@ class AppViewModel : ViewModel() {
 
     fun joinClub(clubId: String, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
+            // studentId in club_requests = the same auth userId (Supabase user uuid)
             val result = repository.joinClub(clubId, userId)
             callback(result.isSuccess)
         }
@@ -214,9 +221,9 @@ class AppViewModel : ViewModel() {
         }
     }
 
-    fun updateClubRequest(requestId: String, status: String, callback: (Boolean) -> Unit) {
+    fun updateClubRequest(requestId: String, status: String, interviewDate: String? = null, interviewTime: String? = null, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val result = repository.updateClubRequest(requestId, status)
+            val result = repository.updateClubRequest(requestId, status, interviewDate, interviewTime)
             callback(result.isSuccess)
         }
     }
@@ -356,6 +363,39 @@ class AppViewModel : ViewModel() {
                 if (role == "student") loadCurrentStudent() else loadCurrentFaculty()
             }
             _isLoading.value = false
+        }
+    }
+
+    // --- Study Materials ---
+    fun loadStudyMaterials(batch: String? = null, department: String? = null) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _studyMaterials.value = if (batch != null || department != null)
+                repository.getStudyMaterialsByFilter(batch, department)
+            else
+                repository.getStudyMaterials()
+            _isLoading.value = false
+        }
+    }
+
+    fun uploadStudyMaterial(
+        title: String,
+        subject: String,
+        batch: String,
+        department: String,
+        file: File,
+        callback: (Boolean, String) -> Unit
+    ) {
+        viewModelScope.launch {
+            _uploadProgress.value = true
+            val result = repository.uploadStudyMaterial(title, subject, batch, department, file, userId)
+            _uploadProgress.value = false
+            if (result.isSuccess) {
+                callback(true, "Material uploaded successfully!")
+                loadStudyMaterials()
+            } else {
+                callback(false, result.exceptionOrNull()?.message ?: "Upload failed")
+            }
         }
     }
 }

@@ -28,6 +28,12 @@
     </fragment>
 
     <fragment
+        android:id="@+id/navigation_member_requests"
+        android:name="com.example.myapplication.MemberRequestsFragment"
+        android:label="Member Requests"
+        tools:layout="@layout/fragment_member_requests" />
+
+    <fragment
         android:id="@+id/navigation_club_profile"
         android:name="com.example.myapplication.ClubProfileFragment"
         android:label="Profile"

@@ -16,6 +16,7 @@ class MainRepository {
     private val storage = SupabaseClient.client.storage
     private val adminAuth = SupabaseClient.adminClient.auth.admin
     private val adminDb = SupabaseClient.adminClient.postgrest
+    private val adminStorage = SupabaseClient.adminClient.storage
 
     // --- Auth & User ---
     suspend fun getUserRole(userId: String): String? = withContext(Dispatchers.IO) {
@@ -112,15 +113,20 @@ class MainRepository {
             adminDb.from("clubs").insert(club)
             Result.success(Unit)
         } catch (e: Exception) {
+            Log.e("MainRepository", "Create club failed: ${e.message}")
             Result.failure(e)
         }
     }
 
     suspend fun updateClub(club: Club): Result<Unit> = withContext(Dispatchers.IO) {
         try {
+            // Use adminDb to bypass RLS for administrative updates
             adminDb.from("clubs").update(club) { filter { eq("id", club.id!!) } }
             Result.success(Unit)
-        } catch (e: Exception) { Result.failure(e) }
+        } catch (e: Exception) { 
+            Log.e("MainRepository", "Update club failed: ${e.message}")
+            Result.failure(e) 
+        }
     }
 
     suspend fun deleteClub(clubId: String): Result<Unit> = withContext(Dispatchers.IO) {
@@ -170,11 +176,17 @@ class MainRepository {
     suspend fun uploadClubBanner(clubId: String, file: File): Result<String> = withContext(Dispatchers.IO) {
         try {
             val path = "banners/${clubId}_${System.currentTimeMillis()}.${file.extension}"
-            storage.from("club banner").upload(path, file.readBytes())
-            val publicUrl = storage.from("club banner").publicUrl(path)
+            // Use adminStorage to bypass Storage RLS
+            adminStorage.from("club banner").upload(path, file.readBytes()) {
+                upsert = true
+            }
+            val publicUrl = adminStorage.from("club banner").publicUrl(path)
             adminDb.from("clubs").update({ set("banner_url", publicUrl) }) { filter { eq("id", clubId) } }
             Result.success(publicUrl)
-        } catch (e: Exception) { Result.failure(e) }
+        } catch (e: Exception) { 
+            Log.e("MainRepository", "Club banner upload failed: ${e.message}")
+            Result.failure(e) 
+        }
     }
 
     // --- Announcements ---
@@ -205,19 +217,50 @@ class MainRepository {
     // --- Study Materials ---
     suspend fun getStudyMaterials(): List<StudyMaterial> = withContext(Dispatchers.IO) {
         try {
-            db.from("study_materials").select().decodeList<StudyMaterial>()
+            adminDb.from("study_materials").select().decodeList<StudyMaterial>()
         } catch (e: Exception) { emptyList() }
     }
 
-    suspend fun uploadStudyMaterial(title: String, subject: String, file: File, facultyId: String): Result<String> = withContext(Dispatchers.IO) {
+    suspend fun getStudyMaterialsByFilter(batch: String? = null, department: String? = null): List<StudyMaterial> = withContext(Dispatchers.IO) {
+        try {
+            adminDb.from("study_materials").select {
+                filter {
+                    batch?.let { eq("batch", it) }
+                    department?.let { eq("department", it) }
+                }
+            }.decodeList<StudyMaterial>()
+        } catch (e: Exception) { emptyList() }
+    }
+
+    suspend fun uploadStudyMaterial(
+        title: String,
+        subject: String,
+        batch: String,
+        department: String,
+        file: File,
+        facultyId: String
+    ): Result<String> = withContext(Dispatchers.IO) {
         try {
             val path = "study_materials/${facultyId}_${System.currentTimeMillis()}.${file.extension}"
-            storage.from("study_materials").upload(path, file.readBytes())
-            val publicUrl = storage.from("study_materials").publicUrl(path)
-            val material = StudyMaterial(title = title, subject = subject, fileUrl = publicUrl, facultyId = facultyId)
-            db.from("study_materials").insert(material)
+            adminStorage.from("study_materials").upload(path, file.readBytes()) {
+                upsert = true
+            }
+            val publicUrl = adminStorage.from("study_materials").publicUrl(path)
+            val material = StudyMaterial(
+                title = title,
+                subject = subject,
+                fileUrl = publicUrl,
+                facultyId = facultyId,
+                batch = batch,
+                department = department,
+                fileName = file.name
+            )
+            adminDb.from("study_materials").insert(material)
             Result.success(publicUrl)
-        } catch (e: Exception) { Result.failure(e) }
+        } catch (e: Exception) {
+            Log.e("MainRepository", "Study material upload failed: ${e.message}")
+            Result.failure(e)
+        }
     }
 
     // --- Students ---
@@ -230,8 +273,9 @@ class MainRepository {
     suspend fun addStudent(user: User, student: Student, autoConfirm: Boolean = true): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val newUser = adminAuth.createUserWithEmail {
-                email = user.email
-                password = user.password ?: "Welcome@123"
+                this.email = user.email
+                this.password = user.password ?: "Welcome@123"
+                this.autoConfirm = autoConfirm
             }
             val userId = newUser.id
             adminDb.from("users").insert(user.copy(id = userId, password = null))
@@ -277,8 +321,9 @@ class MainRepository {
     suspend fun addFaculty(user: User, faculty: Faculty): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val newUser = adminAuth.createUserWithEmail {
-                email = user.email
-                password = user.password ?: "Welcome@123"
+                this.email = user.email
+                this.password = user.password ?: "Welcome@123"
+                this.autoConfirm = true
             }
             val userId = newUser.id
             adminDb.from("users").insert(user.copy(id = userId, password = null))
@@ -326,12 +371,17 @@ class MainRepository {
     suspend fun uploadProfileImage(userId: String, file: File, role: String): Result<String> = withContext(Dispatchers.IO) {
         try {
             val path = "profiles/${userId}_${System.currentTimeMillis()}.${file.extension}"
-            storage.from("profiles").upload(path, file.readBytes())
-            val publicUrl = storage.from("profiles").publicUrl(path)
+            adminStorage.from("profiles").upload(path, file.readBytes()) {
+                upsert = true
+            }
+            val publicUrl = adminStorage.from("profiles").publicUrl(path)
             if (role == "student") adminDb.from("students").update({ set("photo_url", publicUrl) }) { filter { eq("user_id", userId) } }
             else adminDb.from("faculty").update({ set("photo_url", publicUrl) }) { filter { eq("user_id", userId) } }
             Result.success(publicUrl)
-        } catch (e: Exception) { Result.failure(e) }
+        } catch (e: Exception) { 
+            Log.e("MainRepository", "Profile image upload failed: ${e.message}")
+            Result.failure(e) 
+        }
     }
     
     suspend fun registerForEvent(eventId: String, studentId: String): Result<Unit> = withContext(Dispatchers.IO) {

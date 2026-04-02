@@ -93,9 +93,9 @@ class MainViewModel(private val repository: MainRepository = MainRepository()) :
         }
     }
 
-    fun uploadStudyMaterial(userId: String, file: File, title: String, subject: String) {
+    fun uploadStudyMaterial(userId: String, file: File, title: String, subject: String, batch: String = "", department: String = "") {
         viewModelScope.launch {
-            repository.uploadStudyMaterial(title, subject, file, userId)
+            repository.uploadStudyMaterial(title, subject, batch, department, file, userId)
             fetchStudyMaterials()
         }
     }

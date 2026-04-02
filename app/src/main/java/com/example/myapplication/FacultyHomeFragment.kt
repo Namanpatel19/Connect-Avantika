@@ -25,7 +25,6 @@ class FacultyHomeFragment : Fragment() {
 
         vm.currentFaculty.observe(viewLifecycleOwner) { f ->
             f?.let {
-                binding.tvWelcome.text = "Welcome back,"
                 binding.tvName.text = it.name
                 binding.tvDept.text = it.department ?: ""
             }
@@ -33,11 +32,17 @@ class FacultyHomeFragment : Fragment() {
 
         binding.rvEvents.layoutManager = LinearLayoutManager(context)
         vm.events.observe(viewLifecycleOwner) { events ->
-            binding.rvEvents.adapter = EventAdapter(events.take(5)) {}
+            binding.rvEvents.adapter = EventAdapter(events.take(5)) { /* read-only for faculty */ }
         }
 
+        // Quick action: Manage Students
         binding.cardManageStudents.setOnClickListener {
             (requireActivity() as MainActivity).navigateTo(R.id.navigation_manage_students)
+        }
+
+        // Quick action: Upload Materials
+        binding.cardUploadMaterial.setOnClickListener {
+            (requireActivity() as MainActivity).navigateTo(R.id.navigation_upload_material)
         }
 
         vm.loadCurrentFaculty()

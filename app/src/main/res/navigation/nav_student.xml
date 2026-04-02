@@ -21,7 +21,21 @@
         android:id="@+id/navigation_clubs"
         android:name="com.example.myapplication.ClubsFragment"
         android:label="Clubs"
-        tools:layout="@layout/fragment_clubs" />
+        tools:layout="@layout/fragment_clubs">
+        <action
+            android:id="@+id/action_clubs_to_details"
+            app:destination="@id/navigation_club_details" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_club_details"
+        android:name="com.example.myapplication.ClubDetailsFragment"
+        android:label="Club Info"
+        tools:layout="@layout/fragment_club_details">
+        <argument
+            android:name="club_id"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_rank"
