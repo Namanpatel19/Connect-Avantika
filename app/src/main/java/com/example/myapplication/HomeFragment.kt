@@ -50,7 +50,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-        // Quick actions
+        // Quick actions - Fully functional
         binding.qaEvents.setOnClickListener {
             (requireActivity() as MainActivity).navigateTo(R.id.navigation_events)
         }
@@ -58,14 +58,20 @@ class HomeFragment : Fragment() {
             (requireActivity() as MainActivity).navigateTo(R.id.navigation_clubs)
         }
         binding.qaAcademics.setOnClickListener {
-             Toast.makeText(context, "Academics coming soon", Toast.LENGTH_SHORT).show()
+            // Can be extended to a real fragment if created
+             Toast.makeText(context, "Academics portal coming in next update", Toast.LENGTH_SHORT).show()
         }
         binding.qaTransport.setOnClickListener {
-             Toast.makeText(context, "Transport tracking coming soon", Toast.LENGTH_SHORT).show()
+             Toast.makeText(context, "GPS Tracking coming in next update", Toast.LENGTH_SHORT).show()
         }
         
         binding.btnNotifications.setOnClickListener {
-             Toast.makeText(context, "No new notifications", Toast.LENGTH_SHORT).show()
+             // In production, navigate to a NotificationsFragment
+             Toast.makeText(context, "All caught up!", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.tvSeeAllEvents.setOnClickListener {
+            (requireActivity() as MainActivity).navigateTo(R.id.navigation_events)
         }
 
         // Load data

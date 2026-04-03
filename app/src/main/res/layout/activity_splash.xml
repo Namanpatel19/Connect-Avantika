@@ -2,17 +2,51 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#05010A">
+    android:background="@drawable/bg_teal_header">
 
-    <!-- Removed missing Lottie animation to prevent crash -->
-
-    <!-- App Logo -->
-    <ImageView
-        android:id="@+id/logo"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:src="@drawable/start_icon"
+    <!-- Subtle radial overlay -->
+    <View
+        android:layout_width="300dp"
+        android:layout_height="300dp"
         android:layout_gravity="center"
-        android:alpha="0" />
+        android:background="@drawable/bg_circle_white"
+        android:alpha="0.04" />
+
+    <!-- App Logo — alpha starts at 0 so animation can fade it in -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/start_icon"
+            android:alpha="0" />
+
+        <TextView
+            android:id="@+id/tvAppName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Connect Avantika"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:alpha="0" />
+
+        <TextView
+            android:id="@+id/tvTagline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Your Campus, Connected"
+            android:textColor="#CCffffff"
+            android:textSize="13sp"
+            android:alpha="0" />
+    </LinearLayout>
 
 </FrameLayout>

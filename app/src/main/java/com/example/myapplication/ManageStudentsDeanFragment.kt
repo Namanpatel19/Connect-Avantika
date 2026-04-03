@@ -6,6 +6,8 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -69,27 +71,39 @@ class ManageStudentsDeanFragment : Fragment() {
 
     private fun showAddDialog() {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_student, null)
+        
+        val actvDept = dialogView.findViewById<AutoCompleteTextView>(R.id.actvDepartment)
+        val departments = arrayOf("B-Tech", "BBA", "BBA-LLB", "BALLB", "BCA", "BDes", "Mdes", "MCA", "Bcom", "BSC agriculture")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, departments)
+        actvDept.setAdapter(adapter)
+
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Create a new user")
+            .setTitle("Create a new student")
             .setView(dialogView)
-            .setPositiveButton("Create user") { _, _ ->
+            .setPositiveButton("Create student") { _, _ ->
                 val name        = dialogView.findViewById<TextInputEditText>(R.id.etName).text.toString().trim()
                 val email       = dialogView.findViewById<TextInputEditText>(R.id.etEmail).text.toString().trim()
                 val password    = dialogView.findViewById<TextInputEditText>(R.id.etPassword).text.toString().trim()
                 val autoConfirm = dialogView.findViewById<MaterialCheckBox>(R.id.cbAutoConfirm).isChecked
-                val enrollment  = dialogView.findViewById<TextInputEditText>(R.id.etEnrollment).text.toString().trim()
-                val dept        = dialogView.findViewById<TextInputEditText>(R.id.etDepartment).text.toString().trim()
+                val enrollment  = dialogView.findViewById<TextInputEditText>(R.id.etEnrollment).text.toString().trim().uppercase()
+                val dept        = actvDept.text.toString().trim()
+                val year        = dialogView.findViewById<TextInputEditText>(R.id.etYear).text.toString().trim()
                 val batch       = dialogView.findViewById<TextInputEditText>(R.id.etBatch).text.toString().trim()
 
-                if (name.isEmpty() || email.isEmpty() || password.isEmpty() || enrollment.isEmpty()) {
-                    Toast.makeText(context, "Fill required fields", Toast.LENGTH_SHORT).show(); return@setPositiveButton
+                if (name.isEmpty() || email.isEmpty() || password.isEmpty() || enrollment.isEmpty() || dept.isEmpty() || year.isEmpty()) {
+                    Toast.makeText(context, "Fill required fields (marked *)", Toast.LENGTH_SHORT).show(); return@setPositiveButton
                 }
                 
+                val combinedDept = "$dept (Year $year)"
                 val user    = User(id = "", email = email, password = password, role = "student")
-                val student = Student(userId = "", name = name, enrollment = enrollment, department = dept, batch = batch)
+                val student = Student(userId = "", name = name, enrollment = enrollment, department = combinedDept, batch = batch)
                 
                 vm.addStudent(user, student, autoConfirm) { success ->
-                    Toast.makeText(context, if (success) "User created!" else "Error creating user", Toast.LENGTH_SHORT).show()
+                    if (success) {
+                        Toast.makeText(context, "Student user created!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Error creating student. Check logs.", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
             .setNegativeButton("Cancel", null).show()

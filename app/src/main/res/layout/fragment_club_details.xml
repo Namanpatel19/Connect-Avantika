@@ -10,9 +10,10 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- Banner / Hero -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="220dp">
+            android:layout_height="240dp">
 
             <ImageView
                 android:id="@+id/ivBanner"
@@ -21,11 +22,13 @@
                 android:scaleType="centerCrop"
                 android:src="@drawable/bg_teal_header" />
 
+            <!-- Dark scrim -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#44000000" />
+                android:background="#66000000" />
 
+            <!-- Change Banner button (club head / admin) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnChangeBanner"
                 style="@style/Widget.Material3.Button.TonalButton"
@@ -34,27 +37,139 @@
                 android:layout_gravity="bottom|end"
                 android:layout_margin="16dp"
                 android:text="Change Banner"
+                android:textAllCaps="false"
                 android:visibility="gone"
-                app:icon="@drawable/ic_camera" />
+                app:icon="@drawable/ic_camera"
+                app:cornerRadius="12dp"/>
 
-            <TextView
-                android:id="@+id/tvClubName"
-                android:layout_width="wrap_content"
+            <!-- Club name overlaid on banner -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|start"
-                android:layout_margin="20dp"
-                android:text="Club Name"
-                android:textColor="@color/white"
-                android:textSize="26sp"
-                android:textStyle="bold" />
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:id="@+id/tvClubName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Club Name"
+                    android:textColor="@color/white"
+                    android:textSize="26sp"
+                    android:textStyle="bold"
+                    android:shadowColor="#AA000000"
+                    android:shadowRadius="8"/>
+
+                <TextView
+                    android:id="@+id/tvClubCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/bg_badge_points"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="3dp"
+                    android:text="Technology"
+                    android:textColor="@color/badge_points_text"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"/>
+            </LinearLayout>
         </FrameLayout>
 
-        <androidx.cardview.widget.CardView
+        <!-- Stats row -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="-24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/bg_card">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <!-- Members count -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/tvMemberCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textColor="@color/primary"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Members"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <!-- Vertical divider -->
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="@color/separator"/>
+
+                <!-- Join status or Join button -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingStart="12dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnJoinClub"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:text="Join This Club"
+                        android:textAllCaps="false"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/secondary"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_clubs"
+                        app:iconSize="18dp"
+                        app:iconTint="@color/white"/>
+
+                    <TextView
+                        android:id="@+id/tvJoinStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text=""
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp"
+                        android:gravity="center"/>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- About Club card -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="2dp">
+            app:cardElevation="0dp"
+            app:strokeColor="@color/separator"
+            app:strokeWidth="1dp"
+            app:cardBackgroundColor="@color/bg_card">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -67,7 +182,8 @@
                     android:layout_height="wrap_content"
                     android:text="About Club"
                     android:textStyle="bold"
-                    android:textSize="18sp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
                     android:layout_marginBottom="8dp"/>
 
                 <EditText
@@ -79,66 +195,32 @@
                     android:textSize="14sp"
                     android:textColor="@color/text_secondary"
                     android:enabled="false"
-                    android:inputType="textMultiLine"/>
+                    android:inputType="textMultiLine"
+                    android:minLines="2"/>
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSaveDescription"
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Save"
+                    android:text="Save Description"
+                    android:textAllCaps="false"
                     android:visibility="gone" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/bg_deep"
-                    android:layout_marginVertical="16dp"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Total Members"
-                            android:textSize="12sp"
-                            android:textColor="@color/text_secondary"/>
-                        <TextView
-                            android:id="@+id/tvMemberCount"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0 Members"
-                            android:textStyle="bold"
-                            android:textSize="16sp"/>
-                    </LinearLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnJoinClub"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Join Club"
-                        android:backgroundTint="@color/secondary"/>
-                </LinearLayout>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Admin Only: Change Lead -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/adminCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="24dp"
             app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/separator"
+            app:strokeWidth="1dp"
+            app:cardBackgroundColor="@color/bg_card"
             android:visibility="gone">
 
             <LinearLayout
@@ -152,6 +234,8 @@
                     android:layout_height="wrap_content"
                     android:text="Administration"
                     android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
                     android:layout_marginBottom="12dp"/>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -165,14 +249,16 @@
                         android:layout_height="wrap_content"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnUpdateLead"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Assign New Lead"/>
+                    android:text="Assign New Lead"
+                    android:textAllCaps="false"
+                    app:cornerRadius="12dp"/>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

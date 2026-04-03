@@ -111,6 +111,11 @@ class LoginActivity : AppCompatActivity() {
 
             loginUser(email, password)
         }
+
+        binding.tvForgotPassword.setOnClickListener {
+            val intent = Intent(this, ForgotPasswordActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun loginUser(emailStr: String, passwordStr: String) {

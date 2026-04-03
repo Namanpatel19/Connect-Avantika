@@ -2,6 +2,8 @@ package com.example.myapplication
 
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.auth.user.UserSession
+import io.github.jan.supabase.auth.SessionManager
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.serializer.KotlinXSerializer
@@ -32,7 +34,14 @@ object SupabaseClient {
         supabaseUrl = SUPABASE_URL,
         supabaseKey = SERVICE_ROLE_KEY
     ) {
-        install(Auth)
+        install(Auth) {
+            // Use a no-op session manager to prevent adminClient from using the logged-in user's session
+            sessionManager = object : SessionManager {
+                override suspend fun saveSession(session: UserSession) {}
+                override suspend fun loadSession(): UserSession? = null
+                override suspend fun deleteSession() {}
+            }
+        }
         install(Postgrest) {
             serializer = KotlinXSerializer(Json {
                 ignoreUnknownKeys = true

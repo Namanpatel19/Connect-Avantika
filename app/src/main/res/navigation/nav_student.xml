@@ -24,7 +24,11 @@
         tools:layout="@layout/fragment_clubs">
         <action
             android:id="@+id/action_clubs_to_details"
-            app:destination="@id/navigation_club_details" />
+            app:destination="@id/navigation_club_details"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
     <fragment
@@ -38,10 +42,10 @@
     </fragment>
 
     <fragment
-        android:id="@+id/navigation_rank"
-        android:name="com.example.myapplication.RankFragment"
-        android:label="Rank"
-        tools:layout="@layout/fragment_rank" />
+        android:id="@+id/navigation_notices"
+        android:name="com.example.myapplication.NoticesFragment"
+        android:label="Notices"
+        tools:layout="@layout/fragment_notices" />
 
     <fragment
         android:id="@+id/navigation_profile"

@@ -13,7 +13,6 @@ import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.data.Club
 import com.example.myapplication.databinding.FragmentClubDetailsBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -24,6 +23,7 @@ class ClubDetailsFragment : Fragment() {
     private lateinit var vm: AppViewModel
     private var clubId: String? = null
     private var currentClub: Club? = null
+    private var hasRequestedJoin = false
 
     private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let { uploadBanner(it) }
@@ -37,20 +37,40 @@ class ClubDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         vm = ViewModelProvider(requireActivity())[AppViewModel::class.java]
-        
+
         clubId = arguments?.getString("club_id")
-        
+
+        // Only students can join clubs
+        val isStudent = vm.userRole == "student"
+        if (!isStudent) {
+            binding.btnJoinClub.visibility = View.GONE
+            binding.tvJoinStatus.visibility = View.GONE
+        }
+
         loadClubData()
+        setupAdminUI()
 
         binding.btnJoinClub.setOnClickListener {
+            if (hasRequestedJoin) return@setOnClickListener
             clubId?.let { id ->
+                binding.btnJoinClub.isEnabled = false
                 vm.joinClub(id) { success ->
-                    Toast.makeText(context, if (success) "Request sent!" else "Error joining", Toast.LENGTH_SHORT).show()
+                    activity?.runOnUiThread {
+                        if (success) {
+                            hasRequestedJoin = true
+                            binding.btnJoinClub.text = "Request Sent ✓"
+                            binding.btnJoinClub.isEnabled = false
+                            binding.tvJoinStatus.text = "Your request is pending review"
+                            binding.tvJoinStatus.visibility = View.VISIBLE
+                            Toast.makeText(context, "Join request sent!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            binding.btnJoinClub.isEnabled = true
+                            Toast.makeText(context, "Failed to send request. You may have already applied.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
             }
         }
-
-        setupAdminUI()
     }
 
     private fun loadClubData() {
@@ -59,29 +79,32 @@ class ClubDetailsFragment : Fragment() {
             currentClub?.let { club ->
                 binding.tvClubName.text = club.name
                 binding.etDescription.setText(club.description ?: "No description provided.")
-                // Real member count would come from a specific API call
-                binding.tvMemberCount.text = "Loading..." 
-                
-                // If user is club lead or super admin, allow editing
+                binding.tvMemberCount.text = "—"
+
+                // Club head / super admin: allow editing
                 val isLead = vm.userId == club.clubHeadId
                 val isAdmin = vm.userRole == "super_admin"
-                
+
                 if (isLead || isAdmin) {
+                    binding.btnJoinClub.visibility = View.GONE
+                    binding.tvJoinStatus.visibility = View.GONE
                     binding.etDescription.isEnabled = true
                     binding.btnSaveDescription.visibility = View.VISIBLE
                     binding.btnChangeBanner.visibility = View.VISIBLE
-                    
+
                     binding.btnSaveDescription.setOnClickListener {
                         val newDesc = binding.etDescription.text.toString()
                         vm.updateClub(club.copy(description = newDesc)) { success ->
                             Toast.makeText(context, if (success) "Description updated" else "Update failed", Toast.LENGTH_SHORT).show()
                         }
                     }
-                    
+
                     binding.btnChangeBanner.setOnClickListener { pickImage.launch("image/*") }
                 }
             }
         }
+
+        if (vm.clubs.value.isNullOrEmpty()) vm.loadAllClubs()
     }
 
     private fun setupAdminUI() {

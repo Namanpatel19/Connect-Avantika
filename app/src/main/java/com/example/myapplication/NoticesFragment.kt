@@ -5,18 +5,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.myapplication.adapters.NoticeAdapter
-import com.example.myapplication.data.FirebaseManager
+import com.example.myapplication.adapters.AnnouncementAdapter
 import com.example.myapplication.databinding.FragmentNoticesBinding
-import kotlinx.coroutines.launch
+import com.example.myapplication.ui.viewmodel.AppViewModel
 
 class NoticesFragment : Fragment() {
 
     private var _binding: FragmentNoticesBinding? = null
     private val binding get() = _binding!!
-    private lateinit var adapter: NoticeAdapter
+    private lateinit var vm: AppViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,24 +28,19 @@ class NoticesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        vm = ViewModelProvider(requireActivity())[AppViewModel::class.java]
 
-        setupRecyclerView()
-        loadNotices()
-    }
-
-    private fun setupRecyclerView() {
-        adapter = NoticeAdapter(emptyList())
         binding.rvNotices.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvNotices.adapter = adapter
-    }
 
-    private fun loadNotices() {
-        binding.progressBar.visibility = View.VISIBLE
-        viewLifecycleOwner.lifecycleScope.launch {
-            val notices = FirebaseManager.getNotices()
-            adapter.updateNotices(notices)
-            binding.progressBar.visibility = View.GONE
+        vm.isLoading.observe(viewLifecycleOwner) { loading ->
+            binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
         }
+
+        vm.announcements.observe(viewLifecycleOwner) { list ->
+            binding.rvNotices.adapter = AnnouncementAdapter(list)
+        }
+
+        vm.loadAllAnnouncements()
     }
 
     override fun onDestroyView() {

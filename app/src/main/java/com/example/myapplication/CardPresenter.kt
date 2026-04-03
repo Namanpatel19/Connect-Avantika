@@ -22,9 +22,8 @@ class CardPresenter : Presenter() {
     override fun onCreateViewHolder(parent: ViewGroup): Presenter.ViewHolder {
         Log.d(TAG, "onCreateViewHolder")
 
-        sDefaultBackgroundColor = ContextCompat.getColor(parent.context, R.color.default_background)
-        sSelectedBackgroundColor =
-            ContextCompat.getColor(parent.context, R.color.selected_background)
+        sDefaultBackgroundColor = ContextCompat.getColor(parent.context, R.color.bg_deep)
+        sSelectedBackgroundColor = ContextCompat.getColor(parent.context, R.color.primary)
         mDefaultCardImage = ContextCompat.getDrawable(parent.context, R.drawable.movie)
 
         val cardView = object : ImageCardView(parent.context) {
@@ -67,7 +66,7 @@ class CardPresenter : Presenter() {
 
     private fun updateCardBackgroundColor(view: ImageCardView, selected: Boolean) {
         val color = if (selected) sSelectedBackgroundColor else sDefaultBackgroundColor
-        // Both background colors should be set because the view"s background is temporarily visible
+        // Both background colors should be set because the view's background is temporarily visible
         // during animations.
         view.setBackgroundColor(color)
         view.setInfoAreaBackgroundColor(color)
