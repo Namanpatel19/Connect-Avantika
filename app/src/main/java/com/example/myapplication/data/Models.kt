@@ -42,6 +42,7 @@ data class Event(
     @SerialName("created_by") val createdBy: String? = null,
     val status: String = "pending",
     @SerialName("event_date") val eventDate: String? = null,
+    @SerialName("banner_url") val bannerUrl: String? = null,
     @SerialName("created_at") val createdAt: String? = null
 )
 

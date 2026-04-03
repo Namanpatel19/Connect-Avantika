@@ -101,6 +101,20 @@ class MainRepository {
         }
     }
 
+    suspend fun uploadEventBanner(file: File): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val path = "banners/event_${System.currentTimeMillis()}.${file.extension}"
+            adminStorage.from("event_banners").upload(path, file.readBytes()) {
+                upsert = true
+            }
+            val publicUrl = adminStorage.from("event_banners").publicUrl(path)
+            Result.success(publicUrl)
+        } catch (e: Exception) {
+            Log.e("MainRepository", "Event banner upload failed: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
     // --- Clubs ---
     suspend fun getClubs(): List<Club> = withContext(Dispatchers.IO) {
         try {
@@ -158,6 +172,14 @@ class MainRepository {
         try {
             db.from("club_requests").select {
                 filter { eq("club_id", clubId) }
+            }.decodeList<ClubRequest>()
+        } catch (e: Exception) { emptyList() }
+    }
+    
+    suspend fun getUserClubRequests(studentId: String): List<ClubRequest> = withContext(Dispatchers.IO) {
+        try {
+            db.from("club_requests").select {
+                filter { eq("student_id", studentId) }
             }.decodeList<ClubRequest>()
         } catch (e: Exception) { emptyList() }
     }
@@ -239,24 +261,27 @@ class MainRepository {
         department: String,
         file: File,
         facultyId: String
-    ): Result<String> = withContext(Dispatchers.IO) {
+    ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            val path = "study_materials/${facultyId}_${System.currentTimeMillis()}.${file.extension}"
+            val fileName = "${System.currentTimeMillis()}_${file.name}"
+            val path = "materials/$fileName"
             adminStorage.from("study_materials").upload(path, file.readBytes()) {
                 upsert = true
             }
             val publicUrl = adminStorage.from("study_materials").publicUrl(path)
+            
             val material = StudyMaterial(
                 title = title,
                 subject = subject,
-                fileUrl = publicUrl,
-                facultyId = facultyId,
                 batch = batch,
                 department = department,
-                fileName = file.name
+                fileUrl = publicUrl,
+                fileName = file.name,
+                facultyId = facultyId
             )
+            
             adminDb.from("study_materials").insert(material)
-            Result.success(publicUrl)
+            Result.success(Unit)
         } catch (e: Exception) {
             Log.e("MainRepository", "Study material upload failed: ${e.message}")
             Result.failure(e)

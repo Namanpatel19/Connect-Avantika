@@ -50,6 +50,9 @@ class AppViewModel : ViewModel() {
 
     private val _clubRequests = MutableLiveData<List<ClubRequest>>()
     val clubRequests: LiveData<List<ClubRequest>> get() = _clubRequests
+    
+    private val _myClubRequests = MutableLiveData<List<ClubRequest>>()
+    val myClubRequests: LiveData<List<ClubRequest>> get() = _myClubRequests
 
     private val _studentCount = MutableLiveData<Int>()
     val studentCount: LiveData<Int> get() = _studentCount
@@ -179,6 +182,7 @@ class AppViewModel : ViewModel() {
 
     fun loadClubs() {
         loadAllClubs()
+        loadMyClubRequests()
     }
 
     fun addClub(club: Club, callback: (Boolean) -> Unit) {
@@ -207,9 +211,15 @@ class AppViewModel : ViewModel() {
 
     fun joinClub(clubId: String, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
-            // studentId in club_requests = the same auth userId (Supabase user uuid)
             val result = repository.joinClub(clubId, userId)
             callback(result.isSuccess)
+            if (result.isSuccess) loadMyClubRequests()
+        }
+    }
+    
+    fun loadMyClubRequests() {
+        viewModelScope.launch {
+            _myClubRequests.value = repository.getUserClubRequests(userId)
         }
     }
 
@@ -275,19 +285,28 @@ class AppViewModel : ViewModel() {
         }
     }
 
-    fun submitEventRequest(event: Event, callback: (Boolean) -> Unit) {
+    fun submitEventRequest(event: Event, bannerFile: File? = null, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val result = repository.createEvent(event)
+            _isLoading.value = true
+            var finalEvent = event
+            if (bannerFile != null) {
+                val uploadResult = repository.uploadEventBanner(bannerFile)
+                if (uploadResult.isSuccess) {
+                    finalEvent = event.copy(bannerUrl = uploadResult.getOrNull())
+                }
+            }
+            val result = repository.createEvent(finalEvent)
             callback(result.isSuccess)
             if (result.isSuccess) {
                 loadMyClub()
                 loadAllEvents()
             }
+            _isLoading.value = false
         }
     }
 
-    fun createEventRequest(event: Event, callback: (Boolean) -> Unit) {
-        submitEventRequest(event, callback)
+    fun createEventRequest(event: Event, bannerFile: File? = null, callback: (Boolean) -> Unit) {
+        submitEventRequest(event, bannerFile, callback)
     }
 
     fun registerForEvent(eventId: String, callback: (Boolean) -> Unit) {

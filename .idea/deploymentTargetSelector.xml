@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="Avantika Connect">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-03-30T08:14:46.765309300Z">
+        <DropdownSelection timestamp="2026-04-03T11:25:49.381535400Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=WSGEDM8P75VOR4MF" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Khati\.android\avd\Medium_Phone.avd" />
             </handle>
           </Target>
         </DropdownSelection>
