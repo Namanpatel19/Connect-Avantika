@@ -49,7 +49,7 @@ class CreateEventDialog : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         vm = ViewModelProvider(requireActivity())[AppViewModel::class.java]
 
-        binding.btn_pick_banner.setOnClickListener {
+        binding.btnPickBanner.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             pickImageLauncher.launch(intent)
         }

@@ -29,10 +29,10 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             app:boxStrokeColor="#2D6A7F"
             app:hintTextColor="#2D6A7F"
-            app:cornerRadiusTopStart="12dp"
-            app:cornerRadiusTopEnd="12dp"
-            app:cornerRadiusBottomStart="12dp"
-            app:cornerRadiusBottomEnd="12dp"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
             android:layout_marginBottom="16dp">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etTitle"
@@ -49,10 +49,10 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             app:boxStrokeColor="#2D6A7F"
             app:hintTextColor="#2D6A7F"
-            app:cornerRadiusTopStart="12dp"
-            app:cornerRadiusTopEnd="12dp"
-            app:cornerRadiusBottomStart="12dp"
-            app:cornerRadiusBottomEnd="12dp"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
             android:layout_marginBottom="16dp">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etDescription"
@@ -74,7 +74,7 @@
             android:layout_marginBottom="8dp"/>
 
         <FrameLayout
-            android:id="@+id/btn_pick_banner"
+            android:id="@+id/btnPickBanner"
             android:layout_width="match_parent"
             android:layout_height="140dp"
             android:background="@drawable/bg_badge_points"
@@ -85,7 +85,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:visibility="gone"/>
+                android:visibility="gone"
+                android:contentDescription="Banner Preview"/>
 
             <LinearLayout
                 android:id="@+id/ll_upload_placeholder"
@@ -98,7 +99,8 @@
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:src="@android:drawable/ic_menu_gallery"
-                    app:tint="#4338CA"/>
+                    app:tint="#4338CA"
+                    android:contentDescription="Gallery Icon"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

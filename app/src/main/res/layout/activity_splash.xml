@@ -1,52 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/splash_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_teal_header">
+    android:background="#0A0E1A"
+    android:clipChildren="false"
+    android:clipToPadding="false">
 
-    <!-- Subtle radial overlay -->
-    <View
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:layout_gravity="center"
-        android:background="@drawable/bg_circle_white"
-        android:alpha="0.04" />
+    <!-- Deep Background Gradient -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/splash_gradient_bg"
+        android:scaleType="centerCrop"
+        android:alpha="0.3"/>
 
-    <!-- App Logo — alpha starts at 0 so animation can fade it in -->
+    <!-- Container for magic rings -->
+    <com.example.myapplication.MagicRingsView
+        android:id="@+id/magic_rings"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Central Logo and Text Content -->
     <LinearLayout
+        android:id="@+id/main_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_centerInParent="true"
+        android:gravity="center"
         android:orientation="vertical"
-        android:gravity="center">
+        android:elevation="10dp">
 
-        <ImageView
-            android:id="@+id/logo"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/logo_card"
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:src="@drawable/start_icon"
-            android:alpha="0" />
+            app:cardCornerRadius="30dp"
+            app:cardElevation="20dp"
+            app:cardBackgroundColor="@android:color/white"
+            app:strokeWidth="0dp"
+            android:alpha="0">
+
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:src="@drawable/start_icon"
+                android:scaleType="fitCenter" />
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:id="@+id/tvAppName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="24dp"
             android:text="Connect Avantika"
             android:textColor="@color/white"
-            android:textSize="22sp"
-            android:textStyle="bold"
+            android:textSize="34sp"
+            android:fontFamily="sans-serif-black"
+            android:letterSpacing="0.02"
             android:alpha="0" />
 
         <TextView
             android:id="@+id/tvTagline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Your Campus, Connected"
-            android:textColor="#CCffffff"
-            android:textSize="13sp"
+            android:layout_marginTop="8dp"
+            android:text="stay connected, stay ahead"
+            android:textColor="#99FFFFFF"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.1"
             android:alpha="0" />
+
     </LinearLayout>
 
-</FrameLayout>
+    <!-- White Flash View for the transition -->
+    <View
+        android:id="@+id/flash_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:alpha="0" />
+
+    <!-- Footer -->
+    <TextView
+        android:id="@+id/tvFooter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="30dp"
+        android:text="by VNS"
+        android:textColor="#44FFFFFF"
+        android:textSize="12sp"
+        android:fontFamily="sans-serif-light"
+        android:letterSpacing="0.3"
+        android:alpha="0" />
+
+</RelativeLayout>

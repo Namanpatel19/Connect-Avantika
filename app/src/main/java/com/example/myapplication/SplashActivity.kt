@@ -1,16 +1,16 @@
 package com.example.myapplication
 
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.animation.AnimationUtils
-import android.view.animation.DecelerateInterpolator
-import android.widget.ImageView
+import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.AnticipateOvershootInterpolator
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.card.MaterialCardView
 
 class SplashActivity : AppCompatActivity() {
 
@@ -18,36 +18,91 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        val logo     = findViewById<ImageView>(R.id.logo)
+        val logoCard = findViewById<MaterialCardView>(R.id.logo_card)
         val tvName   = findViewById<TextView>(R.id.tvAppName)
         val tvTag    = findViewById<TextView>(R.id.tvTagline)
+        val tvFooter = findViewById<TextView>(R.id.tvFooter)
+        val flashView = findViewById<View>(R.id.flash_view)
+        
+        // 1. Initial State
+        logoCard.scaleX = 0.5f
+        logoCard.scaleY = 0.5f
+        logoCard.alpha = 0f
+        tvName.alpha = 0f
+        tvTag.alpha = 0f
+        tvFooter.alpha = 0f
 
-        // Logo: scale + fade in with bounce
-        val logoAnim = AnimationUtils.loadAnimation(this, R.anim.logo_anim)
-        logo.startAnimation(logoAnim)
-        logo.animate().alpha(1f).setDuration(700).setStartDelay(0).start()
+        // 2. Entrance Animations
+        logoCard.animate()
+            .scaleX(1f)
+            .scaleY(1f)
+            .alpha(1f)
+            .setDuration(1000)
+            .setStartDelay(200)
+            .setInterpolator(AnticipateOvershootInterpolator())
+            .start()
 
-        // App name: fade + slide up (delayed)
         tvName.animate()
             .alpha(1f)
-            .translationYBy(-20f)
-            .setDuration(600)
-            .setStartDelay(500)
-            .setInterpolator(DecelerateInterpolator())
+            .setDuration(800)
+            .setStartDelay(800)
+            .setInterpolator(AccelerateDecelerateInterpolator())
             .start()
 
-        // Tagline: fade in (more delayed)
         tvTag.animate()
             .alpha(1f)
-            .setDuration(500)
-            .setStartDelay(800)
+            .setDuration(800)
+            .setStartDelay(1100)
             .start()
 
-        // Navigate to Login after 2.5 s
+        tvFooter.animate()
+            .alpha(1f)
+            .setDuration(800)
+            .setStartDelay(1600)
+            .start()
+
+        // 3. Smooth Transition Sequence
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, LoginActivity::class.java))
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-            finish()
-        }, 2500)
+            
+            // Phase A: Rapid zoom-out of content
+            val zoomOutDuration = 600L
+            logoCard.animate()
+                .scaleX(8f)
+                .scaleY(8f)
+                .alpha(0f)
+                .setDuration(zoomOutDuration)
+                .setInterpolator(AccelerateInterpolator())
+                .start()
+                
+            tvName.animate()
+                .scaleX(3f)
+                .scaleY(3f)
+                .alpha(0f)
+                .setDuration(zoomOutDuration)
+                .start()
+                
+            tvTag.animate()
+                .scaleX(3f)
+                .scaleY(3f)
+                .alpha(0f)
+                .setDuration(zoomOutDuration)
+                .start()
+
+            // Phase B: White Flash overlay
+            flashView.animate()
+                .alpha(1f)
+                .setDuration(500)
+                .setStartDelay(100) // Start slightly after zoom begins
+                .withEndAction {
+                    val intent = Intent(this, LoginActivity::class.java)
+                    startActivity(intent)
+                    
+                    // Use a seamless fade transition
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                    finish()
+                }
+                .start()
+                
+        }, 3000)
     }
 }

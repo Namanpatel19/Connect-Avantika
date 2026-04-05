@@ -6,6 +6,8 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -30,6 +32,9 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // 1. Prepare for Entrance Animation
+        prepareEntranceAnimation()
+
         setupRoleSelection()
         setupClickListeners()
         
@@ -37,6 +42,55 @@ class LoginActivity : AppCompatActivity() {
         updateRoleUI(binding.roleFaculty)
         
         checkSession()
+
+        // 2. Start Entrance Animation
+        startEntranceAnimation()
+    }
+
+    private fun prepareEntranceAnimation() {
+        // Hide elements initially
+        binding.headerLayout.alpha = 0f
+        binding.headerLogoCard.scaleX = 0.5f
+        binding.headerLogoCard.scaleY = 0.5f
+        
+        binding.loginCardLayout.alpha = 0f
+        binding.loginCardLayout.translationY = 100f
+        
+        binding.tvContactAdmin.alpha = 0f
+    }
+
+    private fun startEntranceAnimation() {
+        // Header fade in
+        binding.headerLayout.animate()
+            .alpha(1f)
+            .setDuration(600)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
+
+        // Logo pop in
+        binding.headerLogoCard.animate()
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(800)
+            .setStartDelay(200)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .start()
+
+        // Login card slide up
+        binding.loginCardLayout.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(700)
+            .setStartDelay(400)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
+
+        // Footer fade in
+        binding.tvContactAdmin.animate()
+            .alpha(1f)
+            .setDuration(600)
+            .setStartDelay(800)
+            .start()
     }
 
     private fun setupRoleSelection() {
