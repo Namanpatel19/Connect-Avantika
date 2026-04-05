@@ -9,16 +9,19 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.myapplication.data.Event
+import com.example.myapplication.data.User
 import com.example.myapplication.databinding.DialogCreateEventBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Calendar
+import java.util.Locale
 
 class CreateEventDialog : DialogFragment() {
     private var _binding: DialogCreateEventBinding? = null
@@ -26,6 +29,8 @@ class CreateEventDialog : DialogFragment() {
     private lateinit var vm: AppViewModel
     private var selectedBannerUri: Uri? = null
     private var selectedDate: Calendar? = null
+    private var deans: List<User> = emptyList()
+    private var selectedDeanId: String? = null
 
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -48,6 +53,17 @@ class CreateEventDialog : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         vm = ViewModelProvider(requireActivity())[AppViewModel::class.java]
+
+        vm.deans.observe(viewLifecycleOwner) { deanList ->
+            deans = deanList
+            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, deanList.map { it.email })
+            binding.spinnerDean.setAdapter(adapter)
+        }
+        vm.loadDeans()
+
+        binding.spinnerDean.setOnItemClickListener { _, _, position, _ ->
+            selectedDeanId = deans[position].id
+        }
 
         binding.btnPickBanner.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
@@ -84,10 +100,16 @@ class CreateEventDialog : DialogFragment() {
         binding.btnSubmit.setOnClickListener {
             val title = binding.etTitle.text.toString().trim()
             val desc  = binding.etDescription.text.toString().trim()
+            val feeStr = binding.etEntryFee.text.toString().trim()
+            val fee = feeStr.toDoubleOrNull() ?: 0.0
             
             if (title.isEmpty()) { 
                 Toast.makeText(context, "Enter event title", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener 
+            }
+            if (selectedDeanId == null) {
+                Toast.makeText(context, "Please select a dean for approval", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
             if (selectedDate == null) {
                 Toast.makeText(context, "Please select a date", Toast.LENGTH_SHORT).show()
@@ -102,20 +124,23 @@ class CreateEventDialog : DialogFragment() {
                 description = desc,
                 clubId      = clubId,
                 createdBy   = vm.userId,
-                status      = if (vm.userRole == "dean" || vm.userRole == "super_admin") "approved" else "pending",
-                eventDate   = "${dateStr}T00:00:00"
+                status      = "pending",
+                eventDate   = "${dateStr}T00:00:00",
+                deanId      = selectedDeanId,
+                entryFee    = fee,
+                isPaid      = fee > 0
             )
             
             val bannerFile = selectedBannerUri?.let { uriToTempFile(it) }
 
             binding.btnSubmit.isEnabled = false
-            vm.submitEventRequest(event, bannerFile) { success ->
+            vm.submitEvent(event, bannerFile) { success ->
                 binding.btnSubmit.isEnabled = true
                 if (success) {
-                    Toast.makeText(context, "Event created successfully!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Event submitted for dean approval!", Toast.LENGTH_SHORT).show()
                     dismiss()
                 } else {
-                    Toast.makeText(context, "Failed to create event", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Failed to submit event", Toast.LENGTH_SHORT).show()
                 }
             }
         }

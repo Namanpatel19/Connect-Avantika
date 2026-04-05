@@ -40,10 +40,24 @@ data class Event(
     val description: String? = null,
     @SerialName("club_id") val clubId: String? = null,
     @SerialName("created_by") val createdBy: String? = null,
-    val status: String = "pending",
+    val status: String = "pending", // pending, approved, rejected
     @SerialName("event_date") val eventDate: String? = null,
     @SerialName("banner_url") val bannerUrl: String? = null,
-    @SerialName("created_at") val createdAt: String? = null
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("dean_id") val deanId: String? = null, // The dean selected for approval
+    @SerialName("entry_fee") val entryFee: Double? = 0.0,
+    @SerialName("is_paid") val isPaid: Boolean = false
+)
+
+@Serializable
+data class EventRegistration(
+    val id: String? = null,
+    @SerialName("event_id") val eventId: String,
+    @SerialName("student_id") val studentId: String,
+    val email: String? = null,
+    val contact: String? = null,
+    val confirmed: Boolean = false,
+    @SerialName("registered_at") val registeredAt: String? = null
 )
 
 @Serializable
@@ -58,36 +72,14 @@ data class Club(
 )
 
 @Serializable
-data class Announcement(
-    val id: String? = null,
-    val title: String,
-    val content: String? = null,
-    @SerialName("created_by") val createdBy: String? = null,
-    @SerialName("created_at") val createdAt: String? = null
-)
-
-@Serializable
-data class StudyMaterial(
-    val id: String? = null,
-    @SerialName("faculty_id") val facultyId: String? = null,
-    val title: String,
-    @SerialName("file_url") val fileUrl: String,
-    val subject: String? = null,
-    val batch: String? = null,
-    val department: String? = null,
-    @SerialName("file_name") val fileName: String? = null,
-    @SerialName("created_at") val createdAt: String? = null
-)
-
-@Serializable
 data class ClubRequest(
     val id: String? = null,
     @SerialName("club_id") val clubId: String,
     @SerialName("student_id") val studentId: String,
-    val status: String = "pending", // pending, interview, accepted, rejected
+    val status: String = "pending",
     @SerialName("interview_date") val interviewDate: String? = null,
     @SerialName("interview_time") val interviewTime: String? = null,
-    @SerialName("interview_venue") val interviewVenue: String? = null,
+    @SerialName("venue") val interviewVenue: String? = null,
     @SerialName("requested_at") val requestedAt: String? = null
 )
 
@@ -97,14 +89,6 @@ data class ClubMember(
     @SerialName("club_id") val clubId: String,
     @SerialName("student_id") val studentId: String,
     @SerialName("joined_at") val joinedAt: String? = null
-)
-
-@Serializable
-data class EventRegistration(
-    val id: String? = null,
-    @SerialName("event_id") val eventId: String,
-    @SerialName("student_id") val studentId: String,
-    @SerialName("registered_at") val registeredAt: String? = null
 )
 
 @Serializable

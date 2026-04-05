@@ -47,6 +47,11 @@ class DeanHomeFragment : Fragment() {
             (requireActivity() as MainActivity).navigateTo(R.id.navigation_manage_announcements)
         }
 
+        // Profile button in header
+        binding.btnProfile.setOnClickListener {
+            (requireActivity() as MainActivity).navigateTo(R.id.navigation_dean_profile)
+        }
+
         vm.loadSystemStats()
         vm.loadAnnouncements()
     }
