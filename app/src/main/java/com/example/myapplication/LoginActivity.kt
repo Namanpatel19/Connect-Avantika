@@ -16,6 +16,7 @@ import androidx.core.widget.ImageViewCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.databinding.ActivityLoginBinding
 import com.example.myapplication.repository.MainRepository
+import com.onesignal.OneSignal
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import kotlinx.coroutines.launch
@@ -204,12 +205,18 @@ class LoginActivity : AppCompatActivity() {
                     val canLogin = when (normalizedSelectedRole) {
                         "super_admin" -> isSuperAdmin
                         "dean" -> normalizedDbRole == "dean" || isSuperAdmin
+                        "student" -> normalizedDbRole == "student" || normalizedDbRole == "club_head" || isSuperAdmin
                         else -> normalizedDbRole == normalizedSelectedRole || isSuperAdmin 
                     }
 
                     if (canLogin) {
                         Log.d("LoginActivity", "Login authorized. Navigating...")
-                        navigateToDashboard(dbRole ?: selectedRole, userId)
+                        
+                        // OneSignal Login
+                        OneSignal.login(userId)
+                        
+                        // Pass the selected role to dashboard so user gets the expected UI
+                        navigateToDashboard(selectedRole, userId)
                     } else {
                         Log.e("LoginActivity", "Role mismatch. DB: $dbRole, UI Selected: $selectedRole")
                         val displayRole = dbRole ?: "unknown"
@@ -234,7 +241,10 @@ class LoginActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
                     val role = repository.getUserRole(user.id)
-                    role?.let { navigateToDashboard(it, user.id) }
+                    role?.let { 
+                        OneSignal.login(user.id)
+                        navigateToDashboard(it, user.id) 
+                    }
                 } catch (e: Exception) {
                     // Session might be invalid or role fetch failed
                 }

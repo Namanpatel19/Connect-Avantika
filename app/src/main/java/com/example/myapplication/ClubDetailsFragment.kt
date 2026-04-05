@@ -10,7 +10,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import com.example.myapplication.data.Club
+import com.example.myapplication.data.ClubRequest
 import com.example.myapplication.databinding.FragmentClubDetailsBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
 import kotlinx.coroutines.launch
@@ -23,7 +25,6 @@ class ClubDetailsFragment : Fragment() {
     private lateinit var vm: AppViewModel
     private var clubId: String? = null
     private var currentClub: Club? = null
-    private var hasRequestedJoin = false
 
     private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let { uploadBanner(it) }
@@ -40,34 +41,85 @@ class ClubDetailsFragment : Fragment() {
 
         clubId = arguments?.getString("club_id")
 
-        // Only students can join clubs
-        val isStudent = vm.userRole == "student"
-        if (!isStudent) {
-            binding.btnJoinClub.visibility = View.GONE
-            binding.tvJoinStatus.visibility = View.GONE
+        binding.toolbar.setNavigationOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
 
         loadClubData()
+        setupJoinLogic()
         setupAdminUI()
+    }
+
+    private fun setupJoinLogic() {
+        val isStudent = vm.userRole == "student"
+        if (!isStudent) {
+            binding.btnJoinClub.visibility = View.GONE
+            binding.cvStatus.visibility = View.GONE
+            return
+        }
+
+        vm.myClubRequests.observe(viewLifecycleOwner) { requests ->
+            val myRequest = requests.find { it.clubId == clubId }
+            updateJoinButtonUI(myRequest)
+        }
 
         binding.btnJoinClub.setOnClickListener {
-            if (hasRequestedJoin) return@setOnClickListener
             clubId?.let { id ->
                 binding.btnJoinClub.isEnabled = false
                 vm.joinClub(id) { success ->
-                    activity?.runOnUiThread {
-                        if (success) {
-                            hasRequestedJoin = true
-                            binding.btnJoinClub.text = "Request Sent ✓"
-                            binding.btnJoinClub.isEnabled = false
-                            binding.tvJoinStatus.text = "Your request is pending review"
-                            binding.tvJoinStatus.visibility = View.VISIBLE
-                            Toast.makeText(context, "Join request sent!", Toast.LENGTH_SHORT).show()
-                        } else {
-                            binding.btnJoinClub.isEnabled = true
-                            Toast.makeText(context, "Failed to send request. You may have already applied.", Toast.LENGTH_SHORT).show()
-                        }
+                    if (success) {
+                        Toast.makeText(context, "Join request sent to Club Lead!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        binding.btnJoinClub.isEnabled = true
+                        Toast.makeText(context, "Failed to send request.", Toast.LENGTH_SHORT).show()
                     }
+                }
+            }
+        }
+    }
+
+    private fun updateJoinButtonUI(request: ClubRequest?) {
+        if (request == null) {
+            binding.btnJoinClub.visibility = View.VISIBLE
+            binding.btnJoinClub.text = "Join Club"
+            binding.btnJoinClub.isEnabled = true
+            binding.cvStatus.visibility = View.GONE
+            binding.cvInterview.visibility = View.GONE
+        } else {
+            binding.cvStatus.visibility = View.VISIBLE
+            when (request.status) {
+                "pending" -> {
+                    binding.btnJoinClub.visibility = View.GONE
+                    binding.tvJoinStatusTitle.text = "Request Pending"
+                    binding.tvJoinStatus.text = "Your request is being reviewed by the club lead."
+                    binding.cvInterview.visibility = View.GONE
+                }
+                "interview" -> {
+                    binding.btnJoinClub.visibility = View.GONE
+                    binding.tvJoinStatusTitle.text = "Interview Stage"
+                    binding.tvJoinStatus.text = "Congratulations! You've been selected for an interview."
+                    
+                    binding.cvInterview.visibility = View.VISIBLE
+                    binding.tvInterviewDetails.text = "Date: ${request.interviewDate ?: "TBD"}\nTime: ${request.interviewTime ?: "TBD"}\nVenue: ${request.interviewVenue ?: "TBD"}"
+                }
+                "accepted" -> {
+                    binding.btnJoinClub.visibility = View.GONE
+                    binding.tvJoinStatusTitle.text = "Member"
+                    binding.tvJoinStatus.text = "Welcome! You are an official member of this club."
+                    binding.cvInterview.visibility = View.GONE
+                }
+                "rejected" -> {
+                    binding.btnJoinClub.visibility = View.VISIBLE
+                    binding.btnJoinClub.text = "Re-apply"
+                    binding.btnJoinClub.isEnabled = true
+                    binding.tvJoinStatusTitle.text = "Request Declined"
+                    binding.tvJoinStatus.text = "Your previous request was not accepted. You can try applying again later."
+                    binding.cvInterview.visibility = View.GONE
+                }
+                else -> {
+                    binding.btnJoinClub.visibility = View.VISIBLE
+                    binding.cvStatus.visibility = View.GONE
+                    binding.cvInterview.visibility = View.GONE
                 }
             }
         }
@@ -78,8 +130,11 @@ class ClubDetailsFragment : Fragment() {
             currentClub = clubs.find { it.id == clubId }
             currentClub?.let { club ->
                 binding.tvClubName.text = club.name
-                binding.etDescription.setText(club.description ?: "No description provided.")
-                binding.tvMemberCount.text = "—"
+                binding.tvDescription.text = club.description ?: "No description provided."
+                
+                if (!club.bannerUrl.isNullOrEmpty()) {
+                    Glide.with(this).load(club.bannerUrl).placeholder(R.drawable.bg_teal_header).into(binding.ivBanner)
+                }
 
                 // Club head / super admin: allow editing
                 val isLead = vm.userId == club.clubHeadId
@@ -87,15 +142,22 @@ class ClubDetailsFragment : Fragment() {
 
                 if (isLead || isAdmin) {
                     binding.btnJoinClub.visibility = View.GONE
-                    binding.tvJoinStatus.visibility = View.GONE
-                    binding.etDescription.isEnabled = true
+                    binding.cvStatus.visibility = View.GONE
+                    binding.tvDescription.visibility = View.GONE
+                    binding.etDescription.visibility = View.VISIBLE
+                    binding.etDescription.setText(club.description)
                     binding.btnSaveDescription.visibility = View.VISIBLE
                     binding.btnChangeBanner.visibility = View.VISIBLE
 
                     binding.btnSaveDescription.setOnClickListener {
                         val newDesc = binding.etDescription.text.toString()
                         vm.updateClub(club.copy(description = newDesc)) { success ->
-                            Toast.makeText(context, if (success) "Description updated" else "Update failed", Toast.LENGTH_SHORT).show()
+                            if (success) {
+                                binding.tvDescription.text = newDesc
+                                Toast.makeText(context, "Description updated", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "Update failed", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
 
@@ -111,10 +173,10 @@ class ClubDetailsFragment : Fragment() {
         if (vm.userRole == "super_admin") {
             binding.adminCard.visibility = View.VISIBLE
             binding.btnUpdateLead.setOnClickListener {
-                val newLeadId = binding.etNewLeadId.text.toString().trim()
-                if (newLeadId.isNotEmpty() && currentClub != null) {
-                    vm.updateClub(currentClub!!.copy(clubHeadId = newLeadId)) { success ->
-                        Toast.makeText(context, if (success) "Lead updated!" else "Error", Toast.LENGTH_SHORT).show()
+                val leadEmail = binding.etNewLeadId.text.toString().trim()
+                if (leadEmail.isNotEmpty() && clubId != null) {
+                    vm.assignClubLead(clubId!!, leadEmail) { success ->
+                        Toast.makeText(context, if (success) "Lead assigned!" else "Error: User not found", Toast.LENGTH_SHORT).show()
                     }
                 }
             }

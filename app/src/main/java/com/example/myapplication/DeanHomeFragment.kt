@@ -23,10 +23,10 @@ class DeanHomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         vm = ViewModelProvider(requireActivity())[AppViewModel::class.java]
 
-        vm.studentCount.observe(viewLifecycleOwner) { binding.tvStudents.text = it.toString() }
-        vm.facultyCount.observe(viewLifecycleOwner)  { binding.tvFaculty.text  = it.toString() }
-        vm.clubCount.observe(viewLifecycleOwner)     { binding.tvClubs.text    = it.toString() }
-        vm.eventCount.observe(viewLifecycleOwner)    { binding.tvEvents.text   = it.toString() }
+        vm.students.observe(viewLifecycleOwner) { binding.tvStudents.text = it.size.toString() }
+        vm.faculty.observe(viewLifecycleOwner)  { binding.tvFaculty.text  = it.size.toString() }
+        vm.clubs.observe(viewLifecycleOwner)    { binding.tvClubs.text    = it.size.toString() }
+        vm.events.observe(viewLifecycleOwner)   { binding.tvEvents.text   = it.size.toString() }
 
         binding.rvActivity.layoutManager = LinearLayoutManager(context)
         vm.announcements.observe(viewLifecycleOwner) { list ->

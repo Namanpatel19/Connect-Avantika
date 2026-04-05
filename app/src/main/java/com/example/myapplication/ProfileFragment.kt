@@ -13,8 +13,8 @@ import com.example.myapplication.databinding.FragmentProfileBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.onesignal.OneSignal
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.user.UserUpdateBuilder
 import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
@@ -52,12 +52,16 @@ class ProfileFragment : Fragment() {
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
                     SupabaseClient.client.auth.signOut()
+                    // OneSignal Logout
+                    OneSignal.logout()
+                    
                     val intent = Intent(requireContext(), LoginActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
                     requireActivity().finish()
                 } catch (e: Exception) {
                     // Fallback to login anyway
+                    OneSignal.logout()
                     val intent = Intent(requireContext(), LoginActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)

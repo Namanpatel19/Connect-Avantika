@@ -56,6 +56,9 @@ dependencies {
     implementation(libs.lottie)
     implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)
+    
+    // OneSignal
+    implementation(libs.onesignal)
 
     // Jetpack Compose
     val composeBom = platform(libs.androidx.compose.bom)

@@ -67,7 +67,7 @@ class ClubsFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        vm.loadClubs()
+        vm.loadAllClubs()
     }
     
     private fun refreshList() {

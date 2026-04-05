@@ -14,7 +14,7 @@
         <item name="colorPrimaryContainer">@color/primary_dark</item>
         <item name="colorOnPrimaryContainer">@color/primary_light</item>
         <item name="colorSecondary">@color/secondary</item>
-        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorOnSecondary">@color/white</item>
         <item name="colorTertiary">@color/accent</item>
 
         <!-- Surface -->
