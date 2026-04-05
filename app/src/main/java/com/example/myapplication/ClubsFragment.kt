@@ -67,7 +67,7 @@ class ClubsFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        vm.loadClubs()
+        vm.loadAllClubs()
     }
     
     private fun refreshList() {
@@ -100,7 +100,7 @@ class ClubsFragment : Fragment() {
                     if (!isStudent) {
                         Toast.makeText(context, "Only students can join clubs", Toast.LENGTH_SHORT).show()
                     } else {
-                        vm.joinClub(club.id ?: "") { success ->
+                        vm.joinClub(club.id ?: "", club.name, club.clubHeadId) { success ->
                             val msg = if (success) "Join request sent!" else "Already applied or error"
                             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                         }

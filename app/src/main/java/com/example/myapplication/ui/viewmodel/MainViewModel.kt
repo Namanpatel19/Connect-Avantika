@@ -102,7 +102,7 @@ class MainViewModel(private val repository: MainRepository = MainRepository()) :
 
     fun createEventRequest(event: Event) {
         viewModelScope.launch {
-            repository.createEventRequest(event)
+            repository.createEvent(event)
             fetchEvents("pending")
         }
     }

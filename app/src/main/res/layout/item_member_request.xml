@@ -121,34 +121,34 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAccept"
                 android:layout_width="0dp"
-                android:layout_height="38dp"
-                android:layout_weight="1"
-                android:text="✓ Accept"
+                android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
+                android:layout_weight="1"
                 android:backgroundTint="@color/secondary"
+                android:text="✓ Accept"
                 android:textSize="11sp"
-                app:cornerRadius="10dp"/>
+                app:cornerRadius="10dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnInterview"
                 android:layout_width="0dp"
-                android:layout_height="38dp"
-                android:layout_weight="1"
-                android:text="📅 Interview"
+                android:layout_height="match_parent"
                 android:layout_marginEnd="4dp"
+                android:layout_weight="1"
                 android:backgroundTint="@color/accent"
+                android:text="📅 Interview"
                 android:textSize="11sp"
-                app:cornerRadius="10dp"/>
+                app:cornerRadius="10dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnReject"
                 android:layout_width="0dp"
-                android:layout_height="38dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="✕ Reject"
                 android:backgroundTint="@color/accent_rose"
+                android:text="✕ Reject"
                 android:textSize="11sp"
-                app:cornerRadius="10dp"/>
+                app:cornerRadius="10dp" />
 
         </LinearLayout>
     </LinearLayout>

@@ -1,106 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- === UNIVERSITY APP FIGMA PALETTE === -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
 
-    <!-- Backgrounds -->
-    <color name="bg_deep">#F5F7FA</color>
-    <color name="bg_surface">#EEF2FF</color>
-    <color name="bg_card">#FFFFFF</color>
-    <color name="bg_card_glass">#FFFFFF</color>
-    <color name="bg_light">#F5F7FA</color>
-    <color name="background">#F5F7FA</color>
+    <color name="primary">#0F5D73</color>
+    <color name="primary_light">#E0F2F1</color>
+    <color name="primary_dark">#0A4151</color>
 
-    <!-- Primary – Figma Teal -->
-    <color name="primary">#2D6A7F</color>
-    <color name="primary_dark">#1E4F61</color>
-    <color name="primary_light">#5D91A3</color>
-    <color name="primary_teal">#2D6A7F</color>
-    <color name="secondary_teal">#1E4F61</color>
-    <color name="header_teal">#2D6A7F</color>
-
-    <!-- Secondary – Figma Green -->
-    <color name="secondary">#22C55E</color>
-    <color name="secondary_dark">#16A34A</color>
-    <color name="secondary_light">#86EFAC</color>
-    <color name="green_btn">#22C55E</color>
-
-    <!-- Tertiary – Amber / Orange -->
-    <color name="accent">#F59E0B</color>
-    <color name="accent_green">#22C55E</color>
+    <color name="secondary">#10B981</color>
+    <color name="accent">#10B981</color>
     <color name="accent_rose">#F43F5E</color>
-    <color name="accent_orange">#F97316</color>
+    <color name="accent_orange">#F59E0B</color>
 
-    <!-- iOS-compat aliases -->
-    <color name="ios_blue">#2D6A7F</color>
-    <color name="ios_green">#22C55E</color>
-    <color name="ios_red">#F43F5E</color>
-    <color name="ios_orange">#F59E0B</color>
-    <color name="ios_teal">#2D6A7F</color>
-    <color name="ios_indigo">#5D91A3</color>
+    <color name="bg_deep">#F8FAFC</color>
+    <color name="bg_card">#FFFFFF</color>
+    <color name="bg_surface">#FFFFFF</color>
+    <color name="background">#F8FAFC</color>
 
-    <!-- Text -->
-    <color name="text_primary">#1A1A2E</color>
+    <color name="background_gradient_start">#0F5D73</color>
+    <color name="background_gradient_end">#0A4151</color>
+
+    <color name="text_primary">#1E293B</color>
     <color name="text_secondary">#64748B</color>
     <color name="text_hint">#94A3B8</color>
-    <color name="text_on_primary">#FFFFFF</color>
-    <color name="white">#FFFFFF</color>
-    <color name="black">#000000</color>
+    <color name="separator">#E2E8F0</color>
 
-    <!-- Chip / Badge colors -->
-    <color name="badge_beginner_bg">#DCFCE7</color>
-    <color name="badge_beginner_text">#16A34A</color>
-    <color name="badge_intermediate_bg">#FEF3C7</color>
-    <color name="badge_intermediate_text">#D97706</color>
-    <color name="badge_advanced_bg">#FFE4E6</color>
-    <color name="badge_advanced_text">#E11D48</color>
-    <color name="badge_points_bg">#EEF2FF</color>
-    <color name="badge_points_text">#4338CA</color>
+    <color name="badge_points_text">#0F5D73</color>
+    <color name="badge_points_bg">#E0F2F1</color>
+    <color name="badge_advanced_bg">#FEF3C7</color>
+    <color name="badge_advanced_text">#B45309</color>
+    <color name="badge_beginner_text">#059669</color>
+    <color name="badge_beginner_bg">#D1FAE5</color>
 
-    <!-- Quick Action icon bg -->
-    <color name="qa_events_bg">#E0F2FE</color>
-    <color name="qa_clubs_bg">#DCFCE7</color>
-    <color name="qa_calendar_bg">#FEF3C7</color>
-    <color name="qa_transport_bg">#FCE7F3</color>
-
-    <!-- Bubble / Tile Colors -->
-    <color name="bubble_blue">#DBEAFE</color>
-    <color name="bubble_green">#DCFCE7</color>
-    <color name="bubble_orange">#FEF3C7</color>
-    <color name="bubble_purple">#EDE9FE</color>
-
-    <!-- Dividers / Borders -->
-    <color name="separator">#E8EDF2</color>
-    <color name="border_light">#E8EDF2</color>
-    <color name="stroke_glass">#332D6A7F</color>
-
-    <!-- Navigation -->
-    <color name="bottom_nav_selected">#2D6A7F</color>
-    <color name="bottom_nav_unselected">#94A3B8</color>
+    <color name="nav_unselected">#94A3B8</color>
     <color name="bottom_nav_bg">#FFFFFF</color>
-    <color name="bottom_nav_indicator">#1A2D6A7F</color>
 
-    <!-- Status / Role Colors -->
-    <color name="role_admin_bg">#EEF2FF</color>
-    <color name="role_admin_border">#2D6A7F</color>
-    <color name="neutral">#64748B</color>
-    <color name="error_red">#F43F5E</color>
-    <color name="midnight_slate">#1A1A2E</color>
-    <color name="deep_obsidian">#334155</color>
-    <color name="electric_iris">#5D91A3</color>
-    <color name="neon_accent">#2D6A7F</color>
+    <color name="error_red">#EF4444</color>
 
-    <!-- Gradient anchors -->
-    <color name="dashboard_header_bg">#2D6A7F</color>
-    <color name="background_gradient_start">#2D6A7F</color>
-    <color name="background_gradient_end">#1E4F61</color>
-    <color name="goal_card_bg">#22C55E</color>
-    <color name="splash_bg_start">#2D6A7F</color>
-    <color name="splash_bg_center">#246070</color>
-    <color name="splash_bg_end">#1E4F61</color>
+    <color name="dashboard_header_bg">#0F5D73</color>
+    <color name="goal_card_bg">#FFFFFF</color>
+    <color name="neon_accent">#10B981</color>
 
-    <!-- Leanback -->
-    <color name="default_background">#F5F7FA</color>
-    <color name="selected_background">#2D6A7F</color>
-    <color name="fastlane_background">#FFFFFF</color>
-    <color name="search_opaque">#2D6A7F</color>
+    <!-- Leanback / TV specific colors -->
+    <color name="fastlane_background">#0F5D73</color>
+    <color name="search_opaque">#10B981</color>
+    <color name="default_background">#0F5D73</color>
+    <color name="selected_background">#10B981</color>
+
+    <!-- Missing badge colors used in adapters -->
+    <color name="badge_intermediate_bg">#DBEAFE</color>
+    <color name="badge_intermediate_text">#1E40AF</color>
+
+    <!-- OneSignal/Notification specific colors if needed -->
+    <color name="notification_accent">#0F5D73</color>
 </resources>

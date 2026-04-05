@@ -10,16 +10,36 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
+import com.onesignal.OneSignal
+import com.onesignal.debug.LogLevel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     lateinit var appViewModel: AppViewModel
 
+    private val ONESIGNAL_APP_ID = "fa04dbc2-3bcb-4fe7-adc1-9205d5669056"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Verbose Logging helps with debugging OneSignal issues.
+        OneSignal.Debug.logLevel = LogLevel.VERBOSE
+
+        // OneSignal Initialization
+        OneSignal.initWithContext(this, ONESIGNAL_APP_ID)
+
+        // requestPermission will show the native Android notification permission prompt.
+        // NOTE: It's recommended to use a Custom Message Prompt before calling this method
+        // to increase your conversion rates: https://documentation.onesignal.com/docs/permission-requests
+        CoroutineScope(Dispatchers.IO).launch {
+            OneSignal.Notifications.requestPermission(true)
+        }
 
         // Handle edge-to-edge and system bars overlapping
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
@@ -35,6 +55,9 @@ class MainActivity : AppCompatActivity() {
         appViewModel = ViewModelProvider(this)[AppViewModel::class.java]
         appViewModel.userId   = userId
         appViewModel.userRole = userRole
+
+        // Login OneSignal User
+        OneSignal.login(userId)
 
         setupNavigation(userRole)
     }

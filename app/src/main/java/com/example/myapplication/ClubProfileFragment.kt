@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,9 +8,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.bumptech.glide.Glide
+import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.databinding.FragmentClubProfileBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
+import com.onesignal.OneSignal
+import io.github.jan.supabase.auth.auth
+import kotlinx.coroutines.launch
 
 class ClubProfileFragment : Fragment() {
     private var _binding: FragmentClubProfileBinding? = null
@@ -42,6 +46,22 @@ class ClubProfileFragment : Fragment() {
             ) ?: return@setOnClickListener
             vm.updateClub(club) { success ->
                 Toast.makeText(context, if (success) "Club profile updated!" else "Error", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.btnLogout.setOnClickListener {
+            lifecycleScope.launch {
+                try {
+                    SupabaseClient.client.auth.signOut()
+                    OneSignal.logout()
+                    val intent = Intent(requireContext(), LoginActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    requireActivity().finish()
+                } catch (e: Exception) {
+                    OneSignal.logout()
+                    Toast.makeText(context, "Logout failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 

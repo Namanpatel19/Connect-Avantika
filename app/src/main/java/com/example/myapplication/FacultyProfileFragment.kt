@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.myapplication.databinding.FragmentFacultyProfileBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
+import com.onesignal.OneSignal
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.launch
 
@@ -52,11 +53,13 @@ class FacultyProfileFragment : Fragment() {
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
                     SupabaseClient.client.auth.signOut()
+                    OneSignal.logout()
                     val intent = Intent(requireContext(), LoginActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
                     requireActivity().finish()
                 } catch (e: Exception) {
+                    OneSignal.logout()
                     val intent = Intent(requireContext(), LoginActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)

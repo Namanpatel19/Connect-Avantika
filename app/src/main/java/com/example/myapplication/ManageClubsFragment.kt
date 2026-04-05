@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.adapters.ClubAdapter
 import com.example.myapplication.data.Club
@@ -33,9 +34,22 @@ class ManageClubsFragment : Fragment() {
         binding.rvStudents.layoutManager = LinearLayoutManager(context)
         vm.clubs.observe(viewLifecycleOwner) { clubs ->
             binding.tvCount.text = "All Clubs (${clubs.size})"
-            binding.rvStudents.adapter = ClubAdapter(clubs, onDeleteClick = { club ->
-                showDeleteDialog(club)
-            })
+            binding.rvStudents.adapter = ClubAdapter(
+                clubs = clubs,
+                isStudentRole = false,
+                isAdminRole = true,
+                onDeleteClick = { club -> showDeleteDialog(club) },
+                onViewInfoClick = { club ->
+                    val bundle = Bundle().apply { putString("club_id", club.id) }
+                    // Navigate to details. Since this is nested in ManageAll, 
+                    // we need to make sure the nav graph supports this.
+                    try {
+                        findNavController().navigate(R.id.navigation_club_details, bundle)
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Navigation error", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            )
         }
 
         vm.isLoading.observe(viewLifecycleOwner) { loading ->

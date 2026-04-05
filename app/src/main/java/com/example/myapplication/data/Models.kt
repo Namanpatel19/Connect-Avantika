@@ -84,10 +84,19 @@ data class ClubRequest(
     val id: String? = null,
     @SerialName("club_id") val clubId: String,
     @SerialName("student_id") val studentId: String,
-    val status: String = "pending",
+    val status: String = "pending", // pending, interview, accepted, rejected
     @SerialName("interview_date") val interviewDate: String? = null,
     @SerialName("interview_time") val interviewTime: String? = null,
+    @SerialName("interview_venue") val interviewVenue: String? = null,
     @SerialName("requested_at") val requestedAt: String? = null
+)
+
+@Serializable
+data class ClubMember(
+    val id: String? = null,
+    @SerialName("club_id") val clubId: String,
+    @SerialName("student_id") val studentId: String,
+    @SerialName("joined_at") val joinedAt: String? = null
 )
 
 @Serializable
@@ -96,4 +105,14 @@ data class EventRegistration(
     @SerialName("event_id") val eventId: String,
     @SerialName("student_id") val studentId: String,
     @SerialName("registered_at") val registeredAt: String? = null
+)
+
+@Serializable
+data class Notification(
+    val id: String? = null,
+    @SerialName("user_id") val userId: String,
+    val title: String,
+    val message: String,
+    @SerialName("is_read") val isRead: Boolean = false,
+    @SerialName("created_at") val createdAt: String? = null
 )
