@@ -1,6 +1,5 @@
 package com.example.myapplication
 
-import java.util.Collections
 import java.util.Timer
 import java.util.TimerTask
 
@@ -50,6 +49,7 @@ class MainFragment : BrowseSupportFragment() {
     private var mBackgroundTimer: Timer? = null
     private var mBackgroundUri: String? = null
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         Log.i(TAG, "onCreate")
         super.onActivityCreated(savedInstanceState)
@@ -71,23 +71,24 @@ class MainFragment : BrowseSupportFragment() {
 
     private fun prepareBackgroundManager() {
 
-        mBackgroundManager = BackgroundManager.getInstance(activity)
-        mBackgroundManager.attach(activity!!.window)
-        mDefaultBackground = ContextCompat.getDrawable(context!!, R.drawable.default_background)
+        mBackgroundManager = BackgroundManager.getInstance(requireActivity())
+        mBackgroundManager.attach(requireActivity().window)
+        mDefaultBackground = ContextCompat.getDrawable(requireContext(), R.drawable.default_background)
         mMetrics = DisplayMetrics()
-        activity!!.windowManager.defaultDisplay.getMetrics(mMetrics)
+        @Suppress("DEPRECATION")
+        requireActivity().windowManager.defaultDisplay.getMetrics(mMetrics)
     }
 
     private fun setupUIElements() {
         title = getString(R.string.browse_title)
         // over title
-        headersState = BrowseSupportFragment.HEADERS_ENABLED
+        headersState = HEADERS_ENABLED
         isHeadersTransitionOnBackEnabled = true
 
         // set fastLane (or headers) background color
-        brandColor = ContextCompat.getColor(context!!, R.color.fastlane_background)
+        brandColor = ContextCompat.getColor(requireContext(), R.color.fastlane_background)
         // set search icon color
-        searchAffordanceColor = ContextCompat.getColor(context!!, R.color.search_opaque)
+        searchAffordanceColor = ContextCompat.getColor(requireContext(), R.color.search_opaque)
     }
 
     private fun loadRows() {
@@ -155,7 +156,7 @@ class MainFragment : BrowseSupportFragment() {
 
     private fun setupEventListeners() {
         setOnSearchClickedListener {
-            Toast.makeText(context!!, "Implement your own in-app search", Toast.LENGTH_LONG)
+            Toast.makeText(requireContext(), "Implement your own in-app search", Toast.LENGTH_LONG)
                 .show()
         }
 
@@ -172,12 +173,12 @@ class MainFragment : BrowseSupportFragment() {
         ) {
 
             if (item is Movie) {
-                Log.d(TAG, "Item: " + item.toString())
-                val intent = Intent(context!!, DetailsActivity::class.java)
+                Log.d(TAG, "Item: $item")
+                val intent = Intent(requireContext(), DetailsActivity::class.java)
                 intent.putExtra(DetailsActivity.MOVIE, item)
 
                 val bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                    activity!!,
+                    requireActivity(),
                     (itemViewHolder.view as ImageCardView).mainImageView,
                     DetailsActivity.SHARED_ELEMENT_NAME
                 )
@@ -185,10 +186,10 @@ class MainFragment : BrowseSupportFragment() {
                 startActivity(intent, bundle)
             } else if (item is String) {
                 if (item.contains(getString(R.string.error_fragment))) {
-                    val intent = Intent(context!!, BrowseErrorActivity::class.java)
+                    val intent = Intent(requireContext(), BrowseErrorActivity::class.java)
                     startActivity(intent)
                 } else {
-                    Toast.makeText(context!!, item, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), item, Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -209,7 +210,7 @@ class MainFragment : BrowseSupportFragment() {
     private fun updateBackground(uri: String?) {
         val width = mMetrics.widthPixels
         val height = mMetrics.heightPixels
-        Glide.with(context!!)
+        Glide.with(requireContext())
             .load(uri)
             .centerCrop()
             .error(mDefaultBackground)
@@ -246,7 +247,7 @@ class MainFragment : BrowseSupportFragment() {
             view.layoutParams = ViewGroup.LayoutParams(GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT)
             view.isFocusable = true
             view.isFocusableInTouchMode = true
-            view.setBackgroundColor(ContextCompat.getColor(context!!, R.color.default_background))
+            view.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.default_background))
             view.setTextColor(Color.WHITE)
             view.gravity = Gravity.CENTER
             return Presenter.ViewHolder(view)
@@ -260,12 +261,12 @@ class MainFragment : BrowseSupportFragment() {
     }
 
     companion object {
-        private val TAG = "MainFragment"
+        private const val TAG = "MainFragment"
 
-        private val BACKGROUND_UPDATE_DELAY = 300
-        private val GRID_ITEM_WIDTH = 200
-        private val GRID_ITEM_HEIGHT = 200
-        private val NUM_ROWS = 6
-        private val NUM_COLS = 15
+        private const val BACKGROUND_UPDATE_DELAY = 300
+        private const val GRID_ITEM_WIDTH = 200
+        private const val GRID_ITEM_HEIGHT = 200
+        private const val NUM_ROWS = 6
+        private const val NUM_COLS = 15
     }
 }

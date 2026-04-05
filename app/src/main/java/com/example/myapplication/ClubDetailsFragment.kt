@@ -66,7 +66,7 @@ class ClubDetailsFragment : Fragment() {
         binding.btnJoinClub.setOnClickListener {
             clubId?.let { id ->
                 binding.btnJoinClub.isEnabled = false
-                vm.joinClub(id) { success ->
+                vm.joinClub(id, currentClub?.name ?: "", currentClub?.clubHeadId) { success ->
                     if (success) {
                         Toast.makeText(context, "Join request sent to Club Lead!", Toast.LENGTH_SHORT).show()
                     } else {

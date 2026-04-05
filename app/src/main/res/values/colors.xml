@@ -41,6 +41,16 @@
     <color name="goal_card_bg">#FFFFFF</color>
     <color name="neon_accent">#10B981</color>
 
+    <!-- Leanback / TV specific colors -->
+    <color name="fastlane_background">#0F5D73</color>
+    <color name="search_opaque">#10B981</color>
+    <color name="default_background">#0F5D73</color>
+    <color name="selected_background">#10B981</color>
+
+    <!-- Missing badge colors used in adapters -->
+    <color name="badge_intermediate_bg">#DBEAFE</color>
+    <color name="badge_intermediate_text">#1E40AF</color>
+
     <!-- OneSignal/Notification specific colors if needed -->
     <color name="notification_accent">#0F5D73</color>
 </resources>
