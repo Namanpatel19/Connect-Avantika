@@ -40,13 +40,25 @@ data class Event(
     val description: String? = null,
     @SerialName("club_id") val clubId: String? = null,
     @SerialName("created_by") val createdBy: String? = null,
-    val status: String = "pending", // pending, approved, rejected
+    val status: String = "pending", // master status
     @SerialName("event_date") val eventDate: String? = null,
     @SerialName("banner_url") val bannerUrl: String? = null,
     @SerialName("created_at") val createdAt: String? = null,
-    @SerialName("dean_id") val deanId: String? = null, // The dean selected for approval
-    @SerialName("entry_fee") val entryFee: Double? = 0.0,
-    @SerialName("is_paid") val isPaid: Boolean = false
+    
+    // These are NOT in the events table, so we mark them @Transient for the base insert
+    @Transient val deanId: String? = null,
+    @Transient val entryFee: Double? = 0.0,
+    @Transient val isPaid: Boolean = false
+)
+
+@Serializable
+data class EventApproval(
+    val id: String? = null,
+    @SerialName("event_id") val eventId: String,
+    @SerialName("dean_id") val deanId: String,
+    val status: String = "pending",
+    val remarks: String? = null,
+    @SerialName("reviewed_at") val reviewedAt: String? = null
 )
 
 @Serializable
@@ -54,9 +66,9 @@ data class EventRegistration(
     val id: String? = null,
     @SerialName("event_id") val eventId: String,
     @SerialName("student_id") val studentId: String,
-    val email: String? = null,
-    val contact: String? = null,
-    val confirmed: Boolean = false,
+    @Transient val email: String? = null,      // NOT in SQL schema
+    @Transient val contact: String? = null,    // NOT in SQL schema
+    @Transient val confirmed: Boolean = false, // NOT in SQL schema
     @SerialName("registered_at") val registeredAt: String? = null
 )
 
@@ -67,7 +79,7 @@ data class Club(
     val description: String? = null,
     @SerialName("club_head_id") val clubHeadId: String? = null,
     @SerialName("banner_url") val bannerUrl: String? = null,
-    val category: String? = "Other",
+    @Transient val category: String? = "Other", // NOT in SQL schema
     @SerialName("created_at") val createdAt: String? = null
 )
 
@@ -115,9 +127,9 @@ data class StudyMaterial(
     val id: String? = null,
     val title: String,
     val subject: String? = null,
-    val batch: String? = null,
-    val department: String? = null,
+    @Transient val batch: String? = null,      // NOT in SQL schema
+    @Transient val department: String? = null, // NOT in SQL schema
     @SerialName("file_url") val fileUrl: String? = null,
-    @SerialName("uploaded_by") val uploadedBy: String? = null,
+    @SerialName("faculty_id") val uploadedBy: String? = null, // Renamed to match SQL faculty_id
     @SerialName("created_at") val createdAt: String? = null
 )

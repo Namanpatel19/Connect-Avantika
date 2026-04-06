@@ -8,6 +8,8 @@ import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import kotlinx.serialization.json.Json
+import io.ktor.client.plugins.*
+import io.github.jan.supabase.annotations.SupabaseInternal
 
 object SupabaseClient {
     private const val SUPABASE_URL = "https://xgvsasaisnapzyzglgix.supabase.co"
@@ -16,10 +18,18 @@ object SupabaseClient {
     // IMPORTANT: Replace this with your actual secret service_role key from Supabase Dashboard
     private const val SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhndnNhc2Fpc25hcHp5emdsZ2l4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDQxNjE4NiwiZXhwIjoyMDg5OTkyMTg2fQ._WxgafYq-ECa3nPfkOkM-ro06zdDX91WUUYCRGS5IGI"
 
+    @OptIn(SupabaseInternal::class)
     val client = createSupabaseClient(
         supabaseUrl = SUPABASE_URL,
         supabaseKey = SUPABASE_KEY
     ) {
+        httpConfig {
+            install(HttpTimeout) {
+                requestTimeoutMillis = 60000
+                connectTimeoutMillis = 60000
+                socketTimeoutMillis = 60000
+            }
+        }
         install(Auth)
         install(Postgrest) {
             serializer = KotlinXSerializer(Json {
@@ -30,10 +40,18 @@ object SupabaseClient {
         install(Storage)
     }
 
+    @OptIn(SupabaseInternal::class)
     val adminClient = createSupabaseClient(
         supabaseUrl = SUPABASE_URL,
         supabaseKey = SERVICE_ROLE_KEY
     ) {
+        httpConfig {
+            install(HttpTimeout) {
+                requestTimeoutMillis = 60000
+                connectTimeoutMillis = 60000
+                socketTimeoutMillis = 60000
+            }
+        }
         install(Auth) {
             // Use a no-op session manager to prevent adminClient from using the logged-in user's session
             sessionManager = object : SessionManager {

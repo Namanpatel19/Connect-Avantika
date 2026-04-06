@@ -102,14 +102,14 @@ class MainViewModel(private val repository: MainRepository = MainRepository()) :
 
     fun createEventRequest(event: Event) {
         viewModelScope.launch {
-            repository.createEvent(event)
+            repository.createEvent(event, event.deanId)
             fetchEvents("pending")
         }
     }
 
-    fun updateEventStatus(eventId: String, status: String) {
+    fun updateEventStatus(eventId: String, status: String, deanId: String) {
         viewModelScope.launch {
-            repository.updateEventStatus(eventId, status)
+            repository.updateEventStatus(eventId, status, deanId)
             fetchEvents(null) // Refresh all
         }
     }

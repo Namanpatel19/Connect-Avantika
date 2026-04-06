@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -160,35 +161,47 @@ class AppViewModel : ViewModel() {
 
     fun submitEvent(event: Event, bannerFile: File?, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
-            _isLoading.value = true
-            var eventToSubmit = event.copy(createdBy = userId)
-            
-            if (bannerFile != null) {
-                val uploadResult = repository.uploadEventBanner(bannerFile)
-                if (uploadResult.isSuccess) {
-                    eventToSubmit = eventToSubmit.copy(bannerUrl = uploadResult.getOrNull())
+            try {
+                _isLoading.value = true
+                var eventToSubmit = event.copy(createdBy = userId)
+                
+                if (bannerFile != null) {
+                    val uploadResult = repository.uploadEventBanner(bannerFile)
+                    if (uploadResult.isSuccess) {
+                        eventToSubmit = eventToSubmit.copy(bannerUrl = uploadResult.getOrNull())
+                    }
                 }
-            }
-            
-            val result = repository.createEvent(eventToSubmit)
-            if (result.isSuccess) {
-                event.deanId?.let { deanId ->
-                    repository.sendNotification(deanId, "New Event Approval", "A new event '${event.title}' is waiting for your approval.")
+                
+                // Pass deanId separately to repository
+                val result = repository.createEvent(eventToSubmit, event.deanId)
+                if (result.isSuccess) {
+                    event.deanId?.let { deanId ->
+                        repository.sendNotification(deanId, "New Event Approval", "A new event '${event.title}' is waiting for your approval.")
+                    }
+                    loadMyClub()
                 }
-                loadMyClub()
+                _isLoading.value = false
+                callback(result.isSuccess)
+            } catch (e: Exception) {
+                Log.e("AppViewModel", "Submit event failed", e)
+                _isLoading.value = false
+                callback(false)
             }
-            _isLoading.value = false
-            callback(result.isSuccess)
         }
     }
 
     fun updateEventStatus(eventId: String, status: String, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val result = repository.updateEventStatus(eventId, status)
-            if (result.isSuccess) {
-                loadDeanEvents()
+            try {
+                val result = repository.updateEventStatus(eventId, status, userId)
+                if (result.isSuccess) {
+                    loadDeanEvents()
+                }
+                callback(result.isSuccess)
+            } catch (e: Exception) {
+                Log.e("AppViewModel", "Update event status failed", e)
+                callback(false)
             }
-            callback(result.isSuccess)
         }
     }
 
@@ -384,28 +397,34 @@ class AppViewModel : ViewModel() {
 
     fun uploadStudyMaterial(title: String, subject: String, batch: String, dept: String, file: File, callback: (Boolean, String) -> Unit) {
         viewModelScope.launch {
-            _uploadProgress.value = true
-            val uploadResult = repository.uploadStudyFile(file)
-            if (uploadResult.isSuccess) {
-                val material = StudyMaterial(
-                    title = title,
-                    subject = subject,
-                    batch = batch,
-                    department = dept,
-                    fileUrl = uploadResult.getOrNull(),
-                    uploadedBy = userId
-                )
-                val createResult = repository.createStudyMaterial(material)
-                if (createResult.isSuccess) {
-                    loadStudyMaterials()
-                    callback(true, "Material uploaded successfully")
+            try {
+                _uploadProgress.value = true
+                val uploadResult = repository.uploadStudyFile(file)
+                if (uploadResult.isSuccess) {
+                    val material = StudyMaterial(
+                        title = title,
+                        subject = subject,
+                        batch = batch,
+                        department = dept,
+                        fileUrl = uploadResult.getOrNull(),
+                        uploadedBy = userId
+                    )
+                    val createResult = repository.createStudyMaterial(material)
+                    if (createResult.isSuccess) {
+                        loadStudyMaterials()
+                        callback(true, "Material uploaded successfully")
+                    } else {
+                        callback(false, "Failed to save material details")
+                    }
                 } else {
-                    callback(false, "Failed to save material details")
+                    callback(false, "File upload failed")
                 }
-            } else {
-                callback(false, "File upload failed")
+                _uploadProgress.value = false
+            } catch (e: Exception) {
+                Log.e("AppViewModel", "Upload study material failed", e)
+                _uploadProgress.value = false
+                callback(false, "An error occurred: ${e.message}")
             }
-            _uploadProgress.value = false
         }
     }
 }
