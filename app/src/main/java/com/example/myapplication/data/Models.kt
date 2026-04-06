@@ -100,3 +100,24 @@ data class Notification(
     @SerialName("is_read") val isRead: Boolean = false,
     @SerialName("created_at") val createdAt: String? = null
 )
+
+@Serializable
+data class Announcement(
+    val id: String? = null,
+    val title: String,
+    val content: String? = null,
+    @SerialName("created_by") val createdBy: String? = null,
+    @SerialName("created_at") val createdAt: String? = null
+)
+
+@Serializable
+data class StudyMaterial(
+    val id: String? = null,
+    val title: String,
+    val subject: String? = null,
+    val batch: String? = null,
+    val department: String? = null,
+    @SerialName("file_url") val fileUrl: String? = null,
+    @SerialName("uploaded_by") val uploadedBy: String? = null,
+    @SerialName("created_at") val createdAt: String? = null
+)
