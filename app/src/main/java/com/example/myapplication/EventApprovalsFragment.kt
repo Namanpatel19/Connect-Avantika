@@ -25,7 +25,8 @@ class EventApprovalsFragment : Fragment() {
         vm = ViewModelProvider(requireActivity())[AppViewModel::class.java]
 
         binding.rvEvents.layoutManager = LinearLayoutManager(context)
-        vm.pendingEvents.observe(viewLifecycleOwner) { events ->
+        
+        vm.deanPendingEvents.observe(viewLifecycleOwner) { events ->
             binding.tvPending.text = "${events.size} events pending approval"
             binding.tvEmpty.visibility = if (events.isEmpty()) View.VISIBLE else View.GONE
             binding.rvEvents.adapter = EventApprovalAdapter(events,
@@ -41,7 +42,7 @@ class EventApprovalsFragment : Fragment() {
                 }
             )
         }
-        vm.loadPendingEvents()
+        vm.loadDeanEvents()
     }
 
     override fun onDestroyView() { super.onDestroyView(); _binding = null }

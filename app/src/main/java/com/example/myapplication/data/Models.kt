@@ -40,10 +40,36 @@ data class Event(
     val description: String? = null,
     @SerialName("club_id") val clubId: String? = null,
     @SerialName("created_by") val createdBy: String? = null,
-    val status: String = "pending",
+    val status: String = "pending", // master status
     @SerialName("event_date") val eventDate: String? = null,
     @SerialName("banner_url") val bannerUrl: String? = null,
-    @SerialName("created_at") val createdAt: String? = null
+    @SerialName("created_at") val createdAt: String? = null,
+    
+    // These are NOT in the events table, so we mark them @Transient for the base insert
+    @Transient val deanId: String? = null,
+    @Transient val entryFee: Double? = 0.0,
+    @Transient val isPaid: Boolean = false
+)
+
+@Serializable
+data class EventApproval(
+    val id: String? = null,
+    @SerialName("event_id") val eventId: String,
+    @SerialName("dean_id") val deanId: String,
+    val status: String = "pending",
+    val remarks: String? = null,
+    @SerialName("reviewed_at") val reviewedAt: String? = null
+)
+
+@Serializable
+data class EventRegistration(
+    val id: String? = null,
+    @SerialName("event_id") val eventId: String,
+    @SerialName("student_id") val studentId: String,
+    @Transient val email: String? = null,      // NOT in SQL schema
+    @Transient val contact: String? = null,    // NOT in SQL schema
+    @Transient val confirmed: Boolean = false, // NOT in SQL schema
+    @SerialName("registered_at") val registeredAt: String? = null
 )
 
 @Serializable
@@ -53,7 +79,37 @@ data class Club(
     val description: String? = null,
     @SerialName("club_head_id") val clubHeadId: String? = null,
     @SerialName("banner_url") val bannerUrl: String? = null,
-    val category: String? = "Other",
+    @Transient val category: String? = "Other", // NOT in SQL schema
+    @SerialName("created_at") val createdAt: String? = null
+)
+
+@Serializable
+data class ClubRequest(
+    val id: String? = null,
+    @SerialName("club_id") val clubId: String,
+    @SerialName("student_id") val studentId: String,
+    val status: String = "pending",
+    @SerialName("interview_date") val interviewDate: String? = null,
+    @SerialName("interview_time") val interviewTime: String? = null,
+    @SerialName("venue") val interviewVenue: String? = null,
+    @SerialName("requested_at") val requestedAt: String? = null
+)
+
+@Serializable
+data class ClubMember(
+    val id: String? = null,
+    @SerialName("club_id") val clubId: String,
+    @SerialName("student_id") val studentId: String,
+    @SerialName("joined_at") val joinedAt: String? = null
+)
+
+@Serializable
+data class Notification(
+    val id: String? = null,
+    @SerialName("user_id") val userId: String,
+    val title: String,
+    val message: String,
+    @SerialName("is_read") val isRead: Boolean = false,
     @SerialName("created_at") val createdAt: String? = null
 )
 
@@ -69,50 +125,11 @@ data class Announcement(
 @Serializable
 data class StudyMaterial(
     val id: String? = null,
-    @SerialName("faculty_id") val facultyId: String? = null,
     val title: String,
-    @SerialName("file_url") val fileUrl: String,
     val subject: String? = null,
-    val batch: String? = null,
-    val department: String? = null,
-    @SerialName("file_name") val fileName: String? = null,
-    @SerialName("created_at") val createdAt: String? = null
-)
-
-@Serializable
-data class ClubRequest(
-    val id: String? = null,
-    @SerialName("club_id") val clubId: String,
-    @SerialName("student_id") val studentId: String,
-    val status: String = "pending", // pending, interview, accepted, rejected
-    @SerialName("interview_date") val interviewDate: String? = null,
-    @SerialName("interview_time") val interviewTime: String? = null,
-    @SerialName("interview_venue") val interviewVenue: String? = null,
-    @SerialName("requested_at") val requestedAt: String? = null
-)
-
-@Serializable
-data class ClubMember(
-    val id: String? = null,
-    @SerialName("club_id") val clubId: String,
-    @SerialName("student_id") val studentId: String,
-    @SerialName("joined_at") val joinedAt: String? = null
-)
-
-@Serializable
-data class EventRegistration(
-    val id: String? = null,
-    @SerialName("event_id") val eventId: String,
-    @SerialName("student_id") val studentId: String,
-    @SerialName("registered_at") val registeredAt: String? = null
-)
-
-@Serializable
-data class Notification(
-    val id: String? = null,
-    @SerialName("user_id") val userId: String,
-    val title: String,
-    val message: String,
-    @SerialName("is_read") val isRead: Boolean = false,
+    @Transient val batch: String? = null,      // NOT in SQL schema
+    @Transient val department: String? = null, // NOT in SQL schema
+    @SerialName("file_url") val fileUrl: String? = null,
+    @SerialName("faculty_id") val uploadedBy: String? = null, // Renamed to match SQL faculty_id
     @SerialName("created_at") val createdAt: String? = null
 )

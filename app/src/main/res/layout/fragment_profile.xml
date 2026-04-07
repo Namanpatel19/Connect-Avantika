@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_deep">
@@ -18,19 +17,36 @@
             android:background="@drawable/bg_teal_header"
             android:padding="24dp">
 
-            <ImageView
-                android:id="@+id/ivAvatar"
+            <FrameLayout
+                android:id="@+id/frameAvatar"
                 android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_person"
-                android:background="@drawable/bg_circle_white"
-                android:padding="4dp"
-                android:scaleType="centerCrop" />
+                android:layout_height="80dp">
+
+                <ImageView
+                    android:id="@+id/ivAvatar"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/ic_person"
+                    android:background="@drawable/bg_circle_white"
+                    android:padding="4dp"
+                    android:scaleType="centerCrop" />
+
+                <ImageView
+                    android:id="@+id/btnChangePhoto"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="bottom|end"
+                    android:src="@drawable/ic_camera"
+                    android:background="@drawable/bg_circle_accent"
+                    android:padding="5dp"
+                    android:scaleType="centerCrop"
+                    app:tint="@color/white" />
+            </FrameLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/ivAvatar"
+                android:layout_toEndOf="@id/frameAvatar"
                 android:layout_marginStart="16dp"
                 android:layout_centerVertical="true"
                 android:orientation="vertical">
@@ -48,18 +64,18 @@
                     android:id="@+id/tvRole"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="B.Tech Computer Science | 3rd Year"
+                    android:text="Department | Batch"
                     android:textColor="#CCffffff"
                     android:textSize="12sp" />
 
-                <RatingBar
-                    style="?android:attr/ratingBarStyleSmall"
+                <TextView
+                    android:id="@+id/tvEnrollment"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:numStars="5"
-                    android:rating="4.5"
-                    android:progressTint="@color/accent"
-                    android:layout_marginTop="4dp" />
+                    android:text="Enrollment No."
+                    android:textColor="#AAffffff"
+                    android:textSize="11sp"
+                    android:layout_marginTop="2dp" />
             </LinearLayout>
 
             <ImageView
@@ -87,20 +103,7 @@
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="12" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/primary"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Courses Joined" android:textSize="11sp" android:textColor="@color/text_secondary"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_margin="4dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp">
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="6" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/secondary"/>
+                    <TextView android:id="@+id/tvClubsJoined" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/secondary"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Clubs Joined" android:textSize="11sp" android:textColor="@color/text_secondary"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -113,8 +116,8 @@
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="8" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/accent_orange"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Enrolled Events" android:textSize="11sp" android:textColor="@color/text_secondary"/>
+                    <TextView android:id="@+id/tvEventsEnrolled" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/accent_orange"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Events Enrolled" android:textSize="11sp" android:textColor="@color/text_secondary"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -126,8 +129,21 @@
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1,254" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/primary"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Points" android:textSize="11sp" android:textColor="@color/text_secondary"/>
+                    <TextView android:id="@+id/tvPendingRequests" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/primary"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Pending Requests" android:textSize="11sp" android:textColor="@color/text_secondary"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp" android:gravity="center">
+                    <TextView android:id="@+id/tvMaterials" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/primary"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Study Materials" android:textSize="11sp" android:textColor="@color/text_secondary"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
         </GridLayout>
@@ -145,17 +161,17 @@
 
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="8dp">
                     <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/ic_email" app:tint="@color/text_secondary"/>
-                    <TextView android:id="@+id/tvEmail" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="jane.email@university.edu" android:layout_marginStart="12dp" android:textSize="13sp" android:textColor="@color/text_primary"/>
+                    <TextView android:id="@+id/tvEmail" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="email@university.edu" android:layout_marginStart="12dp" android:textSize="13sp" android:textColor="@color/text_primary"/>
                 </LinearLayout>
 
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="8dp">
                     <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/ic_phone" app:tint="@color/text_secondary"/>
-                    <TextView android:id="@+id/tvPhone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="+91 98765 43210" android:layout_marginStart="12dp" android:textSize="13sp" android:textColor="@color/text_primary"/>
+                    <TextView android:id="@+id/tvPhone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="No contact" android:layout_marginStart="12dp" android:textSize="13sp" android:textColor="@color/text_primary"/>
                 </LinearLayout>
 
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
                     <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@drawable/ic_location" app:tint="@color/text_secondary"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Main Campus, Avantika" android:layout_marginStart="12dp" android:textSize="13sp" android:textColor="@color/text_primary"/>
+                    <TextView android:id="@+id/tvDepartment" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Department" android:layout_marginStart="12dp" android:textSize="13sp" android:textColor="@color/text_primary"/>
                 </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>

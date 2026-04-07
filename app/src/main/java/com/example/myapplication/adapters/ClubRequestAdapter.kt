@@ -54,6 +54,17 @@ class ClubRequestAdapter(
                 layoutInterview.visibility = View.GONE
             }
 
+            // Buttons visibility based on status
+            if (req.status == "accepted") {
+                btnAccept.visibility = View.GONE
+                btnReject.visibility = View.GONE
+                btnInterview.visibility = View.GONE
+            } else {
+                btnAccept.visibility = View.VISIBLE
+                btnReject.visibility = View.VISIBLE
+                btnInterview.visibility = View.VISIBLE
+            }
+
             // Buttons
             btnAccept.setOnClickListener    { onAccept(req) }
             btnReject.setOnClickListener    { onReject(req) }

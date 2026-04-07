@@ -45,7 +45,7 @@ class ClubsFragment : Fragment() {
         
         vm.myClubRequests.observe(viewLifecycleOwner) { requests ->
             myRequests = requests
-            joinedClubIds = requests.filter { it.status == "accepted" }.map { it.clubId }.toSet()
+            joinedClubIds = requests.filter { it.status == "accepted" }.map { it.clubId ?: "" }.toSet()
             refreshList()
         }
 
@@ -61,13 +61,12 @@ class ClubsFragment : Fragment() {
 
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                refreshList()
-            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { refreshList() }
             override fun afterTextChanged(s: Editable?) {}
         })
 
         vm.loadAllClubs()
+        vm.loadMyClubRequests() // Crucial for Apply button state
     }
     
     private fun refreshList() {
@@ -101,8 +100,12 @@ class ClubsFragment : Fragment() {
                         Toast.makeText(context, "Only students can join clubs", Toast.LENGTH_SHORT).show()
                     } else {
                         vm.joinClub(club.id ?: "", club.name, club.clubHeadId) { success ->
-                            val msg = if (success) "Join request sent!" else "Already applied or error"
-                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            if (success) {
+                                Toast.makeText(context, "Join request sent!", Toast.LENGTH_SHORT).show()
+                                vm.loadMyClubRequests()
+                            } else {
+                                Toast.makeText(context, "Failed to apply.", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 },
@@ -126,7 +129,7 @@ class ClubsFragment : Fragment() {
                 }
             )
         } else {
-            adapter.updateData(filtered, myRequests)
+            adapter.updateData(filtered, myRequests, joinedClubIds)
         }
     }
 

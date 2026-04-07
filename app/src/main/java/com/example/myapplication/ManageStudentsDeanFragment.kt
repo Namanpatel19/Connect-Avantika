@@ -91,16 +91,14 @@ class ManageStudentsDeanFragment : Fragment() {
                 val password    = dialogView.findViewById<TextInputEditText>(R.id.etPassword).text.toString().trim()
                 val enrollment  = dialogView.findViewById<TextInputEditText>(R.id.etEnrollment).text.toString().trim().uppercase()
                 val dept        = actvDept.text.toString().trim()
-                val year        = dialogView.findViewById<TextInputEditText>(R.id.etYear).text.toString().trim()
                 val batch       = actvBatch.text.toString().trim()
 
-                if (name.isEmpty() || email.isEmpty() || password.isEmpty() || enrollment.isEmpty() || dept.isEmpty() || year.isEmpty() || batch.isEmpty()) {
+                if (name.isEmpty() || email.isEmpty() || password.isEmpty() || enrollment.isEmpty() || dept.isEmpty() || batch.isEmpty()) {
                     Toast.makeText(context, "Fill required fields (marked *)", Toast.LENGTH_SHORT).show(); return@setPositiveButton
                 }
                 
-                val combinedDept = "$dept (Year $year)"
                 val user    = User(id = "", email = email, password = password, role = "student")
-                val student = Student(userId = "", name = name, enrollment = enrollment, department = combinedDept, batch = batch)
+                val student = Student(userId = "", name = name, enrollment = enrollment, department = dept, batch = batch)
                 
                 // Auto Confirm is now true by default
                 vm.addStudent(user, student, autoConfirm = true) { success ->

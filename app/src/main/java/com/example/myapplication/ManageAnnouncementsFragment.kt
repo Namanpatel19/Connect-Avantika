@@ -42,7 +42,7 @@ class ManageAnnouncementsFragment : Fragment() {
         }
 
         binding.btnCreate.setOnClickListener { handleCreate() }
-        vm.loadAllAnnouncements()
+        vm.loadAnnouncements()
     }
 
     private fun handleCreate() {

@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.myapplication.R
 import com.example.myapplication.databinding.ItemClubBinding
 import com.example.myapplication.data.Club
@@ -13,7 +14,7 @@ import com.example.myapplication.data.ClubRequest
 class ClubAdapter(
     private var clubs: List<Club>,
     private var pendingRequests: List<ClubRequest> = emptyList(),
-    private val joinedClubIds: Set<String> = emptySet(),
+    private var joinedClubIds: Set<String> = emptySet(),
     private val isStudentRole: Boolean = true,
     private val isAdminRole: Boolean = false,
     private val onDeleteClick: (Club) -> Unit = {},
@@ -37,23 +38,36 @@ class ClubAdapter(
         b.clubDescription.text = club.description ?: "No description available."
         b.tvClubCategory.text = club.category ?: "Other"
 
-        // Check if joined or pending
-        val isJoined = joinedClubIds.contains(club.id)
-        val isPending = pendingRequests.any { it.clubId == club.id && it.status == "pending" }
+        // Load Club Logo/Banner
+        if (!club.bannerUrl.isNullOrEmpty()) {
+            Glide.with(ctx)
+                .load(club.bannerUrl)
+                .placeholder(R.drawable.ic_clubs)
+                .error(R.drawable.ic_clubs)
+                .into(b.clubLogo)
+        } else {
+            b.clubLogo.setImageResource(R.drawable.ic_clubs)
+        }
+
+        // Check request status
+        val myRequest = pendingRequests.find { it.clubId == club.id }
+        val status = myRequest?.status
 
         // Join button logic
         if (isStudentRole) {
             b.btnJoin.visibility = View.VISIBLE
-            when {
-                isJoined -> {
+            b.btnJoin.isEnabled = true // Default
+            
+            when (status) {
+                "accepted" -> {
                     b.btnJoin.text = "Joined"
-                    b.btnJoin.setIconResource(R.drawable.ic_clubs) // Assuming checkmark icon or similar
+                    b.btnJoin.setIconResource(R.drawable.ic_check)
                     b.btnJoin.backgroundTintList = ContextCompat.getColorStateList(ctx, R.color.separator)
                     b.btnJoin.setTextColor(ContextCompat.getColor(ctx, R.color.text_secondary))
                     b.btnJoin.iconTint = ContextCompat.getColorStateList(ctx, R.color.text_secondary)
                     b.btnJoin.isEnabled = false
                 }
-                isPending -> {
+                "pending" -> {
                     b.btnJoin.text = "Pending"
                     b.btnJoin.setIconResource(R.drawable.ic_clubs)
                     b.btnJoin.backgroundTintList = ContextCompat.getColorStateList(ctx, R.color.badge_intermediate_bg)
@@ -61,13 +75,28 @@ class ClubAdapter(
                     b.btnJoin.iconTint = ContextCompat.getColorStateList(ctx, R.color.badge_intermediate_text)
                     b.btnJoin.isEnabled = false
                 }
+                "interview" -> {
+                    b.btnJoin.text = "Interview"
+                    b.btnJoin.setIconResource(R.drawable.ic_calendar)
+                    b.btnJoin.backgroundTintList = ContextCompat.getColorStateList(ctx, R.color.primary_light)
+                    b.btnJoin.setTextColor(ContextCompat.getColor(ctx, R.color.primary))
+                    b.btnJoin.iconTint = ContextCompat.getColorStateList(ctx, R.color.primary)
+                    b.btnJoin.isEnabled = false
+                }
+                "rejected" -> {
+                    b.btnJoin.text = "Re-apply"
+                    b.btnJoin.setIconResource(R.drawable.ic_clubs)
+                    b.btnJoin.backgroundTintList = ContextCompat.getColorStateList(ctx, R.color.accent_rose)
+                    b.btnJoin.setTextColor(ContextCompat.getColor(ctx, android.R.color.white))
+                    b.btnJoin.iconTint = ContextCompat.getColorStateList(ctx, android.R.color.white)
+                    b.btnJoin.setOnClickListener { onJoinClick(club) }
+                }
                 else -> {
-                    b.btnJoin.text = "" // Icon only as per figma
+                    b.btnJoin.text = "Apply"
                     b.btnJoin.setIconResource(R.drawable.ic_clubs)
                     b.btnJoin.backgroundTintList = ContextCompat.getColorStateList(ctx, R.color.secondary)
                     b.btnJoin.setTextColor(ContextCompat.getColor(ctx, android.R.color.white))
                     b.btnJoin.iconTint = ContextCompat.getColorStateList(ctx, android.R.color.white)
-                    b.btnJoin.isEnabled = true
                     b.btnJoin.setOnClickListener { onJoinClick(club) }
                 }
             }
@@ -85,9 +114,10 @@ class ClubAdapter(
 
     override fun getItemCount() = clubs.size
 
-    fun updateData(newClubs: List<Club>, newRequests: List<ClubRequest> = pendingRequests) {
+    fun updateData(newClubs: List<Club>, newRequests: List<ClubRequest>, newJoinedIds: Set<String>) {
         clubs = newClubs
         pendingRequests = newRequests
+        joinedClubIds = newJoinedIds
         notifyDataSetChanged()
     }
 }
