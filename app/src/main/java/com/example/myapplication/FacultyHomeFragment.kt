@@ -1,5 +1,7 @@
 package com.example.myapplication
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -43,6 +45,12 @@ class FacultyHomeFragment : Fragment() {
         // Quick action: Upload Materials
         binding.cardUploadMaterial.setOnClickListener {
             (requireActivity() as MainActivity).navigateTo(R.id.navigation_upload_material)
+        }
+        
+        // Quick action: Open Moodle
+        binding.cardMoodle.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://moodle.avantika.edu.in/login/index.php"))
+            startActivity(intent)
         }
 
         vm.loadCurrentFaculty()
