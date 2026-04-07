@@ -8,8 +8,4 @@
         android:id="@+id/navigation_manage_all"
         android:icon="@drawable/ic_group"
         android:title="Manage" />
-    <item
-        android:id="@+id/navigation_super_admin_profile"
-        android:icon="@drawable/ic_person"
-        android:title="Profile" />
 </menu>

@@ -32,7 +32,7 @@ object SupabaseClient {
         install(Postgrest) {
             serializer = KotlinXSerializer(Json {
                 ignoreUnknownKeys = true
-                encodeDefaults = true
+                encodeDefaults = false
             })
         }
         install(Storage)
@@ -60,7 +60,7 @@ object SupabaseClient {
         install(Postgrest) {
             serializer = KotlinXSerializer(Json {
                 ignoreUnknownKeys = true
-                encodeDefaults = true
+                encodeDefaults = false
             })
         }
         install(Storage)

@@ -16,66 +16,78 @@ class AppViewModel : ViewModel() {
     var userId: String = ""
     var userRole: String = ""
 
-    private val _isLoading = MutableLiveData<Boolean>()
+    private val _isLoading = MutableLiveData<Boolean>(false)
     val isLoading: LiveData<Boolean> get() = _isLoading
 
-    private val _deans = MutableLiveData<List<User>>()
+    private val _deans = MutableLiveData<List<User>>(emptyList())
     val deans: LiveData<List<User>> get() = _deans
 
-    private val _students = MutableLiveData<List<Student>>()
+    private val _allUsers = MutableLiveData<List<User>>(emptyList())
+    val allUsers: LiveData<List<User>> get() = _allUsers
+
+    private val _students = MutableLiveData<List<Student>>(emptyList())
     val students: LiveData<List<Student>> get() = _students
 
-    private val _faculty = MutableLiveData<List<Faculty>>()
+    private val _faculty = MutableLiveData<List<Faculty>>(emptyList())
     val faculty: LiveData<List<Faculty>> get() = _faculty
 
-    private val _clubs = MutableLiveData<List<Club>>()
+    private val _clubs = MutableLiveData<List<Club>>(emptyList())
     val clubs: LiveData<List<Club>> get() = _clubs
 
-    private val _events = MutableLiveData<List<Event>>()
+    private val _events = MutableLiveData<List<Event>>(emptyList())
     val events: LiveData<List<Event>> get() = _events
 
-    private val _deanPendingEvents = MutableLiveData<List<Event>>()
+    private val _deanPendingEvents = MutableLiveData<List<Event>>(emptyList())
     val deanPendingEvents: LiveData<List<Event>> get() = _deanPendingEvents
 
-    private val _announcements = MutableLiveData<List<Announcement>>()
+    private val _announcements = MutableLiveData<List<Announcement>>(emptyList())
     val announcements: LiveData<List<Announcement>> get() = _announcements
 
-    private val _currentStudent = MutableLiveData<Student?>()
+    private val _currentStudent = MutableLiveData<Student?>(null)
     val currentStudent: LiveData<Student?> get() = _currentStudent
 
-    private val _currentFaculty = MutableLiveData<Faculty?>()
+    private val _currentFaculty = MutableLiveData<Faculty?>(null)
     val currentFaculty: LiveData<Faculty?> get() = _currentFaculty
 
-    private val _myClub = MutableLiveData<Club?>()
+    private val _myClub = MutableLiveData<Club?>(null)
     val myClub: LiveData<Club?> get() = _myClub
 
-    private val _clubEvents = MutableLiveData<List<Event>>()
+    private val _clubEvents = MutableLiveData<List<Event>>(emptyList())
     val clubEvents: LiveData<List<Event>> get() = _clubEvents
 
-    private val _eventRegistrations = MutableLiveData<List<EventRegistration>>()
+    private val _eventRegistrations = MutableLiveData<List<EventRegistration>>(emptyList())
     val eventRegistrations: LiveData<List<EventRegistration>> get() = _eventRegistrations
 
-    private val _myClubRequests = MutableLiveData<List<ClubRequest>>()
+    private val _myClubRequests = MutableLiveData<List<ClubRequest>>(emptyList())
     val myClubRequests: LiveData<List<ClubRequest>> get() = _myClubRequests
 
-    private val _clubRequests = MutableLiveData<List<ClubRequest>>()
+    private val _clubRequests = MutableLiveData<List<ClubRequest>>(emptyList())
     val clubRequests: LiveData<List<ClubRequest>> get() = _clubRequests
 
-    private val _clubMembers = MutableLiveData<List<ClubMember>>()
+    private val _clubMembers = MutableLiveData<List<ClubMember>>(emptyList())
     val clubMembers: LiveData<List<ClubMember>> get() = _clubMembers
 
-    private val _notifications = MutableLiveData<List<Notification>>()
+    private val _notifications = MutableLiveData<List<Notification>>(emptyList())
     val notifications: LiveData<List<Notification>> get() = _notifications
 
-    private val _studyMaterials = MutableLiveData<List<StudyMaterial>>()
+    private val _studyMaterials = MutableLiveData<List<StudyMaterial>>(emptyList())
     val studyMaterials: LiveData<List<StudyMaterial>> get() = _studyMaterials
 
-    private val _uploadProgress = MutableLiveData<Boolean>()
+    private val _uploadProgress = MutableLiveData<Boolean>(false)
     val uploadProgress: LiveData<Boolean> get() = _uploadProgress
+
+    private val _leaderboard = MutableLiveData<List<Pair<Student, UserPoint>>>(emptyList())
+    val leaderboard: LiveData<List<Pair<Student, UserPoint>>> get() = _leaderboard
 
     fun loadDeans() {
         viewModelScope.launch {
             _deans.value = repository.getAllDeans()
+        }
+    }
+
+    fun loadAllUsers() {
+        viewModelScope.launch {
+            _allUsers.value = repository.getAllUsers()
         }
     }
 
@@ -175,10 +187,9 @@ class AppViewModel : ViewModel() {
                     }
                 }
                 
-                // Pass deanId separately to repository
                 val result = repository.createEvent(eventToSubmit, event.deanId)
                 if (result.isSuccess) {
-                    event.deanId?.let { deanId ->
+                    event.deanId?.let { deanId: String ->
                         repository.sendNotification(deanId, "New Event Approval", "A new event '${event.title}' is waiting for your approval.")
                     }
                     loadMyClub()
@@ -213,7 +224,7 @@ class AppViewModel : ViewModel() {
             val result = repository.deleteEvent(id)
             if (result.isSuccess) {
                 loadAllEvents()
-                loadMyClub() // Refresh club events if any
+                loadMyClub()
             }
             callback(result.isSuccess)
         }
@@ -222,13 +233,18 @@ class AppViewModel : ViewModel() {
     fun registerForEvent(eventId: String, contact: String? = null, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
             val result = repository.registerForEvent(EventRegistration(eventId = eventId, studentId = userId, contact = contact))
+            if (result.isSuccess) {
+                loadApprovedEvents() // Refresh to update registration state
+            }
             callback(result.isSuccess)
         }
     }
 
     fun loadEventEntries(eventId: String) {
         viewModelScope.launch {
+            _isLoading.value = true
             _eventRegistrations.value = repository.getEventRegistrations(eventId)
+            _isLoading.value = false
         }
     }
 
@@ -250,7 +266,9 @@ class AppViewModel : ViewModel() {
         viewModelScope.launch {
             val result = repository.joinClub(clubId, userId)
             if (result.isSuccess) {
-                clubHeadId?.let { repository.sendNotification(it, "New Join Request", "A student wants to join $clubName.") }
+                clubHeadId?.let { headId: String -> 
+                    repository.sendNotification(headId, "New Join Request", "A student wants to join $clubName.") 
+                }
                 loadMyClubRequests()
             }
             callback(result.isSuccess)
@@ -279,6 +297,7 @@ class AppViewModel : ViewModel() {
                 repository.addClubMember(request.clubId, request.studentId)
                 repository.sendNotification(request.studentId, "Club Request Accepted", "You have been accepted into the club.")
                 loadClubRequests(request.clubId)
+                loadMyClub() // Refresh members
             }
             callback(result.isSuccess)
         }
@@ -290,6 +309,17 @@ class AppViewModel : ViewModel() {
             if (result.isSuccess) {
                 repository.sendNotification(request.studentId, "Club Request Rejected", "Your request to join the club has been rejected.")
                 loadClubRequests(request.clubId)
+            }
+            callback(result.isSuccess)
+        }
+    }
+
+    fun kickClubMember(clubId: String, studentId: String, callback: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val result = repository.deleteClubMember(clubId, studentId)
+            if (result.isSuccess) {
+                repository.sendNotification(studentId, "Club Membership", "You have been removed from the club.")
+                loadMyClub()
             }
             callback(result.isSuccess)
         }
@@ -337,6 +367,8 @@ class AppViewModel : ViewModel() {
         loadAllFaculty()
         loadAllClubs()
         loadAllEvents()
+        loadDeans()
+        loadAllUsers()
     }
 
     fun createAnnouncement(ann: Announcement, callback: (Boolean) -> Unit) {
@@ -388,7 +420,13 @@ class AppViewModel : ViewModel() {
     fun loadApprovedEvents() {
         viewModelScope.launch {
             _isLoading.value = true
-            _events.value = repository.getApprovedEvents()
+            val events = repository.getApprovedEvents()
+            val registrations = repository.getStudentEventRegistrations(userId)
+            val regIds = registrations.map { it.eventId }.toSet()
+            
+            events.forEach { it.isRegistered = regIds.contains(it.id) }
+            
+            _events.value = events
             _isLoading.value = false
         }
     }
@@ -432,6 +470,14 @@ class AppViewModel : ViewModel() {
         }
     }
 
+    fun loadLeaderboard() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _leaderboard.value = repository.getLeaderboard()
+            _isLoading.value = false
+        }
+    }
+
     // --- Profile Stats ---
     private val _studentClubsCount = MutableLiveData<Int>(0)
     val studentClubsCount: LiveData<Int> get() = _studentClubsCount
@@ -456,12 +502,31 @@ class AppViewModel : ViewModel() {
             val result = repository.uploadProfileImage(userId, file, userRole)
             _isLoading.value = false
             if (result.isSuccess) {
-                // Refresh profile data
                 if (userRole == "student") loadCurrentStudent() else loadCurrentFaculty()
                 callback(true, result.getOrNull())
             } else {
                 callback(false, null)
             }
+        }
+    }
+
+    fun addDean(user: User, callback: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repository.addDean(user)
+            if (result.isSuccess) loadDeans()
+            _isLoading.value = false
+            callback(result.isSuccess)
+        }
+    }
+
+    fun deleteDean(userId: String, callback: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repository.deleteDean(userId)
+            if (result.isSuccess) loadDeans()
+            _isLoading.value = false
+            callback(result.isSuccess)
         }
     }
 }

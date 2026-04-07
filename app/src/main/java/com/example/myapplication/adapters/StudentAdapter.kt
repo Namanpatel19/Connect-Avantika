@@ -8,7 +8,7 @@ import com.example.myapplication.databinding.ItemStudentBinding
 
 class StudentAdapter(
     private val students: List<Student>,
-    private val onDelete: (Student) -> Unit
+    private val onDelete: (Student) -> Unit = {}
 ) : RecyclerView.Adapter<StudentAdapter.VH>() {
 
     inner class VH(val b: ItemStudentBinding) : RecyclerView.ViewHolder(b.root)
@@ -24,7 +24,7 @@ class StudentAdapter(
         holder.b.tvDept.text       = "${s.department ?: "—"} • ${s.batch ?: "—"}"
         holder.b.tvEnrollment.text = s.enrollment
         holder.b.btnDelete.setOnClickListener { onDelete(s) }
-        // Initials avatar
+
         val initials = s.name.split(" ").mapNotNull { it.firstOrNull()?.toString() }.take(2).joinToString("")
         holder.b.tvInitials.text = initials
     }
