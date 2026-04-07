@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,9 +36,7 @@ class EventsFragment : Fragment() {
                 binding.tvEmpty.visibility = View.GONE
                 binding.rvEvents.visibility = View.VISIBLE
                 binding.rvEvents.adapter = EventAdapter(events) { event ->
-                    // Open registration dialog for confirmation and registration
-                    EventRegistrationDialog.newInstance(event.id ?: "", event.title)
-                        .show(parentFragmentManager, "event_reg")
+                    showRegistrationConfirmation(event.id ?: "", event.title)
                 }
             }
         }
@@ -48,6 +46,18 @@ class EventsFragment : Fragment() {
         }
 
         vm.loadApprovedEvents()
+    }
+
+    private fun showRegistrationConfirmation(eventId: String, title: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Confirm Registration")
+            .setMessage("Do you want to register for '$title'?")
+            .setPositiveButton("Yes") { _, _ ->
+                EventRegistrationDialog.newInstance(eventId, title)
+                    .show(parentFragmentManager, "event_reg")
+            }
+            .setNegativeButton("No", null)
+            .show()
     }
 
     override fun onDestroyView() { super.onDestroyView(); _binding = null }
