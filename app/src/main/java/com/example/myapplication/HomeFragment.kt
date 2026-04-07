@@ -1,5 +1,7 @@
 package com.example.myapplication
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -58,8 +60,8 @@ class HomeFragment : Fragment() {
             (requireActivity() as MainActivity).navigateTo(R.id.navigation_clubs)
         }
         binding.qaAcademics.setOnClickListener {
-            // Can be extended to a real fragment if created
-             Toast.makeText(context, "Academics portal coming in next update", Toast.LENGTH_SHORT).show()
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://moodle.avantika.edu.in/login/index.php"))
+            startActivity(intent)
         }
         binding.qaTransport.setOnClickListener {
              Toast.makeText(context, "GPS Tracking coming in next update", Toast.LENGTH_SHORT).show()

@@ -61,6 +61,9 @@ class AppViewModel : ViewModel() {
     private val _clubRequests = MutableLiveData<List<ClubRequest>>()
     val clubRequests: LiveData<List<ClubRequest>> get() = _clubRequests
 
+    private val _clubMembers = MutableLiveData<List<ClubMember>>()
+    val clubMembers: LiveData<List<ClubMember>> get() = _clubMembers
+
     private val _notifications = MutableLiveData<List<Notification>>()
     val notifications: LiveData<List<Notification>> get() = _notifications
 
@@ -237,6 +240,7 @@ class AppViewModel : ViewModel() {
             club?.id?.let {
                 _clubEvents.value = repository.getEventsByClubId(it)
                 _clubRequests.value = repository.getClubRequests(it)
+                _clubMembers.value = repository.getClubMembers(it)
             }
             _isLoading.value = false
         }
@@ -424,6 +428,39 @@ class AppViewModel : ViewModel() {
                 Log.e("AppViewModel", "Upload study material failed", e)
                 _uploadProgress.value = false
                 callback(false, "An error occurred: ${e.message}")
+            }
+        }
+    }
+
+    // --- Profile Stats ---
+    private val _studentClubsCount = MutableLiveData<Int>(0)
+    val studentClubsCount: LiveData<Int> get() = _studentClubsCount
+
+    private val _studentEventsCount = MutableLiveData<Int>(0)
+    val studentEventsCount: LiveData<Int> get() = _studentEventsCount
+
+    private val _userEmail = MutableLiveData<String?>()
+    val userEmail: LiveData<String?> get() = _userEmail
+
+    fun loadProfileStats() {
+        viewModelScope.launch {
+            _studentClubsCount.value = repository.getStudentClubMemberships(userId).size
+            _studentEventsCount.value = repository.getStudentEventRegistrations(userId).size
+            _userEmail.value = repository.getUserEmail(userId)
+        }
+    }
+
+    fun uploadProfileImage(file: File, callback: (Boolean, String?) -> Unit) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = repository.uploadProfileImage(userId, file, userRole)
+            _isLoading.value = false
+            if (result.isSuccess) {
+                // Refresh profile data
+                if (userRole == "student") loadCurrentStudent() else loadCurrentFaculty()
+                callback(true, result.getOrNull())
+            } else {
+                callback(false, null)
             }
         }
     }

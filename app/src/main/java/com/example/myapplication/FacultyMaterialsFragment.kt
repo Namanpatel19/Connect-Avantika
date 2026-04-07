@@ -99,8 +99,6 @@ class FacultyMaterialsFragment : Fragment() {
         when {
             title.isEmpty() -> { binding.tilTitle.error = "Title is required"; return }
             subject.isEmpty() -> { binding.tilSubject.error = "Subject is required"; return }
-            batch.isEmpty() -> { binding.tilBatch.error = "Select a batch"; return }
-            dept.isEmpty() -> { binding.tilDepartment.error = "Select a department"; return }
             file == null -> { Toast.makeText(context, "Please pick a file first", Toast.LENGTH_SHORT).show(); return }
         }
 
@@ -110,7 +108,7 @@ class FacultyMaterialsFragment : Fragment() {
         binding.tilBatch.error = null
         binding.tilDepartment.error = null
 
-        vm.uploadStudyMaterial(title, subject, batch!!, dept!!, file!!) { success, message ->
+        vm.uploadStudyMaterial(title, subject, batch, dept, file!!) { success, message ->
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
             if (success) {
                 binding.etTitle.text?.clear()

@@ -60,9 +60,9 @@ class ClubHomeFragment : Fragment() {
         vm.clubRequests.observe(viewLifecycleOwner) { requests ->
             val pending = requests.filter { it.status == "pending" || it.status == "interview" }
             binding.tvPendingCount.text = pending.size.toString()
-            
-            // Show real member count if available (assuming accepted requests are members)
-            val members = requests.filter { it.status == "accepted" }
+        }
+
+        vm.clubMembers.observe(viewLifecycleOwner) { members ->
             binding.tvMembersCount.text = members.size.toString()
         }
 

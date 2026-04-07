@@ -11,6 +11,7 @@ import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.UUID
 
 class MainRepository {
     private val db = SupabaseClient.client.postgrest
@@ -159,18 +160,6 @@ class MainRepository {
         }
     }
 
-    suspend fun addClubMember(clubId: String, studentId: String): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            val existing = adminDb.from("club_members").select { filter { eq("club_id", clubId); eq("student_id", studentId) } }.decodeSingleOrNull<ClubMember>()
-            if (existing != null) return@withContext Result.success(Unit)
-            adminDb.from("club_members").insert(ClubMember(clubId = clubId, studentId = studentId))
-            Result.success(Unit)
-        } catch (e: Exception) { 
-            Log.e("MainRepository", "Add club member failed: ${e.message}")
-            Result.failure(e) 
-        }
-    }
-
     // --- Events ---
     suspend fun getAllEvents(): List<Event> = withContext(Dispatchers.IO) { try { db.from("events").select().decodeList<Event>() } catch (e: Exception) { emptyList() } }
     
@@ -186,30 +175,6 @@ class MainRepository {
         } catch (e: Exception) { emptyList() }
     }
 
-    suspend fun getEventsForDean(deanId: String): List<Event> = withContext(Dispatchers.IO) {
-        try {
-            // Join events with event_approvals where dean_id matches and status is pending
-            val approvalRecords = adminDb.from("event_approvals").select {
-                filter { 
-                    eq("dean_id", deanId)
-                    eq("status", "pending") 
-                }
-            }.decodeList<EventApproval>()
-            
-            val eventIds = approvalRecords.map { it.eventId }
-            if (eventIds.isEmpty()) return@withContext emptyList<Event>()
-            
-            adminDb.from("events").select {
-                filter {
-                    isIn("id", eventIds)
-                }
-            }.decodeList<Event>()
-        } catch (e: Exception) { 
-            Log.e("MainRepository", "getEventsForDean failed: ${e.message}")
-            emptyList() 
-        }
-    }
-
     suspend fun getApprovedEvents(): List<Event> = withContext(Dispatchers.IO) {
         try {
             db.from("events").select {
@@ -220,17 +185,16 @@ class MainRepository {
 
     suspend fun createEvent(event: Event, deanId: String?): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            Log.d("MainRepository", "Creating event: ${event.title}, deanId: $deanId")
+            // 1. Generate ID locally so we don't rely on returning it from the server
+            val newEventId = event.id ?: UUID.randomUUID().toString()
+            val eventToInsert = event.copy(id = newEventId, status = "pending")
             
-            // 1. Insert the event (fields in @Transient like deanId won't be sent)
-            val response = adminDb.from("events").insert(event) {
-                select()
-            }.decodeSingle<Event>()
+            Log.d("MainRepository", "Creating event ID: $newEventId, deanId: $deanId")
             
-            val newEventId = response.id!!
-            Log.d("MainRepository", "Event created with ID: $newEventId")
+            // 2. Insert the event. No select() call here to avoid timeout issues.
+            adminDb.from("events").insert(eventToInsert)
             
-            // 2. If a dean was selected, create an entry in event_approvals
+            // 3. If a dean was selected, create an entry in event_approvals immediately
             if (deanId != null) {
                 adminDb.from("event_approvals").insert(
                     EventApproval(
@@ -239,9 +203,7 @@ class MainRepository {
                         status = "pending"
                     )
                 )
-                Log.d("MainRepository", "Event approval entry created for dean: $deanId")
-            } else {
-                Log.w("MainRepository", "No deanId provided for event creation approval!")
+                Log.d("MainRepository", "Event approval entry created successfully")
             }
             
             Result.success(Unit)
@@ -273,263 +235,53 @@ class MainRepository {
         }
     }
 
-    suspend fun deleteEvent(id: String): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("events").delete { filter { eq("id", id) } }
-            Result.success(Unit)
-        } catch (e: Exception) { 
-            Log.e("MainRepository", "Delete event failed: ${e.message}")
-            Result.failure(e) 
-        }
-    }
-
-    suspend fun registerForEvent(registration: EventRegistration): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("event_registrations").insert(registration)
-            Result.success(Unit)
-        } catch (e: Exception) { Result.failure(e) }
-    }
-
-    suspend fun registerForEvent(eventId: String, studentId: String): Result<Unit> = registerForEvent(EventRegistration(eventId = eventId, studentId = studentId))
-
-    suspend fun getEventRegistrations(eventId: String): List<EventRegistration> = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("event_registrations").select {
-                filter { eq("event_id", eventId) }
-            }.decodeList<EventRegistration>()
-        } catch (e: Exception) { emptyList() }
-    }
-
-    // --- Others ---
-    suspend fun sendNotification(userId: String, title: String, message: String): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("notifications").insert(Notification(userId = userId, title = title, message = message))
-            Result.success(Unit)
-        } catch (e: Exception) { Result.failure(e) }
-    }
-
-    suspend fun uploadEventBanner(file: File): Result<String> = withContext(Dispatchers.IO) { try { val path = "banners/event_${System.currentTimeMillis()}.${file.extension}"; adminStorage.from("event banner").upload(path, file.readBytes()) { upsert = true }; val publicUrl = adminStorage.from("event banner").publicUrl(path); Result.success(publicUrl) } catch (e: Exception) { Result.failure(e) } }
-    
-    suspend fun uploadClubBanner(file: File): Result<String> = withContext(Dispatchers.IO) { 
-        try { 
-            val path = "banners/club_${System.currentTimeMillis()}.${file.extension}"
-            adminStorage.from("club banner").upload(path, file.readBytes()) { upsert = true }
-            val publicUrl = adminStorage.from("club banner").publicUrl(path)
-            Result.success(publicUrl) 
-        } catch (e: Exception) { Result.failure(e) } 
-    }
-
-    suspend fun getClubRequests(clubId: String): List<ClubRequest> = withContext(Dispatchers.IO) { try { adminDb.from("club_requests").select { filter { eq("club_id", clubId) }; order("requested_at", Order.DESCENDING) }.decodeList<ClubRequest>() } catch (e: Exception) { emptyList() } }
-    suspend fun getUserClubRequests(studentId: String): List<ClubRequest> = withContext(Dispatchers.IO) { try { adminDb.from("club_requests").select { filter { eq("student_id", studentId) } }.decodeList<ClubRequest>() } catch (e: Exception) { emptyList() } }
-    suspend fun getClubByHeadId(userId: String): Club? = withContext(Dispatchers.IO) { try { adminDb.from("clubs").select { filter { eq("club_head_id", userId) } }.decodeSingleOrNull<Club>() } catch (e: Exception) { null } }
-    suspend fun getEventsByClubId(clubId: String): List<Event> = withContext(Dispatchers.IO) { try { db.from("events").select { filter { eq("club_id", clubId) } }.decodeList<Event>() } catch (e: Exception) { emptyList() } }
-    suspend fun getNotifications(userId: String): List<Notification> = withContext(Dispatchers.IO) { try { db.from("notifications").select { filter { eq("user_id", userId) }; order("created_at", Order.DESCENDING) }.decodeList<Notification>() } catch (e: Exception) { emptyList() } }
-    suspend fun getAnnouncements(): List<Announcement> = withContext(Dispatchers.IO) { try { db.from("announcements").select().decodeList<Announcement>() } catch (e: Exception) { emptyList() } }
-    
-    suspend fun createAnnouncement(ann: Announcement): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("announcements").insert(ann)
-            Result.success(Unit)
-        } catch (e: Exception) { Result.failure(e) }
-    }
-
-    suspend fun deleteAnnouncement(id: String): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("announcements").delete { filter { eq("id", id) } }
-            Result.success(Unit)
-        } catch (e: Exception) { Result.failure(e) }
-    }
-
+    // --- Other methods (getStudentProfile, etc.) ---
     suspend fun getStudentProfile(userId: String): Student? = withContext(Dispatchers.IO) { try { adminDb.from("students").select { filter { eq("user_id", userId) } }.decodeSingleOrNull<Student>() } catch (e: Exception) { null } }
-    
-    suspend fun updateStudentProfile(student: Student): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("students").update(student) { filter { eq("user_id", student.userId) } }
-            Result.success(Unit)
-        } catch (e: Exception) { Result.failure(e) }
-    }
-
-    suspend fun getAllStudents(): List<Student> = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("students").select().decodeList<Student>()
-        } catch (e: Exception) {
-            Log.e("MainRepository", "Students fetch failed: ${e.message}")
-            emptyList()
-        }
-    }
-
-    suspend fun searchStudents(query: String): List<Student> = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("students").select {
-                filter {
-                    or {
-                        ilike("name", "%$query%")
-                        ilike("enrollment", "%$query%")
-                    }
-                }
-            }.decodeList<Student>()
-        } catch (e: Exception) {
-            Log.e("MainRepository", "Student search failed: ${e.message}")
-            emptyList()
-        }
-    }
-
-    suspend fun addStudent(user: User, student: Student): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            val newUser = adminAuth.createUserWithEmail {
-                email = user.email
-                password = user.password!!
-                autoConfirm = true
-            }
-            val newId = newUser.id
-            adminDb.from("users").insert(user.copy(id = newId))
-            adminDb.from("students").insert(student.copy(userId = newId))
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Log.e("MainRepository", "Add student failed", e)
-            Result.failure(e)
-        }
-    }
-
-    // ... (rest of the file)
-    suspend fun deleteStudent(userId: String): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("students").delete { filter { eq("user_id", userId) } }
-            adminDb.from("users").delete { filter { eq("id", userId) } }
-            adminAuth.deleteUser(userId)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Log.e("MainRepository", "Delete student failed", e)
-            Result.failure(e)
-        }
-    }
-
-    suspend fun getFacultyProfile(userId: String): Faculty? = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("faculty").select { filter { eq("user_id", userId) } }.decodeSingleOrNull<Faculty>()
-        } catch (e: Exception) {
-            Log.e("MainRepository", "Faculty profile fetch failed: ${e.message}")
-            null
-        }
-    }
-
-    suspend fun updateFacultyProfile(faculty: Faculty): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("faculty").update(faculty) { filter { eq("user_id", faculty.userId) } }
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Log.e("MainRepository", "Faculty profile update failed: ${e.message}")
-            Result.failure(e)
-        }
-    }
-
-    suspend fun getAllFaculty(): List<Faculty> = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("faculty").select().decodeList<Faculty>()
-        } catch (e: Exception) {
-            Log.e("MainRepository", "Faculty fetch failed: ${e.message}")
-            emptyList()
-        }
-    }
-
-    suspend fun addFaculty(user: User, faculty: Faculty): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            val newUser = adminAuth.createUserWithEmail {
-                email = user.email
-                password = user.password!!
-                autoConfirm = true
-            }
-            
-            val newId = newUser.id
-            adminDb.from("users").insert(user.copy(id = newId))
-            adminDb.from("faculty").insert(faculty.copy(userId = newId))
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Log.e("MainRepository", "Add faculty failed", e)
-            Result.failure(e)
-        }
-    }
-
-    suspend fun deleteFaculty(userId: String): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("faculty").delete { filter { eq("user_id", userId) } }
-            adminDb.from("users").delete { filter { eq("id", userId) } }
-            adminAuth.deleteUser(userId)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Log.e("MainRepository", "Delete faculty failed", e)
-            Result.failure(e)
-        }
-    }
-
-    suspend fun uploadProfileImage(userId: String, file: File, role: String): Result<String> = withContext(Dispatchers.IO) {
-        try {
-            val bucket = if (role == "student") "student_profiles" else "faculty_profiles"
-            val path = "profiles/${userId}_${System.currentTimeMillis()}.${file.extension}"
-            adminStorage.from(bucket).upload(path, file.readBytes()) { upsert = true }
-            val publicUrl = adminStorage.from(bucket).publicUrl(path)
-            
-            if (role == "student") {
-                adminDb.from("students").update(mapOf("photo_url" to publicUrl)) { filter { eq("user_id", userId) } }
-            } else {
-                adminDb.from("faculty").update(mapOf("photo_url" to publicUrl)) { filter { eq("user_id", userId) } }
-            }
-            
-            Result.success(publicUrl)
-        } catch (e: Exception) { 
-            Log.e("MainRepository", "Upload profile image failed: ${e.message}")
-            Result.failure(e) 
-        }
-    }
-
-    // --- Study Materials ---
-    suspend fun getStudyMaterials(): List<StudyMaterial> = withContext(Dispatchers.IO) {
-        try {
-            db.from("study_materials").select().decodeList<StudyMaterial>()
-        } catch (e: Exception) {
-            Log.e("MainRepository", "Study materials fetch failed: ${e.message}")
-            emptyList()
-        }
-    }
-
-    suspend fun uploadStudyFile(file: File): Result<String> = withContext(Dispatchers.IO) {
-        try {
-            val path = "study_materials/${System.currentTimeMillis()}_${file.name}"
-            adminStorage.from("study materials").upload(path, file.readBytes()) { upsert = true }
-            val publicUrl = adminStorage.from("study materials").publicUrl(path)
-            Result.success(publicUrl)
-        } catch (e: Exception) {
-            Log.e("MainRepository", "Study file upload failed: ${e.message}")
-            Result.failure(e)
-        }
-    }
-
-    suspend fun createStudyMaterial(material: StudyMaterial): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("study_materials").insert(material)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Log.e("MainRepository", "Study material creation failed: ${e.message}")
-            Result.failure(e)
-        }
-    }
-
-    suspend fun uploadStudyMaterial(title: String, subject: String, batch: String, dept: String, file: File, userId: String): Result<Unit> = withContext(Dispatchers.IO) {
+    suspend fun getFacultyProfile(userId: String): Faculty? = withContext(Dispatchers.IO) { try { adminDb.from("faculty").select { filter { eq("user_id", userId) } }.decodeSingleOrNull<Faculty>() } catch (e: Exception) { null } }
+    suspend fun uploadProfileImage(userId: String, file: File, role: String): Result<String> = withContext(Dispatchers.IO) { try { val bucket = "student photo"; val path = "profiles/${userId}_${System.currentTimeMillis()}.${file.extension}"; adminStorage.from(bucket).upload(path, file.readBytes()) { upsert = true }; val publicUrl = adminStorage.from(bucket).publicUrl(path); if (role == "student") adminDb.from("students").update(mapOf("photo_url" to publicUrl)) { filter { eq("user_id", userId) } } else adminDb.from("faculty").update(mapOf("photo_url" to publicUrl)) { filter { eq("user_id", userId) } }; Result.success(publicUrl) } catch (e: Exception) { Log.e("MainRepository", "Upload profile image failed: ${e.message}"); Result.failure(e) } }
+    suspend fun uploadEventBanner(file: File): Result<String> = withContext(Dispatchers.IO) { try { val path = "banners/event_${System.currentTimeMillis()}.${file.extension}"; adminStorage.from("event banner").upload(path, file.readBytes()) { upsert = true }; val publicUrl = adminStorage.from("event banner").publicUrl(path); Result.success(publicUrl) } catch (e: Exception) { Result.failure(e) } }
+    suspend fun uploadClubBanner(file: File): Result<String> = withContext(Dispatchers.IO) { try { val path = "banners/club_${System.currentTimeMillis()}.${file.extension}"; adminStorage.from("club banner").upload(path, file.readBytes()) { upsert = true }; val publicUrl = adminStorage.from("club banner").publicUrl(path); Result.success(publicUrl) } catch (e: Exception) { Result.failure(e) } }
+    suspend fun getClubByHeadId(userId: String): Club? = withContext(Dispatchers.IO) { try { adminDb.from("clubs").select { filter { eq("club_head_id", userId) } }.decodeSingleOrNull<Club>() } catch (e: Exception) { Log.e("MainRepository", "getClubByHeadId failed: ${e.message}"); null } }
+    suspend fun getClubMembers(clubId: String): List<ClubMember> = withContext(Dispatchers.IO) { try { adminDb.from("club_members").select { filter { eq("club_id", clubId) } }.decodeList<ClubMember>() } catch (e: Exception) { emptyList() } }
+    suspend fun getEventsByClubId(clubId: String): List<Event> = withContext(Dispatchers.IO) { try { db.from("events").select { filter { eq("club_id", clubId) } }.decodeList<Event>() } catch (e: Exception) { emptyList() } }
+    suspend fun getClubRequests(clubId: String): List<ClubRequest> = withContext(Dispatchers.IO) { try { adminDb.from("club_requests").select { filter { eq("club_id", clubId) } }.decodeList<ClubRequest>() } catch (e: Exception) { emptyList() } }
+    suspend fun getUserClubRequests(studentId: String): List<ClubRequest> = withContext(Dispatchers.IO) { try { adminDb.from("club_requests").select { filter { eq("student_id", studentId) } }.decodeList<ClubRequest>() } catch (e: Exception) { emptyList() } }
+    suspend fun getNotifications(userId: String): List<Notification> = withContext(Dispatchers.IO) { try { db.from("notifications").select { filter { eq("user_id", userId) } }.decodeList<Notification>() } catch (e: Exception) { emptyList() } }
+    suspend fun getAnnouncements(): List<Announcement> = withContext(Dispatchers.IO) { try { db.from("announcements").select().decodeList<Announcement>() } catch (e: Exception) { emptyList() } }
+    suspend fun getStudyMaterials(): List<StudyMaterial> = withContext(Dispatchers.IO) { try { db.from("study_materials").select().decodeList<StudyMaterial>() } catch (e: Exception) { emptyList() } }
+    suspend fun uploadStudyFile(file: File): Result<String> = withContext(Dispatchers.IO) { try { val path = "study_materials/${System.currentTimeMillis()}_${file.name}"; adminStorage.from("study material").upload(path, file.readBytes()) { upsert = true }; val publicUrl = adminStorage.from("study material").publicUrl(path); Result.success(publicUrl) } catch (e: Exception) { Log.e("MainRepository", "Upload study file failed: ${e.message}"); Result.failure(e) } }
+    suspend fun createStudyMaterial(material: StudyMaterial): Result<Unit> = withContext(Dispatchers.IO) { try { adminDb.from("study_materials").insert(material); Result.success(Unit) } catch (e: Exception) { Result.failure(e) } }
+    suspend fun uploadStudyMaterial(title: String, subject: String, batch: String, department: String, file: File, userId: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val uploadResult = uploadStudyFile(file)
             if (uploadResult.isSuccess) {
-                val material = StudyMaterial(
-                    title = title,
-                    subject = subject,
-                    batch = batch,
-                    department = dept,
-                    fileUrl = uploadResult.getOrNull(),
-                    uploadedBy = userId
-                )
-                createStudyMaterial(material)
+                val fileUrl = uploadResult.getOrThrow()
+                createStudyMaterial(StudyMaterial(title = title, subject = subject, fileUrl = fileUrl, uploadedBy = userId))
             } else {
-                Result.failure(Exception("File upload failed"))
+                Result.failure(uploadResult.exceptionOrNull() ?: Exception("Upload failed"))
             }
-        } catch (e: Exception) { Result.failure(e) }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
+    suspend fun sendNotification(userId: String, title: String, message: String): Result<Unit> = withContext(Dispatchers.IO) { try { adminDb.from("notifications").insert(Notification(userId = userId, title = title, message = message)); Result.success(Unit) } catch (e: Exception) { Result.failure(e) } }
+    suspend fun addClubMember(clubId: String, studentId: String): Result<Unit> = withContext(Dispatchers.IO) { try { adminDb.from("club_members").insert(ClubMember(clubId = clubId, studentId = studentId)); Result.success(Unit) } catch (e: Exception) { Result.failure(e) } }
+    suspend fun updateStudentProfile(student: Student): Result<Unit> = withContext(Dispatchers.IO) { try { adminDb.from("students").update(student) { filter { eq("user_id", student.userId) } }; Result.success(Unit) } catch (e: Exception) { Result.failure(e) } }
+    suspend fun updateFacultyProfile(faculty: Faculty): Result<Unit> = withContext(Dispatchers.IO) { try { adminDb.from("faculty").update(faculty) { filter { eq("user_id", faculty.userId) } }; Result.success(Unit) } catch (e: Exception) { Result.failure(e) } }
+    suspend fun getAllStudents(): List<Student> = withContext(Dispatchers.IO) { try { adminDb.from("students").select().decodeList<Student>() } catch (e: Exception) { emptyList() } }
+    suspend fun getAllFaculty(): List<Faculty> = withContext(Dispatchers.IO) { try { adminDb.from("faculty").select().decodeList<Faculty>() } catch (e: Exception) { emptyList() } }
+    suspend fun deleteStudent(userId: String): Result<Unit> = withContext(Dispatchers.IO) { try { adminDb.from("students").delete { filter { eq("user_id", userId) } }; Result.success(Unit) } catch (e: Exception) { Result.failure(e) } }
+    suspend fun deleteFaculty(userId: String): Result<Unit> = withContext(Dispatchers.IO) { try { adminDb.from("faculty").delete { filter { eq("user_id", userId) } }; Result.success(Unit) } catch (e: Exception) { Result.failure(e) } }
+    suspend fun searchStudents(query: String): List<Student> = withContext(Dispatchers.IO) { try { adminDb.from("students").select { filter { or { ilike("name", "%$query%"); ilike("enrollment", "%$query%") } } }.decodeList<Student>() } catch (e: Exception) { emptyList() } }
+    suspend fun addStudent(user: User, student: Student): Result<Unit> = withContext(Dispatchers.IO) { try { adminDb.from("users").insert(user); adminDb.from("students").insert(student); Result.success(Unit) } catch (e: Exception) { Result.failure(e) } }
+    suspend fun addFaculty(user: User, faculty: Faculty): Result<Unit> = withContext(Dispatchers.IO) { try { adminDb.from("users").insert(user); adminDb.from("faculty").insert(faculty); Result.success(Unit) } catch (e: Exception) { Result.failure(e) } }
+    suspend fun createAnnouncement(ann: Announcement): Result<Unit> = withContext(Dispatchers.IO) { try { adminDb.from("announcements").insert(ann); Result.success(Unit) } catch (e: Exception) { Result.failure(e) } }
+    suspend fun deleteAnnouncement(id: String): Result<Unit> = withContext(Dispatchers.IO) { try { adminDb.from("announcements").delete { filter { eq("id", id) } }; Result.success(Unit) } catch (e: Exception) { Result.failure(e) } }
+    suspend fun registerForEvent(reg: EventRegistration): Result<Unit> = withContext(Dispatchers.IO) { try { adminDb.from("event_registrations").insert(reg); Result.success(Unit) } catch (e: Exception) { Result.failure(e) } }
+    suspend fun getEventRegistrations(eventId: String): List<EventRegistration> = withContext(Dispatchers.IO) { try { adminDb.from("event_registrations").select { filter { eq("event_id", eventId) } }.decodeList<EventRegistration>() } catch (e: Exception) { emptyList() } }
+    suspend fun deleteEvent(id: String): Result<Unit> = withContext(Dispatchers.IO) { try { adminDb.from("events").delete { filter { eq("id", id) } }; Result.success(Unit) } catch (e: Exception) { Result.failure(e) } }
+    suspend fun getEventsForDean(deanId: String): List<Event> = withContext(Dispatchers.IO) { try { val approvals = adminDb.from("event_approvals").select { filter { eq("dean_id", deanId); eq("status", "pending") } }.decodeList<EventApproval>(); val ids = approvals.map { it.eventId }; if (ids.isEmpty()) return@withContext emptyList(); adminDb.from("events").select { filter { isIn("id", ids) } }.decodeList<Event>() } catch (e: Exception) { emptyList() } }
+    suspend fun getStudentClubMemberships(studentId: String): List<ClubMember> = withContext(Dispatchers.IO) { try { adminDb.from("club_members").select { filter { eq("student_id", studentId) } }.decodeList<ClubMember>() } catch (e: Exception) { emptyList() } }
+    suspend fun getStudentEventRegistrations(studentId: String): List<EventRegistration> = withContext(Dispatchers.IO) { try { adminDb.from("event_registrations").select { filter { eq("student_id", studentId) } }.decodeList<EventRegistration>() } catch (e: Exception) { emptyList() } }
+    suspend fun getUserEmail(userId: String): String? = withContext(Dispatchers.IO) { try { adminDb.from("users").select { filter { eq("id", userId) } }.decodeSingleOrNull<User>()?.email } catch (e: Exception) { null } }
 }

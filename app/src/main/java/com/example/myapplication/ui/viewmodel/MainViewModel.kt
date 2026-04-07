@@ -116,7 +116,7 @@ class MainViewModel(private val repository: MainRepository = MainRepository()) :
 
     fun registerEvent(eventId: String, studentId: String) {
         viewModelScope.launch {
-            repository.registerForEvent(eventId, studentId)
+            repository.registerForEvent(EventRegistration(eventId = eventId, studentId = studentId))
         }
     }
 

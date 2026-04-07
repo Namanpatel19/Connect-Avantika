@@ -1,5 +1,7 @@
 package com.example.myapplication.adapters
 
+import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +26,16 @@ class StudyMaterialAdapter(
             tvMaterialSubject.text = m.subject ?: "No subject"
             chipBatch.text = m.batch ?: "All Batches"
             chipDept.text = m.department ?: "All Depts"
+            
+            // Click to open/download the file
+            root.setOnClickListener {
+                m.fileUrl?.let { url ->
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        root.context.startActivity(intent)
+                    } catch (_: Exception) { }
+                }
+            }
         }
     }
 
