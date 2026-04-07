@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.myapplication.databinding.FragmentSuperAdminHomeBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
+import com.onesignal.OneSignal
 
 class SuperAdminHomeFragment : Fragment() {
     private var _binding: FragmentSuperAdminHomeBinding? = null
@@ -25,19 +26,22 @@ class SuperAdminHomeFragment : Fragment() {
         vm.faculty.observe(viewLifecycleOwner) { binding.tvFacultyCount.text = it.size.toString() }
         vm.clubs.observe(viewLifecycleOwner) { binding.tvClubCount.text = it.size.toString() }
         vm.events.observe(viewLifecycleOwner) { binding.tvEventCount.text = it.size.toString() }
+        vm.deans.observe(viewLifecycleOwner) { binding.tvDeanCount.text = it.size.toString() }
 
         binding.btnManageAll.setOnClickListener {
             (activity as? MainActivity)?.navigateTo(R.id.navigation_manage_all)
         }
-        
-        binding.btnDeanView.setOnClickListener {
-            (activity as? MainActivity)?.navigateToDeanView()
+
+        binding.btnLogout.setOnClickListener {
+            OneSignal.logout()
+            (activity as? MainActivity)?.logout()
         }
 
         vm.loadAllStudents()
         vm.loadAllFaculty()
         vm.loadAllClubs()
         vm.loadAllEvents()
+        vm.loadDeans()
     }
 
     override fun onDestroyView() {

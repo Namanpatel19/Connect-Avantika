@@ -10,7 +10,8 @@ data class User(
     val email: String,
     @Transient val password: String? = null,
     val role: String,
-    @SerialName("created_at") val createdAt: String? = null
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("last_sign_in_at") val lastSignInAt: String? = null
 )
 
 @Serializable
@@ -45,10 +46,11 @@ data class Event(
     @SerialName("banner_url") val bannerUrl: String? = null,
     @SerialName("created_at") val createdAt: String? = null,
     
-    // These are NOT in the events table, so we mark them @Transient for the base insert
+    // These are NOT in the events table
     @Transient val deanId: String? = null,
     @Transient val entryFee: Double? = 0.0,
-    @Transient val isPaid: Boolean = false
+    @Transient val isPaid: Boolean = false,
+    @Transient var isRegistered: Boolean = false
 )
 
 @Serializable
@@ -131,5 +133,22 @@ data class StudyMaterial(
     @Transient val department: String? = null, // NOT in SQL schema
     @SerialName("file_url") val fileUrl: String? = null,
     @SerialName("faculty_id") val uploadedBy: String? = null, // Renamed to match SQL faculty_id
+    @SerialName("created_at") val createdAt: String? = null
+)
+
+@Serializable
+data class UserPoint(
+    @SerialName("user_id") val userId: String,
+    @SerialName("total_points") val totalPoints: Int = 0,
+    @SerialName("updated_at") val updatedAt: String? = null
+)
+
+@Serializable
+data class PointTransaction(
+    val id: String? = null,
+    @SerialName("user_id") val userId: String,
+    val points: Int,
+    @SerialName("action_type") val actionType: String,
+    @SerialName("reference_id") val referenceId: String? = null,
     @SerialName("created_at") val createdAt: String? = null
 )

@@ -36,9 +36,9 @@ class EventsFragment : Fragment() {
                 binding.tvEmpty.visibility = View.GONE
                 binding.rvEvents.visibility = View.VISIBLE
                 binding.rvEvents.adapter = EventAdapter(events) { event ->
-                    vm.registerForEvent(event.id ?: "") { success ->
-                        Toast.makeText(context, if (success) "Registered successfully!" else "Could not register", Toast.LENGTH_SHORT).show()
-                    }
+                    // Open registration dialog for confirmation and registration
+                    EventRegistrationDialog.newInstance(event.id ?: "", event.title)
+                        .show(parentFragmentManager, "event_reg")
                 }
             }
         }

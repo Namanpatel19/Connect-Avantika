@@ -6,20 +6,37 @@
     android:padding="16dp"
     android:background="#F5F7FA">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Super Admin Dashboard"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:layout_marginBottom="24dp"/>
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="24dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Super Admin Dashboard"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
+
+        <ImageButton
+            android:id="@+id/btnLogout"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_lock_power_off"
+            android:contentDescription="Logout"
+            android:tint="@color/red" />
+    </LinearLayout>
 
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:columnCount="2"
-        android:rowCount="2">
+        android:rowCount="3">
 
         <androidx.cardview.widget.CardView
             android:layout_width="0dp"
@@ -81,6 +98,21 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <androidx.cardview.widget.CardView
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="8dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
+                <TextView android:id="@+id/tvDeanCount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textSize="20sp" android:textStyle="bold"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Deans"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
     </GridLayout>
 
     <LinearLayout
@@ -89,22 +121,13 @@
         android:layout_marginTop="24dp"
         android:orientation="horizontal">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnManageAll"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="4dp"
-            android:text="Manage All" />
-
-        <Button
-            android:id="@+id/btnDeanView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:text="Dean View"
-            android:backgroundTint="@color/secondary"/>
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Manage All"
+            app:cornerRadius="12dp"
+            android:backgroundTint="@color/primary"/>
 
     </LinearLayout>
 

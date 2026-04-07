@@ -26,10 +26,4 @@
             android:name="club_id"
             app:argType="string" />
     </fragment>
-
-    <fragment
-        android:id="@+id/navigation_super_admin_profile"
-        android:name="com.example.myapplication.ProfileFragment"
-        android:label="Profile"
-        tools:layout="@layout/fragment_profile" />
 </navigation>

@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -35,8 +36,6 @@ class MainActivity : AppCompatActivity() {
         OneSignal.initWithContext(this, ONESIGNAL_APP_ID)
 
         // requestPermission will show the native Android notification permission prompt.
-        // NOTE: It's recommended to use a Custom Message Prompt before calling this method
-        // to increase your conversion rates: https://documentation.onesignal.com/docs/permission-requests
         CoroutineScope(Dispatchers.IO).launch {
             OneSignal.Notifications.requestPermission(true)
         }
@@ -45,7 +44,6 @@ class MainActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.updatePadding(top = systemBars.top)
-            // We don't update bottom padding here because BottomNavigationView handles it or we want it at the very bottom
             insets
         }
 
@@ -87,5 +85,13 @@ class MainActivity : AppCompatActivity() {
 
     fun navigateToDeanView() {
         setupNavigation("dean")
+    }
+
+    fun logout() {
+        OneSignal.logout()
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 }

@@ -15,7 +15,6 @@ import com.bumptech.glide.Glide
 import com.example.myapplication.databinding.FragmentProfileBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.textfield.TextInputEditText
 import com.onesignal.OneSignal
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.launch
@@ -91,29 +90,19 @@ class ProfileFragment : Fragment() {
             pickImage.launch("image/*")
         }
 
-        // Change password
+        // Change password - send reset link
         binding.btnChangePassword.setOnClickListener {
-            showChangePasswordDialog()
+            val email = viewModel.userEmail.value
+            if (email != null) {
+                sendPasswordResetLink(email)
+            } else {
+                Toast.makeText(context, "Email not found", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Logout
         binding.btnLogout.setOnClickListener {
-            viewLifecycleOwner.lifecycleScope.launch {
-                try {
-                    SupabaseClient.client.auth.signOut()
-                    OneSignal.logout()
-                    val intent = Intent(requireContext(), LoginActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    requireActivity().finish()
-                } catch (e: Exception) {
-                    OneSignal.logout()
-                    val intent = Intent(requireContext(), LoginActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    requireActivity().finish()
-                }
-            }
+            (activity as? MainActivity)?.logout()
         }
 
         // Load all data
@@ -123,6 +112,17 @@ class ProfileFragment : Fragment() {
         viewModel.loadProfileStats()
         viewModel.loadMyClubRequests()
         viewModel.loadStudyMaterials()
+    }
+
+    private fun sendPasswordResetLink(emailStr: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                SupabaseClient.client.auth.resetPasswordForEmail(emailStr)
+                Toast.makeText(requireContext(), "Password reset link sent to $emailStr", Toast.LENGTH_LONG).show()
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     private fun uploadProfilePhoto(uri: Uri) {
@@ -150,47 +150,6 @@ class ProfileFragment : Fragment() {
             }
         } catch (e: Exception) {
             Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun showChangePasswordDialog() {
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_change_password, null)
-        val etNewPassword = dialogView.findViewById<TextInputEditText>(R.id.etNewPassword)
-        val etConfirmPassword = dialogView.findViewById<TextInputEditText>(R.id.etConfirmPassword)
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Change Password")
-            .setView(dialogView)
-            .setPositiveButton("Update") { _, _ ->
-                val newPass = etNewPassword.text.toString()
-                val confirmPass = etConfirmPassword.text.toString()
-
-                if (newPass.length < 6) {
-                    Toast.makeText(context, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-
-                if (newPass != confirmPass) {
-                    Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-
-                updatePassword(newPass)
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    private fun updatePassword(newPass: String) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                SupabaseClient.client.auth.updateUser {
-                    password = newPass
-                }
-                Toast.makeText(requireContext(), "Password updated successfully", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
-            }
         }
     }
 

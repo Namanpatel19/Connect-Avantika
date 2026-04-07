@@ -42,6 +42,12 @@
     </fragment>
 
     <fragment
+        android:id="@+id/navigation_rank"
+        android:name="com.example.myapplication.RankFragment"
+        android:label="Rank"
+        tools:layout="@layout/fragment_rank" />
+
+    <fragment
         android:id="@+id/navigation_notices"
         android:name="com.example.myapplication.NoticesFragment"
         android:label="Notices"
