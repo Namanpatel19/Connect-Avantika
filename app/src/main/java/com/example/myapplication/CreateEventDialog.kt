@@ -3,6 +3,8 @@ package com.example.myapplication
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -14,6 +16,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.example.myapplication.data.Event
 import com.example.myapplication.data.User
 import com.example.myapplication.databinding.DialogCreateEventBinding
@@ -21,7 +24,6 @@ import com.example.myapplication.ui.viewmodel.AppViewModel
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Calendar
-import java.util.Locale
 
 class CreateEventDialog : DialogFragment() {
     private var _binding: DialogCreateEventBinding? = null
@@ -35,9 +37,15 @@ class CreateEventDialog : DialogFragment() {
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             selectedBannerUri = result.data?.data
-            binding.ivBannerPreview.setImageURI(selectedBannerUri)
-            binding.ivBannerPreview.visibility = View.VISIBLE
-            binding.llUploadPlaceholder.visibility = View.GONE
+            selectedBannerUri?.let { uri ->
+                Glide.with(this)
+                    .load(uri)
+                    .override(800, 450) // Resize for preview to avoid memory issues
+                    .centerCrop()
+                    .into(binding.ivBannerPreview)
+                binding.ivBannerPreview.visibility = View.VISIBLE
+                binding.llUploadPlaceholder.visibility = View.GONE
+            }
         }
     }
 
@@ -131,7 +139,7 @@ class CreateEventDialog : DialogFragment() {
                 isPaid      = fee > 0
             )
             
-            val bannerFile = selectedBannerUri?.let { uriToTempFile(it) }
+            val bannerFile = selectedBannerUri?.let { uriToCompressedFile(it) }
 
             binding.btnSubmit.isEnabled = false
             vm.submitEvent(event, bannerFile) { success ->
@@ -148,16 +156,35 @@ class CreateEventDialog : DialogFragment() {
         binding.btnCancel.setOnClickListener { dismiss() }
     }
 
-    private fun uriToTempFile(uri: Uri): File? {
+    private fun uriToCompressedFile(uri: Uri): File? {
         return try {
             val inputStream = requireContext().contentResolver.openInputStream(uri)
+            val originalBitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+
+            // Resize if too large (e.g., max width 1200)
+            val width = originalBitmap.width
+            val height = originalBitmap.height
+            val maxWidth = 1200
+            val scale = if (width > maxWidth) maxWidth.toFloat() / width else 1f
+            
+            val finalBitmap = if (scale < 1f) {
+                Bitmap.createScaledBitmap(originalBitmap, (width * scale).toInt(), (height * scale).toInt(), true)
+            } else {
+                originalBitmap
+            }
+
             val tempFile = File.createTempFile("upload_banner", ".jpg", requireContext().cacheDir)
             val outputStream = FileOutputStream(tempFile)
-            inputStream?.copyTo(outputStream)
-            inputStream?.close()
+            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
             outputStream.close()
+            
+            if (scale < 1f) originalBitmap.recycle()
+            // finalBitmap.recycle() // Be careful with recycling if using elsewhere
+
             tempFile
         } catch (e: Exception) {
+            e.printStackTrace()
             null
         }
     }

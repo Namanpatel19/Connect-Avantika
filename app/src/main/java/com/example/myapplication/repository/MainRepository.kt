@@ -185,25 +185,37 @@ class MainRepository {
 
     suspend fun createEvent(event: Event, deanId: String?): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            // 1. Generate ID locally so we don't rely on returning it from the server
-            val newEventId = event.id ?: UUID.randomUUID().toString()
-            val eventToInsert = event.copy(id = newEventId, status = "pending")
+            // 1. Generate ID locally
+            val newEventId = UUID.randomUUID().toString()
             
-            Log.d("MainRepository", "Creating event ID: $newEventId, deanId: $deanId")
+            // Map the Kotlin Event model to a database map
+            val eventMap = mutableMapOf<String, Any?>(
+                "id" to newEventId,
+                "title" to event.title,
+                "description" to event.description,
+                "club_id" to event.clubId,
+                "created_by" to event.createdBy,
+                "status" to "pending",
+                "event_date" to event.eventDate,
+                "banner_url" to event.bannerUrl
+            )
             
-            // 2. Insert the event. No select() call here to avoid timeout issues.
-            adminDb.from("events").insert(eventToInsert)
+            Log.d("MainRepository", "Inserting event: $eventMap")
             
-            // 3. If a dean was selected, create an entry in event_approvals immediately
+            // 2. Insert the event
+            adminDb.from("events").insert(eventMap)
+            
+            // 3. Create entry in event_approvals
             if (deanId != null) {
-                adminDb.from("event_approvals").insert(
-                    EventApproval(
-                        eventId = newEventId,
-                        deanId = deanId,
-                        status = "pending"
-                    )
-                )
-                Log.d("MainRepository", "Event approval entry created successfully")
+                // Use a list of map to bypass potential 'columns' query param issues in some SDK versions
+                val approvalData = listOf(mapOf(
+                    "id" to UUID.randomUUID().toString(),
+                    "event_id" to newEventId,
+                    "dean_id" to deanId,
+                    "status" to "pending"
+                ))
+                Log.d("MainRepository", "Inserting approval list: $approvalData")
+                adminDb.from("event_approvals").insert(approvalData)
             }
             
             Result.success(Unit)

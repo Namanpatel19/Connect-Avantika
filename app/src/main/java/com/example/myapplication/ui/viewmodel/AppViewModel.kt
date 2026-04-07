@@ -219,9 +219,9 @@ class AppViewModel : ViewModel() {
         }
     }
 
-    fun registerForEvent(eventId: String, callback: (Boolean) -> Unit) {
+    fun registerForEvent(eventId: String, contact: String? = null, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val result = repository.registerForEvent(EventRegistration(eventId = eventId, studentId = userId))
+            val result = repository.registerForEvent(EventRegistration(eventId = eventId, studentId = userId, contact = contact))
             callback(result.isSuccess)
         }
     }
