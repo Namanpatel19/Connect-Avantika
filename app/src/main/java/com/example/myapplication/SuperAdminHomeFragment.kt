@@ -27,6 +27,7 @@ class SuperAdminHomeFragment : Fragment() {
         vm.clubs.observe(viewLifecycleOwner) { binding.tvClubCount.text = it.size.toString() }
         vm.events.observe(viewLifecycleOwner) { binding.tvEventCount.text = it.size.toString() }
         vm.deans.observe(viewLifecycleOwner) { binding.tvDeanCount.text = it.size.toString() }
+        vm.allUsers.observe(viewLifecycleOwner) { binding.tvTotalUsers.text = it.size.toString() }
 
         binding.btnManageAll.setOnClickListener {
             (activity as? MainActivity)?.navigateTo(R.id.navigation_manage_all)
@@ -37,11 +38,7 @@ class SuperAdminHomeFragment : Fragment() {
             (activity as? MainActivity)?.logout()
         }
 
-        vm.loadAllStudents()
-        vm.loadAllFaculty()
-        vm.loadAllClubs()
-        vm.loadAllEvents()
-        vm.loadDeans()
+        vm.loadSystemStats()
     }
 
     override fun onDestroyView() {

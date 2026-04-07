@@ -3,6 +3,7 @@ package com.example.myapplication.repository
 import android.util.Log
 import com.example.myapplication.SupabaseClient
 import com.example.myapplication.data.*
+import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.storage.storage
@@ -61,12 +62,32 @@ class MainRepository {
         }
     }
 
-    suspend fun getAllUsers(): List<User> = withContext(Dispatchers.IO) {
+    suspend fun getAllUsers(): List<com.example.myapplication.data.User> = withContext(Dispatchers.IO) {
         try {
-            adminDb.from("users").select().decodeList<User>()
+            // Fetch real auth data from Supabase Auth Admin API
+            val authUsers = SupabaseClient.adminClient.auth.admin.retrieveUsers()
+            
+            // Fetch public records to match roles
+            val publicUsers = adminDb.from("users").select().decodeList<com.example.myapplication.data.User>()
+            val roleMap = publicUsers.associateBy({ it.id }, { it.role })
+
+            authUsers.map { authUser ->
+                com.example.myapplication.data.User(
+                    id = authUser.id,
+                    email = authUser.email ?: "no-email",
+                    role = roleMap[authUser.id] ?: "user",
+                    createdAt = authUser.createdAt.toString(),
+                    lastSignInAt = authUser.lastSignInAt?.toString()
+                )
+            }
         } catch (e: Exception) {
-            Log.e("MainRepository", "All users fetch failed: ${e.message}")
-            emptyList()
+            Log.e("MainRepository", "All users fetch failed: ${e.message}", e)
+            // Fallback to public table if admin auth fails
+            try {
+                adminDb.from("users").select().decodeList<com.example.myapplication.data.User>()
+            } catch (e2: Exception) {
+                emptyList()
+            }
         }
     }
 
@@ -177,14 +198,11 @@ class MainRepository {
 
     suspend fun updateClubRequestStatus(requestId: String, status: String, date: String? = null, time: String? = null, venue: String? = null): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            adminDb.from("club_requests").update(buildJsonObject {
-                put("status", status)
-                if (date != null) put("interview_date", date)
-                if (time != null) put("interview_time", time)
-                if (venue != null) put("venue", venue)
-            }) { 
-                filter { eq("id", requestId) } 
-            }
+            val updates = mutableMapOf<String, String?>("status" to status)
+            if (date != null) updates["interview_date"] = date
+            if (time != null) updates["interview_time"] = time
+            if (venue != null) updates["venue"] = venue
+            adminDb.from("club_requests").update(updates) { filter { eq("id", requestId) } }
             Result.success(Unit)
         } catch (e: Exception) { 
             Log.e("MainRepository", "Update club request status failed: ${e.message}")
@@ -390,15 +408,6 @@ class MainRepository {
         try {
             adminDb.from("users").delete { filter { eq("id", userId) } }
             adminDb.from("faculty").delete { filter { eq("user_id", userId) } }
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun updateFacultyProfile(faculty: Faculty): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            adminDb.from("faculty").update(faculty) { filter { eq("user_id", faculty.userId) } }
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

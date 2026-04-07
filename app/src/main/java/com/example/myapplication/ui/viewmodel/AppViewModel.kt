@@ -16,67 +16,67 @@ class AppViewModel : ViewModel() {
     var userId: String = ""
     var userRole: String = ""
 
-    private val _isLoading = MutableLiveData<Boolean>()
+    private val _isLoading = MutableLiveData<Boolean>(false)
     val isLoading: LiveData<Boolean> get() = _isLoading
 
-    private val _deans = MutableLiveData<List<User>>()
+    private val _deans = MutableLiveData<List<User>>(emptyList())
     val deans: LiveData<List<User>> get() = _deans
 
-    private val _allUsers = MutableLiveData<List<User>>()
+    private val _allUsers = MutableLiveData<List<User>>(emptyList())
     val allUsers: LiveData<List<User>> get() = _allUsers
 
-    private val _students = MutableLiveData<List<Student>>()
+    private val _students = MutableLiveData<List<Student>>(emptyList())
     val students: LiveData<List<Student>> get() = _students
 
-    private val _faculty = MutableLiveData<List<Faculty>>()
+    private val _faculty = MutableLiveData<List<Faculty>>(emptyList())
     val faculty: LiveData<List<Faculty>> get() = _faculty
 
-    private val _clubs = MutableLiveData<List<Club>>()
+    private val _clubs = MutableLiveData<List<Club>>(emptyList())
     val clubs: LiveData<List<Club>> get() = _clubs
 
-    private val _events = MutableLiveData<List<Event>>()
+    private val _events = MutableLiveData<List<Event>>(emptyList())
     val events: LiveData<List<Event>> get() = _events
 
-    private val _deanPendingEvents = MutableLiveData<List<Event>>()
+    private val _deanPendingEvents = MutableLiveData<List<Event>>(emptyList())
     val deanPendingEvents: LiveData<List<Event>> get() = _deanPendingEvents
 
-    private val _announcements = MutableLiveData<List<Announcement>>()
+    private val _announcements = MutableLiveData<List<Announcement>>(emptyList())
     val announcements: LiveData<List<Announcement>> get() = _announcements
 
-    private val _currentStudent = MutableLiveData<Student?>()
+    private val _currentStudent = MutableLiveData<Student?>(null)
     val currentStudent: LiveData<Student?> get() = _currentStudent
 
-    private val _currentFaculty = MutableLiveData<Faculty?>()
+    private val _currentFaculty = MutableLiveData<Faculty?>(null)
     val currentFaculty: LiveData<Faculty?> get() = _currentFaculty
 
-    private val _myClub = MutableLiveData<Club?>()
+    private val _myClub = MutableLiveData<Club?>(null)
     val myClub: LiveData<Club?> get() = _myClub
 
-    private val _clubEvents = MutableLiveData<List<Event>>()
+    private val _clubEvents = MutableLiveData<List<Event>>(emptyList())
     val clubEvents: LiveData<List<Event>> get() = _clubEvents
 
-    private val _eventRegistrations = MutableLiveData<List<EventRegistration>>()
+    private val _eventRegistrations = MutableLiveData<List<EventRegistration>>(emptyList())
     val eventRegistrations: LiveData<List<EventRegistration>> get() = _eventRegistrations
 
-    private val _myClubRequests = MutableLiveData<List<ClubRequest>>()
+    private val _myClubRequests = MutableLiveData<List<ClubRequest>>(emptyList())
     val myClubRequests: LiveData<List<ClubRequest>> get() = _myClubRequests
 
-    private val _clubRequests = MutableLiveData<List<ClubRequest>>()
+    private val _clubRequests = MutableLiveData<List<ClubRequest>>(emptyList())
     val clubRequests: LiveData<List<ClubRequest>> get() = _clubRequests
 
-    private val _clubMembers = MutableLiveData<List<ClubMember>>()
+    private val _clubMembers = MutableLiveData<List<ClubMember>>(emptyList())
     val clubMembers: LiveData<List<ClubMember>> get() = _clubMembers
 
-    private val _notifications = MutableLiveData<List<Notification>>()
+    private val _notifications = MutableLiveData<List<Notification>>(emptyList())
     val notifications: LiveData<List<Notification>> get() = _notifications
 
-    private val _studyMaterials = MutableLiveData<List<StudyMaterial>>()
+    private val _studyMaterials = MutableLiveData<List<StudyMaterial>>(emptyList())
     val studyMaterials: LiveData<List<StudyMaterial>> get() = _studyMaterials
 
-    private val _uploadProgress = MutableLiveData<Boolean>()
+    private val _uploadProgress = MutableLiveData<Boolean>(false)
     val uploadProgress: LiveData<Boolean> get() = _uploadProgress
 
-    private val _leaderboard = MutableLiveData<List<Pair<Student, UserPoint>>>()
+    private val _leaderboard = MutableLiveData<List<Pair<Student, UserPoint>>>(emptyList())
     val leaderboard: LiveData<List<Pair<Student, UserPoint>>> get() = _leaderboard
 
     fun loadDeans() {
@@ -242,7 +242,9 @@ class AppViewModel : ViewModel() {
 
     fun loadEventEntries(eventId: String) {
         viewModelScope.launch {
+            _isLoading.value = true
             _eventRegistrations.value = repository.getEventRegistrations(eventId)
+            _isLoading.value = false
         }
     }
 
@@ -444,6 +446,8 @@ class AppViewModel : ViewModel() {
                     val material = StudyMaterial(
                         title = title,
                         subject = subject,
+                        batch = batch,
+                        department = dept,
                         fileUrl = uploadResult.getOrNull(),
                         uploadedBy = userId
                     )

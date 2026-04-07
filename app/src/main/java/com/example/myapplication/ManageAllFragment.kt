@@ -30,13 +30,14 @@ class ManageAllFragment : Fragment() {
                 3 -> "Clubs"
                 4 -> "Events"
                 5 -> "Notices"
+                6 -> "Users (Auth)"
                 else -> null
             }
         }.attach()
     }
 
     private inner class ManagePagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
-        override fun getItemCount(): Int = 6
+        override fun getItemCount(): Int = 7
         override fun createFragment(position: Int): Fragment {
             return when (position) {
                 0 -> ManageStudentsDeanFragment()
@@ -45,6 +46,7 @@ class ManageAllFragment : Fragment() {
                 3 -> ManageClubsFragment()
                 4 -> ManageEventsFragment()
                 5 -> ManageAnnouncementsFragment()
+                6 -> ManageUsersFragment()
                 else -> Fragment()
             }
         }

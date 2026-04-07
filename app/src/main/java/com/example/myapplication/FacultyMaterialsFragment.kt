@@ -23,18 +23,20 @@ class FacultyMaterialsFragment : Fragment() {
     private var _binding: FragmentFacultyUploadBinding? = null
     private val binding get() = _binding!!
     private lateinit var vm: AppViewModel
-    private var selectedFileUri: Uri? = null
     private var selectedFile: File? = null
     private lateinit var materialsAdapter: StudyMaterialAdapter
 
     private val pickFile = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            selectedFileUri = it
-            selectedFile = uriToFile(it)
-            val name = selectedFile?.name ?: "file"
-            binding.chipFileName.text = name
-            binding.chipFileName.visibility = View.VISIBLE
-            binding.tvPickFile.text = "File selected ✓"
+            try {
+                selectedFile = uriToFile(it)
+                val name = selectedFile?.name ?: "file"
+                binding.chipFileName.text = name
+                binding.chipFileName.visibility = View.VISIBLE
+                binding.tvPickFile.text = "File selected ✓"
+            } catch (e: Exception) {
+                Toast.makeText(context, "Error selecting file: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -50,22 +52,18 @@ class FacultyMaterialsFragment : Fragment() {
         setupDropdowns()
         setupRecycler()
 
-        // File picker card click
         binding.cardPickFile.setOnClickListener {
             pickFile.launch("*/*")
         }
 
-        // Upload button
         binding.btnUpload.setOnClickListener { handleUpload() }
 
-        // Upload progress observer
         vm.uploadProgress.observe(viewLifecycleOwner) { uploading ->
             binding.progressUpload.visibility = if (uploading) View.VISIBLE else View.GONE
             binding.btnUpload.isEnabled = !uploading
-            binding.btnUpload.text = if (uploading) "Uploading…" else "Upload Material"
+            binding.btnUpload.text = if (uploading) "Uploading..." else "Upload Material"
         }
 
-        // Previously uploaded materials
         vm.studyMaterials.observe(viewLifecycleOwner) { list ->
             materialsAdapter.update(list)
         }
@@ -96,48 +94,45 @@ class FacultyMaterialsFragment : Fragment() {
         val dept = binding.actvDepartment.text?.toString()?.trim() ?: ""
         val file = selectedFile
 
-        when {
-            title.isEmpty() -> { binding.tilTitle.error = "Title is required"; return }
-            subject.isEmpty() -> { binding.tilSubject.error = "Subject is required"; return }
-            file == null -> { Toast.makeText(context, "Please pick a file first", Toast.LENGTH_SHORT).show(); return }
-        }
+        if (title.isEmpty()) { binding.tilTitle.error = "Title is required"; return }
+        if (subject.isEmpty()) { binding.tilSubject.error = "Subject is required"; return }
+        if (file == null) { Toast.makeText(context, "Please pick a file first", Toast.LENGTH_SHORT).show(); return }
 
-        // Clear errors
         binding.tilTitle.error = null
         binding.tilSubject.error = null
-        binding.tilBatch.error = null
-        binding.tilDepartment.error = null
 
-        vm.uploadStudyMaterial(title, subject, batch, dept, file!!) { success, message ->
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-            if (success) {
-                binding.etTitle.text?.clear()
-                binding.etSubject.text?.clear()
-                binding.actvBatch.text.clear()
-                binding.actvDepartment.text.clear()
-                binding.chipFileName.visibility = View.GONE
-                binding.tvPickFile.text = "Tap to choose file (PDF, DOC, PPT…)"
-                selectedFile = null
-                selectedFileUri = null
+        vm.uploadStudyMaterial(title, subject, batch, dept, file) { success, message ->
+            context?.let {
+                Toast.makeText(it, message, Toast.LENGTH_LONG).show()
+                if (success) {
+                    binding.etTitle.text?.clear()
+                    binding.etSubject.text?.clear()
+                    binding.actvBatch.text.clear()
+                    binding.actvDepartment.text.clear()
+                    binding.chipFileName.visibility = View.GONE
+                    binding.tvPickFile.text = "Tap to choose file (PDF, DOC, PPT...)"
+                    selectedFile = null
+                }
             }
         }
     }
 
-    private fun uriToFile(uri: Uri): File {
-        val contentResolver = requireContext().contentResolver
+    private fun uriToFile(uri: Uri): File? {
+        val context = context ?: return null
+        val contentResolver = context.contentResolver
         val fileName = getFileNameFromUri(uri) ?: "upload_${System.currentTimeMillis()}"
-        val file = File(requireContext().cacheDir, fileName)
-        val inputStream = contentResolver.openInputStream(uri)
-        val outputStream = FileOutputStream(file)
-        inputStream?.copyTo(outputStream)
-        inputStream?.close()
-        outputStream.close()
+        val file = File(context.cacheDir, fileName)
+        contentResolver.openInputStream(uri)?.use { input ->
+            FileOutputStream(file).use { output ->
+                input.copyTo(output)
+            }
+        }
         return file
     }
 
     private fun getFileNameFromUri(uri: Uri): String? {
         var name: String? = null
-        requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+        context?.contentResolver?.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val idx = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
                 if (idx >= 0) name = cursor.getString(idx)

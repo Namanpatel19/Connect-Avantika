@@ -25,7 +25,9 @@ class ClubEventsFragment : Fragment() {
         binding.rvEvents.layoutManager = LinearLayoutManager(context)
 
         vm.clubEvents.observe(viewLifecycleOwner) { events ->
-            binding.rvEvents.adapter = EventAdapter(events) {}
+            binding.rvEvents.adapter = EventAdapter(events, isLeadView = true) { event ->
+                EventEntriesDialog(event).show(parentFragmentManager, "EventEntries")
+            }
             binding.tvEmpty.visibility = if (events.isEmpty()) View.VISIBLE else View.GONE
         }
         binding.fabCreate.setOnClickListener {
