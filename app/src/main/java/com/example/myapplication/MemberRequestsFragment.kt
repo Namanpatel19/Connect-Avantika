@@ -13,9 +13,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.adapters.ClubRequestAdapter
+import com.example.myapplication.adapters.StudentAdapter
+import com.example.myapplication.data.ClubMember
 import com.example.myapplication.data.Student
 import com.example.myapplication.databinding.FragmentMemberRequestsBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
+import com.google.android.material.tabs.TabLayout
 import java.util.*
 
 class MemberRequestsFragment : Fragment() {
@@ -33,28 +36,40 @@ class MemberRequestsFragment : Fragment() {
 
         binding.rvRequests.layoutManager = LinearLayoutManager(context)
 
-        // Observe students to build the studentMap
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) { refreshList() }
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
+        })
+
         vm.students.observe(viewLifecycleOwner) { students ->
             studentMap = students.associateBy { it.userId }
-            refreshAdapter()
+            refreshList()
         }
 
-        // Observe club requests to refresh the list
-        vm.clubRequests.observe(viewLifecycleOwner) { 
-            refreshAdapter()
-        }
+        vm.clubRequests.observe(viewLifecycleOwner) { refreshList() }
+        vm.clubMembers.observe(viewLifecycleOwner) { refreshList() }
 
         vm.myClub.observe(viewLifecycleOwner) { club ->
-            club?.let { vm.loadClubRequests(it.id!!) }
+            club?.let { 
+                vm.loadClubRequests(it.id!!)
+            }
         }
 
         if (vm.myClub.value == null) vm.loadMyClub()
         vm.loadAllStudents()
     }
 
-    private fun refreshAdapter() {
+    private fun refreshList() {
+        if (binding.tabLayout.selectedTabPosition == 0) {
+            showRequests()
+        } else {
+            showMembers()
+        }
+    }
+
+    private fun showRequests() {
         val requests = vm.clubRequests.value?.filter { it.status == "pending" || it.status == "interview" } ?: emptyList()
-        
         binding.tvPendingCount.text = "${requests.size} active request(s)"
         binding.tvEmpty.visibility = if (requests.isEmpty()) View.VISIBLE else View.GONE
         
@@ -62,25 +77,47 @@ class MemberRequestsFragment : Fragment() {
             requests    = requests,
             studentMap  = studentMap,
             onAccept    = { req -> 
-                vm.acceptClubRequest(req) { success ->
-                    if (success) {
-                        Toast.makeText(context, "Student accepted!", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "Failed to accept student.", Toast.LENGTH_SHORT).show()
-                    }
-                }
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Accept Member")
+                    .setMessage("Add this student to the club?")
+                    .setPositiveButton("Accept") { _, _ ->
+                        vm.acceptClubRequest(req) { success ->
+                            Toast.makeText(context, if (success) "Accepted!" else "Error", Toast.LENGTH_SHORT).show()
+                        }
+                    }.setNegativeButton("Cancel", null).show()
             },
             onReject    = { req -> 
-                vm.rejectClubRequest(req) { success ->
-                    if (success) {
-                        Toast.makeText(context, "Request rejected", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "Failed to reject.", Toast.LENGTH_SHORT).show()
-                    }
-                }
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Reject Request")
+                    .setMessage("Reject this join request?")
+                    .setPositiveButton("Reject") { _, _ ->
+                        vm.rejectClubRequest(req) { success ->
+                            Toast.makeText(context, if (success) "Rejected" else "Error", Toast.LENGTH_SHORT).show()
+                        }
+                    }.setNegativeButton("Cancel", null).show()
             },
             onInterview = { req -> showInterviewDialog(req) }
         )
+    }
+
+    private fun showMembers() {
+        val members = vm.clubMembers.value ?: emptyList()
+        binding.tvPendingCount.text = "${members.size} active member(s)"
+        binding.tvEmpty.visibility = if (members.isEmpty()) View.VISIBLE else View.GONE
+
+        val memberStudents = members.mapNotNull { studentMap[it.studentId] }
+        binding.rvRequests.adapter = StudentAdapter(memberStudents) { student ->
+            AlertDialog.Builder(requireContext())
+                .setTitle("Kick Member")
+                .setMessage("Remove ${student.name} from the club?")
+                .setPositiveButton("Kick") { _, _ ->
+                    val clubId = vm.myClub.value?.id ?: return@setPositiveButton
+                    vm.kickClubMember(clubId, student.userId) { success ->
+                        Toast.makeText(context, if (success) "Member removed" else "Error", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .setNegativeButton("Cancel", null).show()
+        }
     }
 
     private fun showInterviewDialog(request: com.example.myapplication.data.ClubRequest) {
@@ -98,11 +135,7 @@ class MemberRequestsFragment : Fragment() {
                     .setPositiveButton("Schedule") { _, _ ->
                         val venue = input.text.toString().ifEmpty { "Main Hall" }
                         vm.callForInterview(request, date, time, venue) { success ->
-                            if (success) {
-                                Toast.makeText(context, "Interview scheduled!", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(context, "Failed to schedule interview.", Toast.LENGTH_SHORT).show()
-                            }
+                            Toast.makeText(context, if (success) "Scheduled!" else "Error", Toast.LENGTH_SHORT).show()
                         }
                     }
                     .setNegativeButton("Cancel", null)
