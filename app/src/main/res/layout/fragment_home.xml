@@ -43,16 +43,36 @@
                     android:textSize="14sp" />
             </LinearLayout>
 
-            <ImageView
+            <FrameLayout
                 android:id="@+id/btnNotifications"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:background="@drawable/bg_circle_white"
-                android:padding="8dp"
-                android:src="@drawable/ic_notifications"
-                app:tint="@color/primary" />
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="8dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_notifications"
+                    app:tint="@color/primary" />
+
+                <TextView
+                    android:id="@+id/tvNotificationBadge"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="top|end"
+                    android:background="@drawable/bg_notification_dot"
+                    android:gravity="center"
+                    android:text="0"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+            </FrameLayout>
         </RelativeLayout>
 
         <!-- Weekly Goal Card -->
