@@ -13,6 +13,7 @@ import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
 import com.onesignal.OneSignal
 import com.onesignal.debug.LogLevel
+import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -88,10 +89,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun logout() {
-        OneSignal.logout()
-        val intent = Intent(this, LoginActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finish()
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                SupabaseClient.client.auth.signOut()
+            } catch (e: Exception) {
+                // Ignore
+            }
+            OneSignal.logout()
+            val intent = Intent(this@MainActivity, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+        }
     }
 }

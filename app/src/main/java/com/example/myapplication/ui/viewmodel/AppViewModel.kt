@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 class AppViewModel : ViewModel() {
-    private val repository = MainRepository()
+    val repository = MainRepository()
 
     var userId: String = ""
     var userRole: String = ""
@@ -69,6 +69,9 @@ class AppViewModel : ViewModel() {
 
     private val _notifications = MutableLiveData<List<Notification>>(emptyList())
     val notifications: LiveData<List<Notification>> get() = _notifications
+    
+    private val _unreadNotificationsCount = MutableLiveData<Int>(0)
+    val unreadNotificationsCount: LiveData<Int> get() = _unreadNotificationsCount
 
     private val _studyMaterials = MutableLiveData<List<StudyMaterial>>(emptyList())
     val studyMaterials: LiveData<List<StudyMaterial>> get() = _studyMaterials
@@ -235,6 +238,7 @@ class AppViewModel : ViewModel() {
             val result = repository.registerForEvent(EventRegistration(eventId = eventId, studentId = userId, contact = contact))
             if (result.isSuccess) {
                 loadApprovedEvents() // Refresh to update registration state
+                loadLeaderboard() // Refresh points
             }
             callback(result.isSuccess)
         }
@@ -276,7 +280,23 @@ class AppViewModel : ViewModel() {
     }
 
     fun loadMyClubRequests() { viewModelScope.launch { _myClubRequests.value = repository.getUserClubRequests(userId) } }
-    fun loadNotifications() { viewModelScope.launch { _notifications.value = repository.getNotifications(userId) } }
+    
+    fun loadNotifications() { 
+        viewModelScope.launch { 
+            val list = repository.getNotifications(userId)
+            _notifications.value = list
+            _unreadNotificationsCount.value = list.count { !it.isRead }
+        } 
+    }
+    
+    fun markNotificationsAsRead() {
+        viewModelScope.launch {
+            repository.markNotificationsRead(userId)
+            _unreadNotificationsCount.value = 0
+            loadNotifications()
+        }
+    }
+
     fun loadCurrentStudent() { viewModelScope.launch { _currentStudent.value = repository.getStudentProfile(userId); loadMyClubRequests() } }
     fun loadCurrentFaculty() { viewModelScope.launch { _currentFaculty.value = repository.getFacultyProfile(userId) } }
     fun loadAllStudents() { viewModelScope.launch { _students.value = repository.getAllStudents() } }
@@ -298,6 +318,7 @@ class AppViewModel : ViewModel() {
                 repository.sendNotification(request.studentId, "Club Request Accepted", "You have been accepted into the club.")
                 loadClubRequests(request.clubId)
                 loadMyClub() // Refresh members
+                loadLeaderboard() // Refresh points
             }
             callback(result.isSuccess)
         }
@@ -383,6 +404,14 @@ class AppViewModel : ViewModel() {
         viewModelScope.launch {
             val result = repository.deleteAnnouncement(id)
             if (result.isSuccess) loadAnnouncements()
+            callback(result.isSuccess)
+        }
+    }
+
+    fun updateStudentProfile(student: Student, callback: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val result = repository.updateStudentProfile(student)
+            if (result.isSuccess) loadCurrentStudent()
             callback(result.isSuccess)
         }
     }

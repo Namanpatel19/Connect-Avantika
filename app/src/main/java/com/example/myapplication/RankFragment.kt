@@ -7,7 +7,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.example.myapplication.adapters.LeaderboardAdapter
+import com.example.myapplication.data.Student
+import com.example.myapplication.data.UserPoint
 import com.example.myapplication.databinding.FragmentRankBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
 
@@ -32,9 +35,13 @@ class RankFragment : Fragment() {
             binding.progressBar.visibility = View.GONE
             if (data.isEmpty()) {
                 binding.tvEmpty.visibility = View.VISIBLE
+                binding.layoutPodium.visibility = View.GONE
             } else {
                 binding.tvEmpty.visibility = View.GONE
-                adapter.update(data)
+                updatePodium(data)
+                // Remaining students in list
+                val listData = if (data.size > 3) data.subList(3, data.size) else emptyList()
+                adapter.update(listData)
             }
         }
 
@@ -43,6 +50,46 @@ class RankFragment : Fragment() {
         }
 
         vm.loadLeaderboard()
+    }
+
+    private fun updatePodium(data: List<Pair<Student, UserPoint>>) {
+        binding.layoutPodium.visibility = View.VISIBLE
+        
+        // Rank 1
+        if (data.isNotEmpty()) {
+            val (s, p) = data[0]
+            binding.tvNameRank1.text = s.name
+            binding.tvPtsRank1.text = "${p.totalPoints} pts"
+            if (!s.photoUrl.isNullOrEmpty()) {
+                Glide.with(this).load(s.photoUrl).circleCrop().into(binding.ivRank1)
+            }
+        }
+
+        // Rank 2
+        if (data.size > 1) {
+            val (s, p) = data[1]
+            binding.layoutRank2.visibility = View.VISIBLE
+            binding.tvNameRank2.text = s.name
+            binding.tvPtsRank2.text = "${p.totalPoints} pts"
+            if (!s.photoUrl.isNullOrEmpty()) {
+                Glide.with(this).load(s.photoUrl).circleCrop().into(binding.ivRank2)
+            }
+        } else {
+            binding.layoutRank2.visibility = View.INVISIBLE
+        }
+
+        // Rank 3
+        if (data.size > 2) {
+            val (s, p) = data[2]
+            binding.layoutRank3.visibility = View.VISIBLE
+            binding.tvNameRank3.text = s.name
+            binding.tvPtsRank3.text = "${p.totalPoints} pts"
+            if (!s.photoUrl.isNullOrEmpty()) {
+                Glide.with(this).load(s.photoUrl).circleCrop().into(binding.ivRank3)
+            }
+        } else {
+            binding.layoutRank3.visibility = View.INVISIBLE
+        }
     }
 
     override fun onDestroyView() {

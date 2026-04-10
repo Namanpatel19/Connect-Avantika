@@ -12,9 +12,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.example.myapplication.data.Student
 import com.example.myapplication.databinding.FragmentProfileBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 import com.onesignal.OneSignal
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.launch
@@ -90,6 +92,11 @@ class ProfileFragment : Fragment() {
             pickImage.launch("image/*")
         }
 
+        // Edit Profile Button
+        binding.btnEditProfile.setOnClickListener {
+            showEditProfileDialog()
+        }
+
         // Change password - send reset link
         binding.btnChangePassword.setOnClickListener {
             val email = viewModel.userEmail.value
@@ -112,6 +119,47 @@ class ProfileFragment : Fragment() {
         viewModel.loadProfileStats()
         viewModel.loadMyClubRequests()
         viewModel.loadStudyMaterials()
+    }
+
+    private fun showEditProfileDialog() {
+        val student = viewModel.currentStudent.value ?: return
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_student, null)
+        
+        // Use existing dialog layout but hide auth fields
+        dialogView.findViewById<View>(R.id.tilEmail)?.visibility = View.GONE
+        dialogView.findViewById<View>(R.id.tilPassword)?.visibility = View.GONE
+        
+        val etName = dialogView.findViewById<TextInputEditText>(R.id.etName)
+        val etEnrollment = dialogView.findViewById<TextInputEditText>(R.id.etEnrollment)
+        val actvDept = dialogView.findViewById<TextInputEditText>(R.id.actvDepartment)
+        val actvBatch = dialogView.findViewById<TextInputEditText>(R.id.actvBatch)
+        
+        etName?.setText(student.name)
+        etEnrollment?.setText(student.enrollment)
+        actvDept?.setText(student.department)
+        actvBatch?.setText(student.batch)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Edit Profile")
+            .setView(dialogView)
+            .setPositiveButton("Save") { _, _ ->
+                val updatedStudent = student.copy(
+                    name = etName?.text.toString().trim(),
+                    enrollment = etEnrollment?.text.toString().trim(),
+                    department = actvDept?.text.toString().trim(),
+                    batch = actvBatch?.text.toString().trim()
+                )
+                
+                viewModel.updateStudentProfile(updatedStudent) { success ->
+                    if (success) {
+                        Toast.makeText(context, "Profile updated!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Update failed", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun sendPasswordResetLink(emailStr: String) {

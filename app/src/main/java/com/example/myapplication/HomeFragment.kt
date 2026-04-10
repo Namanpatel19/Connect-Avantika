@@ -51,6 +51,15 @@ class HomeFragment : Fragment() {
                 binding.tvGreeting.text = "Hi, ${it.name.split(" ").first()}! 👋"
             }
         }
+        
+        vm.unreadNotificationsCount.observe(viewLifecycleOwner) { count ->
+            if (count > 0) {
+                binding.tvNotificationBadge.visibility = View.VISIBLE
+                binding.tvNotificationBadge.text = if (count > 9) "9+" else count.toString()
+            } else {
+                binding.tvNotificationBadge.visibility = View.GONE
+            }
+        }
 
         // Quick actions - Fully functional
         binding.qaEvents.setOnClickListener {
@@ -68,8 +77,7 @@ class HomeFragment : Fragment() {
         }
         
         binding.btnNotifications.setOnClickListener {
-             // In production, navigate to a NotificationsFragment
-             Toast.makeText(context, "All caught up!", Toast.LENGTH_SHORT).show()
+            (requireActivity() as MainActivity).navigateTo(R.id.navigation_notifications)
         }
 
         binding.tvSeeAllEvents.setOnClickListener {
@@ -80,6 +88,7 @@ class HomeFragment : Fragment() {
         vm.loadApprovedEvents()
         vm.loadAnnouncements()
         vm.loadCurrentStudent()
+        vm.loadNotifications()
     }
 
     override fun onDestroyView() { super.onDestroyView(); _binding = null }
