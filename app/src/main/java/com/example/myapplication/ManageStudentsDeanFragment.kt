@@ -72,13 +72,13 @@ class ManageStudentsDeanFragment : Fragment() {
         
         // Department Dropdown
         val actvDept = dialogView.findViewById<AutoCompleteTextView>(R.id.actvDepartment)
-        val departments = arrayOf("B-Tech", "BBA", "BBA-LLB", "BALLB", "BCA", "BDes", "Mdes", "MCA", "Bcom", "BSC agriculture")
+        val departments = arrayOf("BTech", "BCA", "MCA", "MBA", "BSc", "BSc Agriculture", "BDes", "MDes", "LLB", "BA+LLB", "BBA+LLB")
         val deptAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, departments)
         actvDept.setAdapter(deptAdapter)
 
         // Batch Dropdown
         val actvBatch = dialogView.findViewById<AutoCompleteTextView>(R.id.actvBatch)
-        val batches = arrayOf("2022", "2023", "2024", "2025", "2026", "2027", "2029", "2030")
+        val batches = (2021..2030).map { "$it" }.toTypedArray()
         val batchAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, batches)
         actvBatch.setAdapter(batchAdapter)
 

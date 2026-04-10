@@ -1,6 +1,7 @@
 package com.example.myapplication
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,26 +28,30 @@ class RankFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         vm = ViewModelProvider(requireActivity())[AppViewModel::class.java]
 
-        adapter = LeaderboardAdapter(emptyList())
+        // Pass offset 3 because first 3 are in podium
+        adapter = LeaderboardAdapter(emptyList(), offset = 3)
         binding.rvRankings.layoutManager = LinearLayoutManager(context)
         binding.rvRankings.adapter = adapter
         
         vm.leaderboard.observe(viewLifecycleOwner) { data ->
+            Log.d("RankFragment", "Leaderboard data size: ${data.size}")
             binding.progressBar.visibility = View.GONE
-            if (data.isEmpty()) {
+            if (data.isNullOrEmpty()) {
                 binding.tvEmpty.visibility = View.VISIBLE
                 binding.layoutPodium.visibility = View.GONE
+                adapter.update(emptyList())
             } else {
                 binding.tvEmpty.visibility = View.GONE
                 updatePodium(data)
-                // Remaining students in list
+                
+                // Remaining students in list (from rank 4 onwards)
                 val listData = if (data.size > 3) data.subList(3, data.size) else emptyList()
                 adapter.update(listData)
             }
         }
 
         vm.isLoading.observe(viewLifecycleOwner) { loading ->
-            binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+            if (loading) binding.progressBar.visibility = View.VISIBLE
         }
 
         vm.loadLeaderboard()
@@ -58,11 +63,16 @@ class RankFragment : Fragment() {
         // Rank 1
         if (data.isNotEmpty()) {
             val (s, p) = data[0]
+            binding.layoutRank1.visibility = View.VISIBLE
             binding.tvNameRank1.text = s.name
             binding.tvPtsRank1.text = "${p.totalPoints} pts"
-            if (!s.photoUrl.isNullOrEmpty()) {
-                Glide.with(this).load(s.photoUrl).circleCrop().into(binding.ivRank1)
-            }
+            Glide.with(this)
+                .load(s.photoUrl)
+                .placeholder(R.drawable.ic_person)
+                .circleCrop()
+                .into(binding.ivRank1)
+        } else {
+            binding.layoutRank1.visibility = View.INVISIBLE
         }
 
         // Rank 2
@@ -71,9 +81,11 @@ class RankFragment : Fragment() {
             binding.layoutRank2.visibility = View.VISIBLE
             binding.tvNameRank2.text = s.name
             binding.tvPtsRank2.text = "${p.totalPoints} pts"
-            if (!s.photoUrl.isNullOrEmpty()) {
-                Glide.with(this).load(s.photoUrl).circleCrop().into(binding.ivRank2)
-            }
+            Glide.with(this)
+                .load(s.photoUrl)
+                .placeholder(R.drawable.ic_person)
+                .circleCrop()
+                .into(binding.ivRank2)
         } else {
             binding.layoutRank2.visibility = View.INVISIBLE
         }
@@ -84,9 +96,11 @@ class RankFragment : Fragment() {
             binding.layoutRank3.visibility = View.VISIBLE
             binding.tvNameRank3.text = s.name
             binding.tvPtsRank3.text = "${p.totalPoints} pts"
-            if (!s.photoUrl.isNullOrEmpty()) {
-                Glide.with(this).load(s.photoUrl).circleCrop().into(binding.ivRank3)
-            }
+            Glide.with(this)
+                .load(s.photoUrl)
+                .placeholder(R.drawable.ic_person)
+                .circleCrop()
+                .into(binding.ivRank3)
         } else {
             binding.layoutRank3.visibility = View.INVISIBLE
         }

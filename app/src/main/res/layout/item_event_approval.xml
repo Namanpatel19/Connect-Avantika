@@ -28,14 +28,23 @@
         </LinearLayout>
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="horizontal" android:layout_marginTop="12dp" android:weightSum="2">
-            <com.google.android.material.button.MaterialButton android:id="@+id/btnApprove"
-                android:layout_width="0dp" android:layout_height="40dp"
-                android:layout_weight="1" android:text="✓ Approve"
-                android:layout_marginEnd="6dp" android:backgroundTint="@color/secondary"/>
-            <com.google.android.material.button.MaterialButton android:id="@+id/btnReject"
-                android:layout_width="0dp" android:layout_height="40dp"
-                android:layout_weight="1" android:text="✗ Reject"
-                android:backgroundTint="@color/accent_rose"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnApprove"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/secondary"
+                android:text="✓ Approve" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnReject"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:backgroundTint="@color/accent_rose"
+                android:text="✗ Reject" />
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

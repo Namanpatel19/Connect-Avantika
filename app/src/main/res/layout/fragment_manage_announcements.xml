@@ -77,13 +77,14 @@
                     android:minLines="3"
                     android:gravity="top"/>
             </com.google.android.material.textfield.TextInputLayout>
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCreate"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/primary"
                 android:text="Post Announcement"
-                android:textAllCaps="false"
-                android:backgroundTint="@color/primary"/>
+                android:textAllCaps="false" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

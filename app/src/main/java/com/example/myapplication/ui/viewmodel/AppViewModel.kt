@@ -173,7 +173,7 @@ class AppViewModel : ViewModel() {
 
     fun loadDeanEvents() {
         viewModelScope.launch {
-            _deanPendingEvents.value = repository.getEventsForDean(userId)
+            _deanPendingEvents.value = userId.let { repository.getEventsForDean(it) }
         }
     }
 
@@ -462,7 +462,18 @@ class AppViewModel : ViewModel() {
 
     fun loadStudyMaterials() {
         viewModelScope.launch {
-            _studyMaterials.value = repository.getStudyMaterials()
+            _studyMaterials.value = when (userRole) {
+                "faculty" -> repository.getStudyMaterialsForFaculty(userId)
+                "student" -> {
+                    val student = _currentStudent.value ?: repository.getStudentProfile(userId)
+                    if (student != null) {
+                        repository.getStudyMaterialsForStudent(student.batch ?: "", student.department ?: "")
+                    } else {
+                        emptyList()
+                    }
+                }
+                else -> repository.getStudyMaterials()
+            }
         }
     }
 

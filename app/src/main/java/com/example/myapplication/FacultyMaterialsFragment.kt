@@ -72,11 +72,11 @@ class FacultyMaterialsFragment : Fragment() {
     }
 
     private fun setupDropdowns() {
-        val batches = listOf("1st Year", "2nd Year", "3rd Year", "4th Year")
+        val batches = (2021..2030).map { "$it" }
         val batchAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, batches)
         binding.actvBatch.setAdapter(batchAdapter)
 
-        val departments = listOf("Computer Science", "Information Technology", "Electronics", "Mechanical", "Civil", "Chemical")
+        val departments = listOf("BTech", "BCA", "MCA", "MBA", "BSc", "BSc Agriculture", "BDes", "MDes", "LLB", "BA+LLB", "BBA+LLB")
         val deptAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, departments)
         binding.actvDepartment.setAdapter(deptAdapter)
     }

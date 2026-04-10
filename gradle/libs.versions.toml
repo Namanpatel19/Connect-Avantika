@@ -26,6 +26,7 @@ lottie = "6.4.0"
 navigationFragmentKtx = "2.9.7"
 navigationUiKtx = "2.9.7"
 onesignal = "5.7.6"
+okhttp = "4.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -49,6 +50,7 @@ play-services-auth = { group = "com.google.android.gms", name = "play-services-a
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 lottie = { group = "com.airbnb.android", name = "lottie", version.ref = "lottie" }
 onesignal = { group = "com.onesignal", name = "OneSignal", version.ref = "onesignal" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 
 # Compose
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -52,7 +53,7 @@ class ProfileFragment : Fragment() {
                 binding.tvRole.text = "${it.department ?: "Student"} | ${it.batch ?: ""}"
                 binding.tvEnrollment.text = "Enrollment: ${it.enrollment}"
                 binding.tvPhone.text = it.contact ?: "No contact added"
-                binding.tvDepartment.text = it.department ?: "Avantika University"
+                binding.tvDepartment.text = it.Address ?: "No address added"
 
                 // Load profile photo
                 if (!it.photoUrl.isNullOrEmpty()) {
@@ -125,34 +126,46 @@ class ProfileFragment : Fragment() {
         val student = viewModel.currentStudent.value ?: return
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_student, null)
         
-        // Use existing dialog layout but hide auth fields
+        // Hide read-only fields for student self-update
+        dialogView.findViewById<View>(R.id.tilName)?.visibility = View.GONE
         dialogView.findViewById<View>(R.id.tilEmail)?.visibility = View.GONE
         dialogView.findViewById<View>(R.id.tilPassword)?.visibility = View.GONE
+        dialogView.findViewById<View>(R.id.tilEnrollment)?.visibility = View.GONE
+        dialogView.findViewById<View>(R.id.tilDepartment)?.visibility = View.GONE
+        dialogView.findViewById<View>(R.id.tilBatch)?.visibility = View.GONE
         
-        val etName = dialogView.findViewById<TextInputEditText>(R.id.etName)
-        val etEnrollment = dialogView.findViewById<TextInputEditText>(R.id.etEnrollment)
-        val actvDept = dialogView.findViewById<TextInputEditText>(R.id.actvDepartment)
-        val actvBatch = dialogView.findViewById<TextInputEditText>(R.id.actvBatch)
+        // Add Address field if not in dialog_add_student.xml (it's not, we'll repurpose one or just use what we have)
+        // Since I can't easily modify the XML layout here without potentially breaking "Add Student" view,
+        // I will repurpose 'tilDepartment' hint to 'Address' for student profile edit
+        val tilContact = dialogView.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilName) // Hidden above
+        // Actually, let's just use etEmail and etPassword fields for Contact and Address to avoid adding new views
         
-        etName?.setText(student.name)
-        etEnrollment?.setText(student.enrollment)
-        actvDept?.setText(student.department)
-        actvBatch?.setText(student.batch)
+        val tilAddress = dialogView.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilEmail)
+        tilAddress.visibility = View.VISIBLE
+        tilAddress.hint = "Address *"
+        val etAddress = dialogView.findViewById<TextInputEditText>(R.id.etEmail)
+        etAddress?.inputType = android.text.InputType.TYPE_CLASS_TEXT
+        etAddress?.setText(student.Address)
+
+        val tilPhone = dialogView.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilPassword)
+        tilPhone.visibility = View.VISIBLE
+        tilPhone.hint = "Contact Number *"
+        val etPhone = dialogView.findViewById<TextInputEditText>(R.id.etPassword)
+        etPhone?.inputType = android.text.InputType.TYPE_CLASS_PHONE
+        etPhone?.setText(student.contact)
 
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Edit Profile")
+            .setTitle("Update Contact Details")
             .setView(dialogView)
-            .setPositiveButton("Save") { _, _ ->
+            .setPositiveButton("Update") { _, _ ->
                 val updatedStudent = student.copy(
-                    name = etName?.text.toString().trim(),
-                    enrollment = etEnrollment?.text.toString().trim(),
-                    department = actvDept?.text.toString().trim(),
-                    batch = actvBatch?.text.toString().trim()
+                    contact = etPhone?.text.toString().trim(),
+                    Address = etAddress?.text.toString().trim()
                 )
                 
                 viewModel.updateStudentProfile(updatedStudent) { success ->
                     if (success) {
-                        Toast.makeText(context, "Profile updated!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Details updated!", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(context, "Update failed", Toast.LENGTH_SHORT).show()
                     }
