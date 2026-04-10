@@ -83,10 +83,11 @@
 
                     <LinearLayout
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="56dp"
                         android:layout_weight="1"
                         android:gravity="center"
                         android:orientation="vertical">
+
                         <TextView
                             android:id="@+id/tvMemberCount"
                             android:layout_width="wrap_content"
@@ -95,6 +96,7 @@
                             android:textColor="@color/primary"
                             android:textSize="22sp"
                             android:textStyle="bold" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -120,7 +122,7 @@
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnJoinClub"
                             android:layout_width="match_parent"
-                            android:layout_height="48dp"
+                            android:layout_height="match_parent"
                             android:text="Join Club"
                             android:textAllCaps="false"
                             android:textColor="@color/white"
@@ -130,7 +132,7 @@
                             app:cornerRadius="12dp"
                             app:icon="@drawable/ic_clubs"
                             app:iconSize="20dp"
-                            app:iconTint="@color/white"/>
+                            app:iconTint="@color/white" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

@@ -1,9 +1,17 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.services)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose.compiler)
+}
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
 }
 
 android {
@@ -18,6 +26,16 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val url = localProperties.getProperty("SUPABASE_URL_S") ?: ""
+        val key = localProperties.getProperty("SUPABASE_PUBLIC_KEY") ?: ""
+        val adminKey = localProperties.getProperty("SUPABASE_SERVICE_ROLE_KEY") ?: ""
+        val oneSignalRestKey = localProperties.getProperty("ONESIGNAL_REST_API_KEY") ?: ""
+
+        buildConfigField("String", "SUPABASE_URL_S", "\"$url\"")
+        buildConfigField("String", "SUPABASE_PUBLIC_KEY", "\"$key\"")
+        buildConfigField("String", "SUPABASE_ADMIN_KEY", "\"$adminKey\"")
+        buildConfigField("String", "ONESIGNAL_REST_API_KEY", "\"$oneSignalRestKey\"")
     }
 
     buildTypes {
@@ -39,6 +57,7 @@ android {
     buildFeatures {
         viewBinding = true
         compose = true
+        buildConfig = true
     }
 }
 
@@ -59,6 +78,7 @@ dependencies {
     
     // OneSignal
     implementation(libs.onesignal)
+    implementation(libs.okhttp)
 
     // Jetpack Compose
     val composeBom = platform(libs.androidx.compose.bom)

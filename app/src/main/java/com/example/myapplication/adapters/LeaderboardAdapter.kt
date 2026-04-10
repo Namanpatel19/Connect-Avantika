@@ -12,7 +12,8 @@ import com.example.myapplication.data.Student
 import com.example.myapplication.data.UserPoint
 
 class LeaderboardAdapter(
-    private var data: List<Pair<Student, UserPoint>>
+    private var data: List<Pair<Student, UserPoint>>,
+    private val offset: Int = 0
 ) : RecyclerView.Adapter<LeaderboardAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -31,8 +32,9 @@ class LeaderboardAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val (student, point) = data[position]
+        val actualRank = position + 1 + offset
         
-        holder.tvRank.text = "#${position + 1}"
+        holder.tvRank.text = "#$actualRank"
         holder.tvName.text = student.name
         holder.tvPoints.text = "${point.totalPoints} pts"
         holder.tvDept.text = "${student.department} | ${student.batch}"
@@ -43,11 +45,11 @@ class LeaderboardAdapter(
             .circleCrop()
             .into(holder.ivAvatar)
             
-        // Highlight top 3
-        when(position) {
-            0 -> holder.tvRank.setTextColor(holder.itemView.context.getColor(R.color.secondary))
-            1 -> holder.tvRank.setTextColor(holder.itemView.context.getColor(R.color.primary))
-            2 -> holder.tvRank.setTextColor(holder.itemView.context.getColor(R.color.primary_dark))
+        // Style based on rank
+        when(actualRank) {
+            1 -> holder.tvRank.setTextColor(holder.itemView.context.getColor(R.color.secondary))
+            2 -> holder.tvRank.setTextColor(holder.itemView.context.getColor(R.color.primary))
+            3 -> holder.tvRank.setTextColor(holder.itemView.context.getColor(R.color.primary_dark))
             else -> holder.tvRank.setTextColor(holder.itemView.context.getColor(R.color.text_secondary))
         }
     }

@@ -64,4 +64,10 @@
         android:name="com.example.myapplication.NotificationsFragment"
         android:label="Notifications"
         tools:layout="@layout/fragment_notifications" />
+
+    <fragment
+        android:id="@+id/navigation_student_materials"
+        android:name="com.example.myapplication.StudentMaterialsFragment"
+        android:label="Study Materials"
+        tools:layout="@layout/fragment_student_materials" />
 </navigation>

@@ -34,6 +34,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".BrowseErrorActivity"
             android:exported="false" />
 
