@@ -14,6 +14,7 @@ import com.google.android.material.button.MaterialButton
 class EventAdapter(
     private var events: List<Event>,
     private val isLeadView: Boolean = false,
+    private val onDeleteClick: ((Event) -> Unit)? = null,
     private val onActionClick: (Event) -> Unit = {}
 ) : RecyclerView.Adapter<EventAdapter.EventViewHolder>() {
 
@@ -23,9 +24,11 @@ class EventAdapter(
         val tvEventLevel: TextView = view.findViewById(R.id.tv_event_level)
         val tvEventPoints: TextView = view.findViewById(R.id.tv_event_points)
         val tvEventDate: TextView = view.findViewById(R.id.tv_event_date)
+        val tvEventTime: TextView = view.findViewById(R.id.tv_event_time)
         val tvEventLocation: TextView = view.findViewById(R.id.tv_event_location)
         val tvEventOrganizer: TextView = view.findViewById(R.id.tv_event_organizer)
         val btnAction: MaterialButton = view.findViewById(R.id.btn_register)
+        val btnDelete: MaterialButton = view.findViewById(R.id.btn_delete_event)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventViewHolder {
@@ -37,8 +40,9 @@ class EventAdapter(
     override fun onBindViewHolder(holder: EventViewHolder, position: Int) {
         val event = events[position]
         holder.tvEventTitle.text = event.title
-        holder.tvEventDate.text = event.eventDate?.replace("T", " ") ?: "Date TBA"
-        holder.tvEventLocation.text = "Campus"
+        holder.tvEventDate.text = event.eventDate?.substringBefore("T") ?: "Date TBA"
+        holder.tvEventTime.text = event.eventTime ?: "Time TBA"
+        holder.tvEventLocation.text = event.venue ?: "Campus"
         holder.tvEventOrganizer.text = event.clubId ?: "University"
 
         if (!event.bannerUrl.isNullOrEmpty()) {
@@ -64,7 +68,10 @@ class EventAdapter(
             holder.btnAction.text = "View Entries"
             holder.btnAction.isEnabled = true
             holder.btnAction.alpha = 1.0f
+            holder.btnDelete.visibility = View.VISIBLE
+            holder.btnDelete.setOnClickListener { onDeleteClick?.invoke(event) }
         } else {
+            holder.btnDelete.visibility = View.GONE
             if (event.isRegistered) {
                 holder.btnAction.text = "Registered !!"
                 holder.btnAction.isEnabled = false

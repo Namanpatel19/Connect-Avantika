@@ -2,6 +2,7 @@ package com.example.myapplication
 
 import android.app.Activity
 import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -31,6 +32,7 @@ class CreateEventDialog : DialogFragment() {
     private lateinit var vm: AppViewModel
     private var selectedBannerUri: Uri? = null
     private var selectedDate: Calendar? = null
+    private var selectedTime: String? = null
     private var deans: List<User> = emptyList()
     private var selectedDeanId: String? = null
 
@@ -105,15 +107,31 @@ class CreateEventDialog : DialogFragment() {
             }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
         }
 
+        binding.btnPickTime.setOnClickListener {
+            val cal = Calendar.getInstance()
+            TimePickerDialog(requireContext(), { _, h, min ->
+                val time = "${h.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}"
+                selectedTime = time
+                binding.tvTime.text = time
+                binding.tvTime.visibility = View.VISIBLE
+                binding.btnPickTime.text = "Change Time: $time"
+            }, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), false).show()
+        }
+
         binding.btnSubmit.setOnClickListener {
             val title = binding.etTitle.text.toString().trim()
             val desc  = binding.etDescription.text.toString().trim()
+            val venue = binding.etVenue.text.toString().trim()
             val feeStr = binding.etEntryFee.text.toString().trim()
             val fee = feeStr.toDoubleOrNull() ?: 0.0
             
             if (title.isEmpty()) { 
                 Toast.makeText(context, "Enter event title", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener 
+            }
+            if (venue.isEmpty()) {
+                Toast.makeText(context, "Enter event venue", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
             if (selectedDeanId == null) {
                 Toast.makeText(context, "Please select a dean for approval", Toast.LENGTH_SHORT).show()
@@ -123,6 +141,10 @@ class CreateEventDialog : DialogFragment() {
                 Toast.makeText(context, "Please select a date", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+            if (selectedTime == null) {
+                Toast.makeText(context, "Please select a time", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
             val clubId = vm.myClub.value?.id 
             val dateStr = binding.tvDate.text.toString()
@@ -130,10 +152,12 @@ class CreateEventDialog : DialogFragment() {
             val event = Event(
                 title       = title,
                 description = desc,
+                venue       = venue,
                 clubId      = clubId,
                 createdBy   = vm.userId,
                 status      = "pending",
                 eventDate   = "${dateStr}T00:00:00",
+                eventTime   = selectedTime,
                 deanId      = selectedDeanId,
                 entryFee    = fee,
                 isPaid      = fee > 0

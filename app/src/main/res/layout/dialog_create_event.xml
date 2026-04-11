@@ -71,6 +71,26 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:hint="Venue"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="#2D6A7F"
+                app:hintTextColor="#2D6A7F"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                android:layout_marginBottom="16dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etVenue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapWords"
+                    android:textColor="#1E293B"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:hint="Select Dean for Approval"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 app:boxStrokeColor="#2D6A7F"
@@ -167,7 +187,19 @@
                 app:cornerRadius="12dp"
                 android:textColor="#2D6A7F"
                 app:strokeColor="#2D6A7F"
-                android:layout_marginBottom="24dp"/>
+                android:layout_marginBottom="12dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPickTime"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Select Event Time"
+                app:icon="@android:drawable/ic_menu_recent_history"
+                app:cornerRadius="12dp"
+                android:textColor="#2D6A7F"
+                app:strokeColor="#2D6A7F"
+                android:layout_marginBottom="12dp"/>
 
             <TextView
                 android:id="@+id/tvDate"
@@ -177,7 +209,17 @@
                 android:textColor="#1E293B"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:layout_marginTop="-16dp"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/tvTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="#1E293B"
+                android:textSize="16sp"
+                android:textStyle="bold"
                 android:layout_marginBottom="24dp"
                 android:visibility="gone"/>
 

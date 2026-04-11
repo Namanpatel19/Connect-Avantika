@@ -32,4 +32,5 @@
     <string name="buy_2">Buy movie</string>
     <string name="related_movies">Related Movies</string>
     <string name="movie">Movie</string>
+    <string name="default_web_client_id">225378641751-v73hfjt2lio06vto7c2u6r5882utm6df.apps.googleusercontent.com</string>
 </resources>

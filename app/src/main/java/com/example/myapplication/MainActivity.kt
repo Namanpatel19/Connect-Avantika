@@ -2,13 +2,15 @@ package com.example.myapplication
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
+import androidx.navigation.ui.NavigationUI
 import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.ui.viewmodel.AppViewModel
 import com.onesignal.OneSignal
@@ -22,6 +24,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     lateinit var appViewModel: AppViewModel
+    private var navController: NavController? = null
 
     private val ONESIGNAL_APP_ID = "fa04dbc2-3bcb-4fe7-adc1-9205d5669056"
 
@@ -71,17 +74,33 @@ class MainActivity : AppCompatActivity() {
         }
 
         val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navHost.navController
-        navController.setGraph(navRes)
+        navController = navHost.navController
+        navController?.setGraph(navRes)
 
         binding.bottomNav.menu.clear()
         binding.bottomNav.inflateMenu(menuRes)
-        binding.bottomNav.setupWithNavController(navController)
+        
+        navController?.let { controller ->
+            binding.bottomNav.setOnItemSelectedListener { item ->
+                NavigationUI.onNavDestinationSelected(item, controller)
+                true
+            }
+            
+            // Re-sync bottom nav state with current destination
+            controller.addOnDestinationChangedListener { _, destination, _ ->
+                val menu = binding.bottomNav.menu
+                for (i in 0 until menu.size()) {
+                    val item = menu.getItem(i)
+                    if (item.itemId == destination.id) {
+                        item.isChecked = true
+                    }
+                }
+            }
+        }
     }
 
     fun navigateTo(destinationId: Int) {
-        val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        navHost.navController.navigate(destinationId)
+        navController?.navigate(destinationId)
     }
 
     fun navigateToDeanView() {

@@ -55,9 +55,9 @@ class HomeFragment : Fragment() {
             (activity as? MainActivity)?.navigateTo(R.id.navigation_clubs)
         }
 
-        // Repurposing academics button for Study Materials
+        // Updated academics button to show selection dialog
         binding.qaAcademics.setOnClickListener {
-            (activity as? MainActivity)?.navigateTo(R.id.navigation_student_materials)
+            AcademicsDialog().show(parentFragmentManager, "AcademicsDialog")
         }
 
         binding.tvSeeAllEvents.setOnClickListener {
