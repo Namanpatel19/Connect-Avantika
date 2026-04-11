@@ -23,6 +23,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 class MainRepository {
     private val db = SupabaseClient.client.postgrest
     private val adminDb = SupabaseClient.adminClient.postgrest
+    private val adminStorage = SupabaseClient.adminClient.storage
     private val httpClient = OkHttpClient()
 
     // --- Auth & User ---
@@ -112,10 +113,17 @@ class MainRepository {
 
     suspend fun deleteDean(userId: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            SupabaseClient.adminClient.auth.admin.deleteUser(userId)
+            adminDb.from("event_approvals").delete { filter { eq("dean_id", userId) } }
+            try {
+                adminDb.from("events").update(buildJsonObject { put("dean_id", null as String?) }) {
+                    filter { eq("dean_id", userId) }
+                }
+            } catch (e: Exception) { }
             adminDb.from("users").delete { filter { eq("id", userId) } }
+            SupabaseClient.adminClient.auth.admin.deleteUser(userId)
             Result.success(Unit)
         } catch (e: Exception) {
+            Log.e("MainRepository", "Delete dean failed: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -136,13 +144,36 @@ class MainRepository {
 
     suspend fun updateClub(club: Club): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            adminDb.from("clubs").update(club) { filter { eq("id", club.id!!) } }
+            adminDb.from("clubs").update(buildJsonObject {
+                put("name", club.name)
+                put("description", club.description)
+                put("club_head_id", club.clubHeadId)
+                put("banner_url", club.bannerUrl)
+                put("category", club.category)
+            }) { filter { eq("id", club.id!!) } }
             Result.success(Unit)
-        } catch (e: Exception) { Result.failure(e) }
+        } catch (e: Exception) { 
+            Log.e("MainRepository", "Update club failed", e)
+            Result.failure(e) 
+        }
+    }
+
+    suspend fun updateClubBanner(clubId: String, bannerUrl: String): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            adminDb.from("clubs").update(buildJsonObject {
+                put("banner_url", bannerUrl)
+            }) { filter { eq("id", clubId) } }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("MainRepository", "Update club banner failed", e)
+            Result.failure(e)
+        }
     }
 
     suspend fun deleteClub(id: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
+            adminDb.from("club_members").delete { filter { eq("club_id", id) } }
+            adminDb.from("club_requests").delete { filter { eq("club_id", id) } }
             adminDb.from("clubs").delete { filter { eq("id", id) } }
             Result.success(Unit)
         } catch (e: Exception) { Result.failure(e) }
@@ -269,36 +300,93 @@ class MainRepository {
     suspend fun createEvent(event: Event, deanId: String?): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val newEventId = UUID.randomUUID().toString()
-            val eventToInsert = event.copy(id = newEventId, status = "pending")
-            adminDb.from("events").insert(eventToInsert)
-            if (deanId != null) {
-                adminDb.from("event_approvals").insert(buildJsonObject {
+            
+            val eventJson = buildJsonObject {
+                put("id", newEventId)
+                put("title", event.title)
+                put("description", event.description)
+                put("club_id", event.clubId)
+                put("created_by", event.createdBy)
+                put("status", "pending")
+                if (!event.eventDate.isNullOrBlank()) put("event_date", event.eventDate)
+                put("banner_url", event.bannerUrl)
+                put("venue", event.venue)
+                if (!event.eventTime.isNullOrBlank()) put("event_time", event.eventTime)
+                if (!deanId.isNullOrBlank()) put("dean_id", deanId)
+                put("entry_fee", event.entryFee)
+                put("is_paid", event.isPaid)
+            }
+            
+            adminDb.from("events").insert(eventJson)
+            
+            if (!deanId.isNullOrBlank()) {
+                val approvalJson = buildJsonObject {
                     put("id", UUID.randomUUID().toString())
                     put("event_id", newEventId)
                     put("dean_id", deanId)
                     put("status", "pending")
-                })
+                }
+                adminDb.from("event_approvals").insert(approvalJson)
+                
+                sendNotification(deanId, "New Event Approval", "A new event '${event.title}' is waiting for your approval.")
             }
+
             Result.success(Unit)
-        } catch (e: Exception) { Result.failure(e) }
+        } catch (e: Exception) {
+            Log.e("MainRepository", "Create event failed: ${e.message}", e)
+            Result.failure(e)
+        }
     }
 
     suspend fun updateEventStatus(eventId: String, status: String, deanId: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            adminDb.from("events").update(buildJsonObject { put("status", status) }) { filter { eq("id", eventId) } }
-            adminDb.from("event_approvals").update(buildJsonObject { put("status", status) }) {
+            val lowerStatus = status.lowercase()
+            adminDb.from("events").update(buildJsonObject { put("status", lowerStatus) }) { filter { eq("id", eventId) } }
+            adminDb.from("event_approvals").update(buildJsonObject { put("status", lowerStatus) }) {
                 filter { eq("event_id", eventId); eq("dean_id", deanId) }
             }
+
+            val event = adminDb.from("events").select { filter { eq("id", eventId) } }.decodeSingleOrNull<Event>()
+            event?.createdBy?.let { leadId ->
+                val msg = if (lowerStatus == "approved") "Your event '${event.title}' has been approved!" else "Your event '${event.title}' was rejected."
+                sendNotification(leadId, "Event Status Updated", msg)
+            }
+
+            if (lowerStatus == "approved") {
+                val students = adminDb.from("students").select().decodeList<Student>()
+                students.forEach { student ->
+                    sendNotification(student.userId, "New Approved Event", "Check out '${event?.title}'! It's now open for registration.")
+                }
+            }
+
             Result.success(Unit)
-        } catch (e: Exception) { Result.failure(e) }
+        } catch (e: Exception) { 
+            Log.e("MainRepository", "Update event status failed", e)
+            Result.failure(e) 
+        }
     }
 
     suspend fun getEventsForDean(deanId: String): List<Event> = withContext(Dispatchers.IO) {
         try {
-            db.from("events").select {
-                filter { eq("dean_id", deanId); eq("status", "pending") }
+            val approvals = adminDb.from("event_approvals").select {
+                filter { 
+                    eq("dean_id", deanId)
+                    eq("status", "pending") 
+                }
+            }.decodeList<EventApproval>()
+            
+            val approvalIds = approvals.map { it.eventId }
+            if (approvalIds.isEmpty()) return@withContext emptyList()
+            
+            return@withContext adminDb.from("events").select {
+                filter { 
+                    isIn("id", approvalIds)
+                }
             }.decodeList<Event>()
-        } catch (e: Exception) { emptyList() }
+        } catch (e: Exception) { 
+            Log.e("MainRepository", "getEventsForDean failed", e)
+            emptyList() 
+        }
     }
 
     suspend fun getEventsByClubId(clubId: String): List<Event> = withContext(Dispatchers.IO) {
@@ -307,9 +395,14 @@ class MainRepository {
 
     suspend fun deleteEvent(id: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
+            adminDb.from("event_approvals").delete { filter { eq("event_id", id) } }
+            adminDb.from("event_registrations").delete { filter { eq("event_id", id) } }
             adminDb.from("events").delete { filter { eq("id", id) } }
             Result.success(Unit)
-        } catch (e: Exception) { Result.failure(e) }
+        } catch (e: Exception) {
+            Log.e("MainRepository", "Delete event failed", e)
+            Result.failure(e)
+        }
     }
 
     suspend fun registerForEvent(registration: EventRegistration): Result<Unit> = withContext(Dispatchers.IO) {
@@ -321,7 +414,7 @@ class MainRepository {
     }
 
     suspend fun getEventRegistrations(eventId: String): List<EventRegistration> = withContext(Dispatchers.IO) {
-        try { db.from("event_registrations").select { filter { eq("event_id", eventId) } }.decodeList<EventRegistration>() } catch (e: Exception) { emptyList() }
+        try { db.from("event_registrations").select { filter { eq("id", eventId) } }.decodeList<EventRegistration>() } catch (e: Exception) { emptyList() }
     }
 
     suspend fun getStudentEventRegistrations(userId: String): List<EventRegistration> = withContext(Dispatchers.IO) {
@@ -346,6 +439,7 @@ class MainRepository {
         } catch (e: Exception) { Result.failure(e) }
     }
 
+    // --- Leaderboard & Points ---
     suspend fun getAllStudents(): List<Student> = withContext(Dispatchers.IO) {
         try { db.from("students").select().decodeList<Student>() } catch (e: Exception) { emptyList() }
     }
@@ -364,69 +458,75 @@ class MainRepository {
 
     suspend fun addStudent(user: User, student: Student): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            Log.d("MainRepository", "Adding student: ${user.email}")
             val authUser = SupabaseClient.adminClient.auth.admin.createUserWithEmail {
                 email = user.email
                 password = user.password ?: "123456"
                 autoConfirm = true
             }
-            Log.d("MainRepository", "Auth user created: ${authUser.id}")
-            
             val newUser = user.copy(id = authUser.id, role = "student")
             adminDb.from("users").upsert(newUser)
-            Log.d("MainRepository", "User record upserted")
-            
             adminDb.from("students").upsert(student.copy(userId = authUser.id))
-            Log.d("MainRepository", "Student record upserted")
-            
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("MainRepository", "Add student failed: ${e.message}", e)
+            Log.e("MainRepository", "Add student failed", e)
             Result.failure(e) 
         }
     }
 
     suspend fun deleteStudent(userId: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            SupabaseClient.adminClient.auth.admin.deleteUser(userId)
-            adminDb.from("users").delete { filter { eq("id", userId) } }
+            adminDb.from("club_members").delete { filter { eq("student_id", userId) } }
+            adminDb.from("club_requests").delete { filter { eq("student_id", userId) } }
+            adminDb.from("event_registrations").delete { filter { eq("student_id", userId) } }
+            adminDb.from("point_transactions").delete { filter { eq("user_id", userId) } }
+            adminDb.from("user_points").delete { filter { eq("user_id", userId) } }
+            adminDb.from("notifications").delete { filter { eq("user_id", userId) } }
             adminDb.from("students").delete { filter { eq("user_id", userId) } }
+            adminDb.from("users").delete { filter { eq("id", userId) } }
+            SupabaseClient.adminClient.auth.admin.deleteUser(userId)
             Result.success(Unit)
-        } catch (e: Exception) { Result.failure(e) }
+        } catch (e: Exception) { 
+            Log.e("MainRepository", "Delete student failed", e)
+            Result.failure(e) 
+        }
     }
 
-    @Suppress("DEPRECATION")
     suspend fun addFaculty(user: User, faculty: Faculty): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            Log.d("MainRepository", "Adding faculty: ${user.email}")
             val authUser = SupabaseClient.adminClient.auth.admin.createUserWithEmail {
                 email = user.email
                 password = user.password ?: "123456"
                 autoConfirm = true
             }
-            Log.d("MainRepository", "Auth user created: ${authUser.id}")
-
             val newUser = user.copy(id = authUser.id, role = "faculty")
             adminDb.from("users").upsert(newUser)
-            Log.d("MainRepository", "User record upserted")
-
             adminDb.from("faculty").upsert(faculty.copy(userId = authUser.id))
-            Log.d("MainRepository", "Faculty record upserted")
-
             Result.success(Unit)
         } catch (e: Exception) { 
-            Log.e("MainRepository", "Add faculty failed: ${e.message}", e)
+            Log.e("MainRepository", "Add faculty failed", e)
             Result.failure(e) 
         }
     }
 
     suspend fun deleteFaculty(userId: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            SupabaseClient.adminClient.auth.admin.deleteUser(userId)
-            adminDb.from("users").delete { filter { eq("id", userId) } }
+            adminDb.from("study_materials").delete { filter { eq("faculty_id", userId) } }
+            try {
+                adminDb.from("events").update(buildJsonObject { put("created_by", null as String?) }) { filter { eq("created_by", userId) } }
+                adminDb.from("announcements").update(buildJsonObject { put("created_by", null as String?) }) { filter { eq("created_by", userId) } }
+            } catch (e: Exception) { }
+            adminDb.from("notifications").delete { filter { eq("user_id", userId) } }
+            adminDb.from("clubs").update(buildJsonObject { put("club_head_id", null as String?) }) {
+                filter { eq("club_head_id", userId) }
+            }
             adminDb.from("faculty").delete { filter { eq("user_id", userId) } }
+            adminDb.from("users").delete { filter { eq("id", userId) } }
+            SupabaseClient.adminClient.auth.admin.deleteUser(userId)
             Result.success(Unit)
-        } catch (e: Exception) { Result.failure(e) }
+        } catch (e: Exception) { 
+            Log.e("MainRepository", "Delete faculty failed: ${e.message}", e)
+            Result.failure(e) 
+        }
     }
 
     suspend fun getLeaderboard(): List<Pair<Student, UserPoint>> = withContext(Dispatchers.IO) {
@@ -460,24 +560,24 @@ class MainRepository {
 
     suspend fun createAnnouncement(ann: Announcement): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            adminDb.from("announcements").insert(ann)
+            val annJson = buildJsonObject {
+                put("title", ann.title)
+                put("content", ann.content)
+                put("created_by", ann.createdBy)
+            }
+            adminDb.from("announcements").insert(annJson)
             
-            // 1. Create in-app notification for ALL users
             val allUsers = adminDb.from("users").select().decodeList<User>()
             allUsers.forEach { user ->
                 try {
                     adminDb.from("notifications").insert(Notification(
                         userId = user.id,
                         title = ann.title,
-                        message = ann.content ?: "New Announcement",
-                        isRead = false
+                        message = ann.content ?: "New Announcement"
                     ))
-                } catch (e: Exception) { Log.e("MainRepository", "Failed to insert notice for ${user.id}") }
+                } catch (e: Exception) { }
             }
-
-            // 2. Send global push notification via OneSignal
             sendGlobalPushNotification(ann.title, ann.content ?: "New announcement posted")
-            
             Result.success(Unit)
         } catch (e: Exception) { 
             Log.e("MainRepository", "Create announcement failed", e)
@@ -514,27 +614,41 @@ class MainRepository {
 
     suspend fun createStudyMaterial(material: StudyMaterial): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            adminDb.from("study_materials").insert(material)
+            val materialJson = buildJsonObject {
+                put("title", material.title)
+                put("subject", material.subject)
+                put("batch", material.batch)
+                put("department", material.department)
+                put("file_url", material.fileUrl)
+                put("faculty_id", material.uploadedBy)
+            }
+            adminDb.from("study_materials").insert(materialJson)
             Result.success(Unit)
         } catch (e: Exception) { Result.failure(e) }
     }
 
     suspend fun uploadStudyMaterial(title: String, subject: String, batch: String, department: String, file: File, facultyId: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            val uploadResult = uploadStudyFile(file)
-            if (uploadResult.isSuccess) {
-                val material = StudyMaterial(
-                    title = title,
-                    subject = subject,
-                    batch = batch,
-                    department = department,
-                    fileUrl = uploadResult.getOrThrow(),
-                    uploadedBy = facultyId
-                )
-                createStudyMaterial(material)
-            } else {
-                Result.failure(uploadResult.exceptionOrNull() ?: Exception("Upload failed"))
-            }
+            val fileUrlResult = uploadStudyFile(file)
+            if (fileUrlResult.isFailure) return@withContext Result.failure(fileUrlResult.exceptionOrNull() ?: Exception("Upload failed"))
+            
+            val url = fileUrlResult.getOrThrow()
+            val material = StudyMaterial(
+                title = title,
+                subject = subject,
+                batch = batch,
+                department = department,
+                fileUrl = url,
+                uploadedBy = facultyId
+            )
+            createStudyMaterial(material)
+        } catch (e: Exception) { Result.failure(e) }
+    }
+
+    suspend fun deleteStudyMaterial(id: String): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            adminDb.from("study_materials").delete { filter { eq("id", id) } }
+            Result.success(Unit)
         } catch (e: Exception) { Result.failure(e) }
     }
 
@@ -542,34 +656,44 @@ class MainRepository {
     suspend fun uploadClubBanner(file: File): Result<String> = withContext(Dispatchers.IO) {
         try {
             val fileName = "club_${UUID.randomUUID()}.${file.extension}"
-            val bucket = SupabaseClient.client.storage.from("banners")
-            bucket.upload("club_banners/$fileName", file.readBytes())
-            Result.success(bucket.publicUrl("club_banners/$fileName"))
-        } catch (e: Exception) { Result.failure(e) }
+            val bucket = adminStorage.from("club banner")
+            bucket.upload(fileName, file.readBytes()) { upsert = true }
+            Result.success(bucket.publicUrl(fileName))
+        } catch (e: Exception) { 
+            Log.e("MainRepository", "uploadClubBanner failed", e)
+            Result.failure(e) 
+        }
     }
 
     suspend fun uploadEventBanner(file: File): Result<String> = withContext(Dispatchers.IO) {
         try {
             val fileName = "event_${UUID.randomUUID()}.${file.extension}"
-            val bucket = SupabaseClient.client.storage.from("banners")
-            bucket.upload("event_banners/$fileName", file.readBytes())
-            Result.success(bucket.publicUrl("event_banners/$fileName"))
-        } catch (e: Exception) { Result.failure(e) }
+            val bucket = adminStorage.from("event banner")
+            bucket.upload(fileName, file.readBytes()) { upsert = true }
+            Result.success(bucket.publicUrl(fileName))
+        } catch (e: Exception) { 
+            Log.e("MainRepository", "uploadEventBanner failed", e)
+            Result.failure(e) 
+        }
     }
 
     suspend fun uploadStudyFile(file: File): Result<String> = withContext(Dispatchers.IO) {
         try {
             val fileName = "study_${UUID.randomUUID()}.${file.extension}"
-            val bucket = SupabaseClient.client.storage.from("materials")
-            bucket.upload("files/$fileName", file.readBytes())
-            Result.success(bucket.publicUrl("files/$fileName"))
-        } catch (e: Exception) { Result.failure(e) }
+            val bucket = adminStorage.from("study material")
+            bucket.upload(fileName, file.readBytes()) { upsert = true }
+            Result.success(bucket.publicUrl(fileName))
+        } catch (e: Exception) { 
+            Log.e("MainRepository", "uploadStudyFile failed", e)
+            Result.failure(e) 
+        }
     }
 
     suspend fun uploadProfileImage(userId: String, file: File, role: String): Result<String> = withContext(Dispatchers.IO) {
         try {
             val fileName = "${role}_$userId.${file.extension}"
-            val bucket = SupabaseClient.client.storage.from("profiles")
+            val bucketName = if (role == "student") "student photo" else "faculty photo"
+            val bucket = adminStorage.from(bucketName)
             bucket.upload(fileName, file.readBytes()) {
                 upsert = true
             }
@@ -582,7 +706,10 @@ class MainRepository {
             }
             
             Result.success(url)
-        } catch (e: Exception) { Result.failure(e) }
+        } catch (e: Exception) { 
+            Log.e("MainRepository", "uploadProfileImage failed", e)
+            Result.failure(e) 
+        }
     }
 
     // --- Notifications ---
@@ -600,9 +727,10 @@ class MainRepository {
     suspend fun sendNotification(userId: String, title: String, message: String) {
         try { 
             adminDb.from("notifications").insert(Notification(userId = userId, title = title, message = message))
-            // Also send OneSignal push
             sendPushNotification(userId, title, message)
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+            Log.e("MainRepository", "sendNotification failed for $userId: ${e.message}")
+        }
     }
 
     private fun sendPushNotification(userId: String, title: String, message: String) {
@@ -614,10 +742,7 @@ class MainRepository {
         }.toString()
 
         val restKey = BuildConfig.ONESIGNAL_REST_API_KEY
-        if (restKey.isEmpty()) {
-            Log.e("OneSignal", "ONESIGNAL_REST_API_KEY is missing!")
-            return
-        }
+        if (restKey.isEmpty()) return
 
         val request = Request.Builder()
             .url("https://onesignal.com/api/v1/notifications")
@@ -626,11 +751,8 @@ class MainRepository {
             .build()
 
         httpClient.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: java.io.IOException) { Log.e("OneSignal", "Push failed", e) }
-            override fun onResponse(call: Call, response: Response) { 
-                Log.d("OneSignal", "Push response: ${response.code} ${response.message}")
-                response.close()
-            }
+            override fun onFailure(call: Call, e: java.io.IOException) { }
+            override fun onResponse(call: Call, response: Response) { response.close() }
         })
     }
 
@@ -643,10 +765,7 @@ class MainRepository {
         }.toString()
 
         val restKey = BuildConfig.ONESIGNAL_REST_API_KEY
-        if (restKey.isEmpty()) {
-            Log.e("OneSignal", "ONESIGNAL_REST_API_KEY is missing!")
-            return
-        }
+        if (restKey.isEmpty()) return
 
         val request = Request.Builder()
             .url("https://onesignal.com/api/v1/notifications")
@@ -655,11 +774,8 @@ class MainRepository {
             .build()
 
         httpClient.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: java.io.IOException) { Log.e("OneSignal", "Global push failed", e) }
-            override fun onResponse(call: Call, response: Response) { 
-                Log.d("OneSignal", "Global push response: ${response.code} ${response.message}")
-                response.close()
-            }
+            override fun onFailure(call: Call, e: java.io.IOException) { }
+            override fun onResponse(call: Call, response: Response) { response.close() }
         })
     }
 }

@@ -16,32 +16,34 @@
         <LinearLayout
             android:id="@+id/header_layout"
             android:layout_width="match_parent"
-            android:layout_height="240dp"
+            android:layout_height="wrap_content"
+            android:minHeight="240dp"
             android:background="@drawable/bg_teal_header"
             android:gravity="center"
+            android:paddingVertical="32dp"
             android:orientation="vertical">
 
-            <!-- Graduation Cap Icon in rounded square -->
+            <!-- App Icon - Enlarged to 130dp -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/header_logo_card"
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                app:cardCornerRadius="18dp"
-                app:cardBackgroundColor="#3D7A8F"
+                android:layout_width="130dp"
+                android:layout_height="130dp"
+                app:cardCornerRadius="26dp"
+                app:cardBackgroundColor="@android:color/transparent"
                 app:cardElevation="0dp">
                 <ImageView
-                    android:layout_width="170dp"
-                    android:layout_height="170dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:src="@drawable/icon_removebg"
-                    android:scaleType="centerInside" />
+                    android:scaleType="centerCrop" />
             </androidx.cardview.widget.CardView>
 
             <TextView
                 android:id="@+id/tv_welcome_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="-18dp"
                 android:fontFamily="sans-serif-medium"
                 android:text="Welcome To"
                 android:textColor="@color/white"
@@ -52,7 +54,7 @@
                 android:id="@+id/tv_welcome_subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="0dp"
                 android:text="Connect Avantika"
                 android:textColor="#B0D8E8"
                 android:textSize="14sp" />
@@ -168,11 +170,13 @@
                 <LinearLayout
                     android:id="@+id/role_admin"
                     android:layout_width="0dp"
-                    android:layout_height="80dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="80dp"
                     android:layout_columnWeight="1"
                     android:layout_margin="5dp"
                     android:background="@drawable/bg_role_tile_default"
                     android:gravity="center"
+                    android:padding="8dp"
                     android:orientation="vertical"
                     android:clickable="true"
                     android:focusable="true">
@@ -191,18 +195,21 @@
                         android:text="Dean"
                         android:textColor="#4D5D78"
                         android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:textAlignment="center" />
                 </LinearLayout>
 
                 <!-- Club Lead -->
                 <LinearLayout
                     android:id="@+id/role_club_lead"
                     android:layout_width="0dp"
-                    android:layout_height="80dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="80dp"
                     android:layout_columnWeight="1"
                     android:layout_margin="5dp"
                     android:background="@drawable/bg_role_tile_default"
                     android:gravity="center"
+                    android:padding="8dp"
                     android:orientation="vertical"
                     android:clickable="true"
                     android:focusable="true">
@@ -220,18 +227,21 @@
                         android:text="Club Lead"
                         android:textColor="#4D5D78"
                         android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:textAlignment="center" />
                 </LinearLayout>
 
                 <!-- Faculty -->
                 <LinearLayout
                     android:id="@+id/role_faculty"
                     android:layout_width="0dp"
-                    android:layout_height="80dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="80dp"
                     android:layout_columnWeight="1"
                     android:layout_margin="5dp"
                     android:background="@drawable/bg_role_tile_selected"
                     android:gravity="center"
+                    android:padding="8dp"
                     android:orientation="vertical"
                     android:clickable="true"
                     android:focusable="true">
@@ -249,18 +259,21 @@
                         android:text="Faculty"
                         android:textColor="@color/black"
                         android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:textAlignment="center" />
                 </LinearLayout>
 
                 <!-- Student -->
                 <LinearLayout
                     android:id="@+id/role_student"
                     android:layout_width="0dp"
-                    android:layout_height="80dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="80dp"
                     android:layout_columnWeight="1"
                     android:layout_margin="5dp"
                     android:background="@drawable/bg_role_tile_default"
                     android:gravity="center"
+                    android:padding="8dp"
                     android:orientation="vertical"
                     android:clickable="true"
                     android:focusable="true">
@@ -278,7 +291,8 @@
                         android:text="Student"
                         android:textColor="#4D5D78"
                         android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:textAlignment="center" />
                 </LinearLayout>
 
             </GridLayout>
@@ -301,7 +315,7 @@
             <Button
                 android:id="@+id/btn_login"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:layout_marginTop="12dp"
                 android:backgroundTint="@color/primary"
                 android:text="Login"
@@ -341,7 +355,7 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_google"
                 android:layout_width="match_parent"
-                android:layout_height="54dp"
+                android:layout_height="56dp"
                 android:layout_marginTop="16dp"
                 android:text="Continue with Google"
                 android:textColor="@color/text_primary"
@@ -364,6 +378,7 @@
             android:layout_marginVertical="24dp"
             android:gravity="center"
             android:textSize="13sp"
+            android:paddingHorizontal="20dp"
             android:textColor="@color/text_secondary">
             <![CDATA[Don't have an account? <b><font color="#2D6A7F">Contact Admin</font></b>]]>
         </TextView>

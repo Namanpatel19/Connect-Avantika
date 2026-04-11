@@ -9,6 +9,7 @@ import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
@@ -16,9 +17,13 @@ import androidx.core.widget.ImageViewCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.databinding.ActivityLoginBinding
 import com.example.myapplication.repository.MainRepository
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.onesignal.OneSignal
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.auth.providers.builtin.IDToken
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
@@ -27,6 +32,25 @@ class LoginActivity : AppCompatActivity() {
     private var selectedRole: String = "faculty"
     private val repository = MainRepository()
     private var adminClickCount = 0
+
+    private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)
+            val idToken = account?.idToken
+            val email = account?.email
+            Log.d("LoginActivity", "Google Account: $email, IDToken available: ${idToken != null}")
+            
+            if (idToken != null && email != null) {
+                loginWithGoogle(idToken, email)
+            } else {
+                Toast.makeText(this, "Google ID Token not found", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Log.e("LoginActivity", "Google sign in failed code: ${e.message}", e)
+            Toast.makeText(this, "Google Sign-In failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -171,6 +195,56 @@ class LoginActivity : AppCompatActivity() {
             val intent = Intent(this, ForgotPasswordActivity::class.java)
             startActivity(intent)
         }
+
+        binding.btnGoogle.setOnClickListener {
+            // Web Client ID from Google Cloud Console / Firebase
+            val webClientId = "225378641751-v73hfjt2lio06vto7c2u6r5882utm6df.apps.googleusercontent.com"
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestIdToken(webClientId)
+                .build()
+            val client = GoogleSignIn.getClient(this, gso)
+            // Sign out first to ensure account picker shows up
+            client.signOut().addOnCompleteListener {
+                googleSignInLauncher.launch(client.signInIntent)
+            }
+        }
+    }
+
+    private fun loginWithGoogle(idTokenValue: String, email: String) {
+        lifecycleScope.launch {
+            try {
+                binding.btnGoogle.isEnabled = false
+                Log.d("LoginActivity", "Login with Google: $email")
+                
+                // 1. Check if user exists in our public.users table
+                val user = repository.getUserByEmail(email)
+                if (user == null) {
+                    Toast.makeText(this@LoginActivity, "Account not found. Please contact admin to register your email.", Toast.LENGTH_LONG).show()
+                    GoogleSignIn.getClient(this@LoginActivity, GoogleSignInOptions.DEFAULT_SIGN_IN).signOut()
+                    return@launch
+                }
+
+                // 2. Sign in with Supabase using IDToken
+                SupabaseClient.client.auth.signInWith(IDToken) {
+                    idToken = idTokenValue
+                    provider = Google
+                }
+
+                val userId = SupabaseClient.client.auth.currentUserOrNull()?.id
+                if (userId != null) {
+                    OneSignal.login(userId)
+                    navigateToDashboard(user.role, userId)
+                } else {
+                    Toast.makeText(this@LoginActivity, "Supabase session failed", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Log.e("LoginActivity", "Google login error", e)
+                Toast.makeText(this@LoginActivity, "Supabase Login failed: ${e.message}", Toast.LENGTH_LONG).show()
+            } finally {
+                binding.btnGoogle.isEnabled = true
+            }
+        }
     }
 
     private fun loginUser(emailStr: String, passwordStr: String) {
@@ -236,17 +310,15 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun checkSession() {
-        val user = SupabaseClient.client.auth.currentUserOrNull()
-        if (user != null) {
-            lifecycleScope.launch {
-                try {
-                    val role = repository.getUserRole(user.id)
-                    role?.let { 
-                        OneSignal.login(user.id)
-                        navigateToDashboard(it, user.id) 
+        lifecycleScope.launch {
+            val session = SupabaseClient.client.auth.currentSessionOrNull()
+            if (session != null) {
+                val userId = session.user?.id
+                if (userId != null) {
+                    val dbRole = repository.getUserRole(userId)
+                    if (dbRole != null) {
+                        navigateToDashboard(dbRole, userId)
                     }
-                } catch (e: Exception) {
-                    // Session might be invalid or role fetch failed
                 }
             }
         }
@@ -254,8 +326,8 @@ class LoginActivity : AppCompatActivity() {
 
     private fun navigateToDashboard(role: String, userId: String) {
         val intent = Intent(this, MainActivity::class.java)
-        intent.putExtra("USER_ROLE", role)
         intent.putExtra("USER_ID", userId)
+        intent.putExtra("USER_ROLE", role)
         startActivity(intent)
         finish()
     }

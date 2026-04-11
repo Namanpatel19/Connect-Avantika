@@ -9,7 +9,10 @@ import com.example.myapplication.data.StudyMaterial
 import com.example.myapplication.databinding.ItemStudyMaterialBinding
 
 class StudyMaterialAdapter(
-    private var materials: List<StudyMaterial>
+    private var materials: List<StudyMaterial>,
+    private val canManage: Boolean = false,
+    private val onViewClick: (StudyMaterial) -> Unit = {},
+    private val onDeleteClick: (StudyMaterial) -> Unit = {}
 ) : RecyclerView.Adapter<StudyMaterialAdapter.VH>() {
 
     inner class VH(val b: ItemStudyMaterialBinding) : RecyclerView.ViewHolder(b.root)
@@ -27,14 +30,16 @@ class StudyMaterialAdapter(
             chipBatch.text = m.batch ?: "All Batches"
             chipDept.text = m.department ?: "All Depts"
             
+            // Manage visibility of buttons
+            btnView.visibility = android.view.View.VISIBLE
+            btnDelete.visibility = if (canManage) android.view.View.VISIBLE else android.view.View.GONE
+
+            btnView.setOnClickListener { onViewClick(m) }
+            btnDelete.setOnClickListener { onDeleteClick(m) }
+
             // Click to open/download the file
             root.setOnClickListener {
-                m.fileUrl?.let { url ->
-                    try {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                        root.context.startActivity(intent)
-                    } catch (_: Exception) { }
-                }
+                onViewClick(m)
             }
         }
     }

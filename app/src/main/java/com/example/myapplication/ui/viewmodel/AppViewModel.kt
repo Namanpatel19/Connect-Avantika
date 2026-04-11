@@ -113,7 +113,10 @@ class AppViewModel : ViewModel() {
     fun updateClub(club: Club, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
             val result = repository.updateClub(club)
-            if (result.isSuccess) loadAllClubs()
+            if (result.isSuccess) {
+                loadAllClubs()
+                loadMyClub()
+            }
             callback(result.isSuccess)
         }
     }
@@ -128,21 +131,29 @@ class AppViewModel : ViewModel() {
 
     fun uploadClubBanner(clubId: String, file: File, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
-            _isLoading.value = true
-            val uploadResult = repository.uploadClubBanner(file)
-            if (uploadResult.isSuccess) {
-                val bannerUrl = uploadResult.getOrNull()
-                val club = _clubs.value?.find { it.id == clubId }
-                if (club != null && bannerUrl != null) {
-                    val updateResult = repository.updateClub(club.copy(bannerUrl = bannerUrl))
-                    if (updateResult.isSuccess) loadAllClubs()
+            try {
+                _isLoading.value = true
+                val uploadResult = repository.uploadClubBanner(file)
+                if (uploadResult.isSuccess) {
+                    val bannerUrl = uploadResult.getOrThrow()
+                    // Use the specific banner update method for reliability
+                    val updateResult = repository.updateClubBanner(clubId, bannerUrl)
+                    if (updateResult.isSuccess) {
+                        loadAllClubs()
+                        loadMyClub()
+                    }
                     _isLoading.value = false
                     callback(updateResult.isSuccess)
-                    return@launch
+                } else {
+                    Log.e("AppViewModel", "Banner upload failed: ${uploadResult.exceptionOrNull()?.message}")
+                    _isLoading.value = false
+                    callback(false)
                 }
+            } catch (e: Exception) {
+                Log.e("AppViewModel", "uploadClubBanner failed", e)
+                _isLoading.value = false
+                callback(false)
             }
-            _isLoading.value = false
-            callback(false)
         }
     }
 
@@ -173,7 +184,9 @@ class AppViewModel : ViewModel() {
 
     fun loadDeanEvents() {
         viewModelScope.launch {
-            _deanPendingEvents.value = userId.let { repository.getEventsForDean(it) }
+            if (userId.isNotEmpty()) {
+                _deanPendingEvents.value = repository.getEventsForDean(userId)
+            }
         }
     }
 
@@ -187,15 +200,20 @@ class AppViewModel : ViewModel() {
                     val uploadResult = repository.uploadEventBanner(bannerFile)
                     if (uploadResult.isSuccess) {
                         eventToSubmit = eventToSubmit.copy(bannerUrl = uploadResult.getOrNull())
+                    } else {
+                        Log.e("AppViewModel", "Banner upload failed: ${uploadResult.exceptionOrNull()?.message}")
+                        _isLoading.value = false
+                        callback(false)
+                        return@launch
                     }
                 }
                 
+                // createEvent already handles sending notification to Dean in the Repository
                 val result = repository.createEvent(eventToSubmit, event.deanId)
                 if (result.isSuccess) {
-                    event.deanId?.let { deanId: String ->
-                        repository.sendNotification(deanId, "New Event Approval", "A new event '${event.title}' is waiting for your approval.")
-                    }
                     loadMyClub()
+                } else {
+                    Log.e("AppViewModel", "Repository createEvent failed: ${result.exceptionOrNull()?.message}")
                 }
                 _isLoading.value = false
                 callback(result.isSuccess)
@@ -394,8 +412,10 @@ class AppViewModel : ViewModel() {
 
     fun createAnnouncement(ann: Announcement, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
-            val result = repository.createAnnouncement(ann)
+            _isLoading.value = true
+            val result = repository.createAnnouncement(ann.copy(createdBy = userId))
             if (result.isSuccess) loadAnnouncements()
+            _isLoading.value = false
             callback(result.isSuccess)
         }
     }

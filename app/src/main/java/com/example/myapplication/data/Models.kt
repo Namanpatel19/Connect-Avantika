@@ -44,12 +44,24 @@ data class Event(
     @SerialName("created_by") val createdBy: String? = null,
     val status: String = "pending",
     @SerialName("event_date") val eventDate: String? = null,
+    @SerialName("event_time") val eventTime: String? = null,
+    val venue: String? = null,
     @SerialName("banner_url") val bannerUrl: String? = null,
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("dean_id") val deanId: String? = null,
     @SerialName("entry_fee") val entryFee: Double = 0.0,
     @SerialName("is_paid") val isPaid: Boolean = false,
     @Transient var isRegistered: Boolean = false
+)
+
+@Serializable
+data class EventApproval(
+    val id: String? = null,
+    @SerialName("event_id") val eventId: String,
+    @SerialName("dean_id") val deanId: String,
+    val status: String,
+    val remarks: String? = null,
+    @SerialName("reviewed_at") val reviewedAt: String? = null
 )
 
 @Serializable
