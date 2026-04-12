@@ -60,7 +60,7 @@ Avantika Connect is a comprehensive mobile solution designed to bridge the commu
 ---
 
 ### Demo Video
-[Watch the Demo on YouTube](https://youtube.com/link-to-your-video)
+[Watch the Demo on YouTube](https://youtu.be/cHXPzW3UQw0?feature=shared)
 
 ---
 
