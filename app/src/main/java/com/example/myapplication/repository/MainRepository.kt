@@ -144,6 +144,7 @@ class MainRepository {
 
     suspend fun updateClub(club: Club): Result<Unit> = withContext(Dispatchers.IO) {
         try {
+            // Surgical update to avoid accidental nulling of fields or primary key issues
             adminDb.from("clubs").update(buildJsonObject {
                 put("name", club.name)
                 put("description", club.description)
@@ -414,7 +415,15 @@ class MainRepository {
     }
 
     suspend fun getEventRegistrations(eventId: String): List<EventRegistration> = withContext(Dispatchers.IO) {
-        try { db.from("event_registrations").select { filter { eq("id", eventId) } }.decodeList<EventRegistration>() } catch (e: Exception) { emptyList() }
+        try { 
+            // FIXED: Column name is event_id, not id
+            db.from("event_registrations").select { 
+                filter { eq("event_id", eventId) } 
+            }.decodeList<EventRegistration>() 
+        } catch (e: Exception) { 
+            Log.e("MainRepository", "getEventRegistrations failed: ${e.message}")
+            emptyList() 
+        }
     }
 
     suspend fun getStudentEventRegistrations(userId: String): List<EventRegistration> = withContext(Dispatchers.IO) {

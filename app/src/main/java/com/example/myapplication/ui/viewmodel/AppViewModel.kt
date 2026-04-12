@@ -136,7 +136,6 @@ class AppViewModel : ViewModel() {
                 val uploadResult = repository.uploadClubBanner(file)
                 if (uploadResult.isSuccess) {
                     val bannerUrl = uploadResult.getOrThrow()
-                    // Use the specific banner update method for reliability
                     val updateResult = repository.updateClubBanner(clubId, bannerUrl)
                     if (updateResult.isSuccess) {
                         loadAllClubs()
@@ -208,7 +207,6 @@ class AppViewModel : ViewModel() {
                     }
                 }
                 
-                // createEvent already handles sending notification to Dean in the Repository
                 val result = repository.createEvent(eventToSubmit, event.deanId)
                 if (result.isSuccess) {
                     loadMyClub()
@@ -255,8 +253,8 @@ class AppViewModel : ViewModel() {
         viewModelScope.launch {
             val result = repository.registerForEvent(EventRegistration(eventId = eventId, studentId = userId, contact = contact))
             if (result.isSuccess) {
-                loadApprovedEvents() // Refresh to update registration state
-                loadLeaderboard() // Refresh points
+                loadApprovedEvents() 
+                loadLeaderboard()
             }
             callback(result.isSuccess)
         }
@@ -335,8 +333,8 @@ class AppViewModel : ViewModel() {
                 repository.addClubMember(request.clubId, request.studentId)
                 repository.sendNotification(request.studentId, "Club Request Accepted", "You have been accepted into the club.")
                 loadClubRequests(request.clubId)
-                loadMyClub() // Refresh members
-                loadLeaderboard() // Refresh points
+                loadMyClub() 
+                loadLeaderboard()
             }
             callback(result.isSuccess)
         }
@@ -501,25 +499,12 @@ class AppViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 _uploadProgress.value = true
-                val uploadResult = repository.uploadStudyFile(file)
-                if (uploadResult.isSuccess) {
-                    val material = StudyMaterial(
-                        title = title,
-                        subject = subject,
-                        batch = batch,
-                        department = dept,
-                        fileUrl = uploadResult.getOrNull(),
-                        uploadedBy = userId
-                    )
-                    val createResult = repository.createStudyMaterial(material)
-                    if (createResult.isSuccess) {
-                        loadStudyMaterials()
-                        callback(true, "Material uploaded successfully")
-                    } else {
-                        callback(false, "Failed to save material details")
-                    }
+                val result = repository.uploadStudyMaterial(title, subject, batch, dept, file, userId)
+                if (result.isSuccess) {
+                    loadStudyMaterials()
+                    callback(true, "Material uploaded successfully")
                 } else {
-                    callback(false, "File upload failed")
+                    callback(false, "Upload failed: ${result.exceptionOrNull()?.message}")
                 }
                 _uploadProgress.value = false
             } catch (e: Exception) {
@@ -527,6 +512,14 @@ class AppViewModel : ViewModel() {
                 _uploadProgress.value = false
                 callback(false, "An error occurred: ${e.message}")
             }
+        }
+    }
+
+    fun deleteStudyMaterial(id: String, callback: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val result = repository.deleteStudyMaterial(id)
+            if (result.isSuccess) loadStudyMaterials()
+            callback(result.isSuccess)
         }
     }
 
