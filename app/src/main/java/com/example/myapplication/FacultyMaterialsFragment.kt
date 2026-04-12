@@ -65,10 +65,15 @@ class FacultyMaterialsFragment : Fragment() {
         }
 
         vm.studyMaterials.observe(viewLifecycleOwner) { list ->
-            materialsAdapter.update(list)
+            materialsAdapter.update(list, vm.faculty.value ?: emptyList())
+        }
+        
+        vm.faculty.observe(viewLifecycleOwner) { facultyList ->
+            materialsAdapter.update(vm.studyMaterials.value ?: emptyList(), facultyList)
         }
 
         vm.loadStudyMaterials()
+        vm.loadAllFaculty()
     }
 
     private fun setupDropdowns() {
@@ -82,7 +87,24 @@ class FacultyMaterialsFragment : Fragment() {
     }
 
     private fun setupRecycler() {
-        materialsAdapter = StudyMaterialAdapter(emptyList())
+        materialsAdapter = StudyMaterialAdapter(
+            materials = emptyList(),
+            canManage = true,
+            onViewClick = { m ->
+                m.fileUrl?.let { url ->
+                    try {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Cannot open: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            },
+            onDeleteClick = { m ->
+                vm.deleteStudyMaterial(m.id!!) {
+                    Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
         binding.rvMaterials.layoutManager = LinearLayoutManager(context)
         binding.rvMaterials.adapter = materialsAdapter
     }
