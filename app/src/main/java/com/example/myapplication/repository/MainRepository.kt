@@ -26,6 +26,8 @@ class MainRepository {
     private val adminStorage = SupabaseClient.adminClient.storage
     private val httpClient = OkHttpClient()
 
+    private fun String.normalize() = this.lowercase().replace("-", "").replace(" ", "").trim()
+
     // --- Auth & User ---
     suspend fun getUserRole(userId: String): String? = withContext(Dispatchers.IO) {
         try {
@@ -409,7 +411,7 @@ class MainRepository {
     suspend fun registerForEvent(registration: EventRegistration): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             adminDb.from("event_registrations").insert(registration)
-            addPoints(registration.studentId, 50, "event_registration", registration.eventId)
+            addPoints(registration.studentId, 100, "event_registration", registration.eventId)
             Result.success(Unit)
         } catch (e: Exception) { Result.failure(e) }
     }
@@ -603,22 +605,31 @@ class MainRepository {
 
     // --- Study Materials ---
     suspend fun getStudyMaterials(): List<StudyMaterial> = withContext(Dispatchers.IO) {
-        try { db.from("study_materials").select().decodeList<StudyMaterial>() } catch (e: Exception) { emptyList() }
+        try { adminDb.from("study_materials").select().decodeList<StudyMaterial>() } catch (e: Exception) { emptyList() }
     }
 
     suspend fun getStudyMaterialsForFaculty(userId: String): List<StudyMaterial> = withContext(Dispatchers.IO) {
-        try { db.from("study_materials").select { filter { eq("faculty_id", userId) } }.decodeList<StudyMaterial>() } catch (e: Exception) { emptyList() }
+        try { adminDb.from("study_materials").select { filter { eq("faculty_id", userId) } }.decodeList<StudyMaterial>() } catch (e: Exception) { emptyList() }
     }
 
     suspend fun getStudyMaterialsForStudent(batch: String, dept: String): List<StudyMaterial> = withContext(Dispatchers.IO) {
         try {
-            db.from("study_materials").select {
-                filter {
-                    eq("batch", batch)
-                    eq("department", dept)
-                }
-            }.decodeList<StudyMaterial>()
-        } catch (e: Exception) { emptyList() }
+            val all = adminDb.from("study_materials").select().decodeList<StudyMaterial>()
+            all.filter { m ->
+                val mBatch = (m.batch ?: "").normalize()
+                val mDept = (m.department ?: "").normalize()
+                val sBatch = batch.normalize()
+                val sDept = dept.normalize()
+                
+                (mBatch == sBatch && mDept == sDept) ||
+                (mBatch.isEmpty() && mDept.isEmpty()) ||
+                (mBatch.isEmpty() && mDept == sDept) ||
+                (mDept.isEmpty() && mBatch == sBatch)
+            }
+        } catch (e: Exception) { 
+            Log.e("MainRepository", "getStudyMaterialsForStudent failed", e)
+            emptyList() 
+        }
     }
 
     suspend fun createStudyMaterial(material: StudyMaterial): Result<Unit> = withContext(Dispatchers.IO) {

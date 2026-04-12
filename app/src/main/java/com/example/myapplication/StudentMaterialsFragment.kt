@@ -36,13 +36,19 @@ class StudentMaterialsFragment : Fragment() {
 
         vm.studyMaterials.observe(viewLifecycleOwner) { list ->
             binding.progressBar.visibility = View.GONE
-            if (list.isNullOrEmpty()) {
+            if (list == null) return@observe
+            
+            if (list.isEmpty()) {
                 binding.tvEmpty.visibility = View.VISIBLE
-                adapter.update(emptyList())
+                adapter.update(emptyList(), vm.faculty.value ?: emptyList())
             } else {
                 binding.tvEmpty.visibility = View.GONE
-                adapter.update(list)
+                adapter.update(list, vm.faculty.value ?: emptyList())
             }
+        }
+        
+        vm.faculty.observe(viewLifecycleOwner) { facultyList ->
+            adapter.update(vm.studyMaterials.value ?: emptyList(), facultyList ?: emptyList())
         }
 
         vm.currentStudent.observe(viewLifecycleOwner) { student ->
@@ -53,6 +59,7 @@ class StudentMaterialsFragment : Fragment() {
 
         binding.progressBar.visibility = View.VISIBLE
         vm.loadStudyMaterials()
+        vm.loadAllFaculty()
     }
 
     private fun setupRecycler() {

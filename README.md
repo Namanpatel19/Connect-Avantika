@@ -27,13 +27,23 @@ Avantika Connect is a comprehensive mobile solution designed to bridge the commu
 
 ---
 
+### Design
+*   **Figma:** [Avantika App Design](https://www.figma.com/design/yeVSjcWg9vgvmYuGPEOZVV/Avantika-App?node-id=0-1&p=f&t=iT1MWmhCehIFsMZW-0)
+
+---
+
 ### Setup and Run Instructions
 
 1.  **Clone the Repository:**
     ```bash
     git clone https://github.com/Namanpatel19/Connect-Avantika.git
     ```
-2.  **Configuration:**
+2.  **Database Setup (Supabase):**
+    *   Create a new project on [Supabase](https://supabase.com/).
+    *   Go to the **SQL Editor** in your Supabase dashboard.
+    *   Copy the contents of `app/database.sql` from this repository.
+    *   Paste the SQL into the editor and click **Run** to create the necessary tables and constraints.
+3.  **Configuration:**
     Open `local.properties` in the root directory and add your Supabase and OneSignal credentials:
     ```properties
     SUPABASE_URL_S="your_supabase_project_url"
@@ -41,9 +51,9 @@ Avantika Connect is a comprehensive mobile solution designed to bridge the commu
     SUPABASE_SERVICE_ROLE_KEY="your_service_role_key"
     ONESIGNAL_REST_API_KEY="your_onesignal_rest_api_key"
     ```
-3.  **Sync Gradle:**
+4.  **Sync Gradle:**
     Open the project in Android Studio and click "Sync Project with Gradle Files".
-4.  **Build & Run:**
+5.  **Build & Run:**
     *   Select an emulator or a physical device (API 24+).
     *   Click the "Run" button or use `./gradlew installDebug`.
 
@@ -51,6 +61,11 @@ Avantika Connect is a comprehensive mobile solution designed to bridge the commu
 
 ### Demo Video
 [Watch the Demo on YouTube](https://youtube.com/link-to-your-video)
+
+---
+
+### Download App
+[Download the App from Google Drive](https://drive.google.com/drive/folders/1cBdzvug94wAjqKS8JpKPioGl_HCmt2Qj?usp=drive_link)
 
 ---
 
@@ -77,3 +92,4 @@ Avantika Connect is a comprehensive mobile solution designed to bridge the commu
 *   **Attendance Tracking:** QR-code based attendance for approved events.
 *   **Advanced Analytics:** Data visualization for deans to track club participation and academic performance.
 *   **Dark Mode:** Comprehensive UI support for system-wide dark theme.
+*   **Live Transport Tracking:** Real-time tracking of university buses for students and faculty.

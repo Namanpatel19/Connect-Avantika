@@ -45,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:text="Material Title"
                 android:textColor="@color/text_primary"
-                android:textSize="14sp"
+                android:textSize="15sp"
                 android:textStyle="bold"/>
 
             <TextView
@@ -54,7 +54,7 @@
                 android:layout_height="wrap_content"
                 android:text="Subject"
                 android:textColor="@color/text_secondary"
-                android:textSize="12sp"/>
+                android:textSize="13sp"/>
 
             <TextView
                 android:id="@+id/tvUploadedBy"
@@ -70,26 +70,32 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="4dp">
+                android:layout_marginTop="8dp">
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipBatch"
                     android:layout_width="wrap_content"
-                    android:layout_height="28dp"
-                    android:textSize="10sp"
-                    app:chipMinHeight="24dp"
-                    app:chipBackgroundColor="#1A00BFA5"
-                    app:chipStrokeWidth="0dp"/>
+                    android:layout_height="wrap_content"
+                    app:chipMinHeight="32dp"
+                    android:textSize="11sp"
+                    android:textColor="@color/primary"
+                    app:chipBackgroundColor="#E0F2F1"
+                    app:chipStrokeWidth="0dp"
+                    android:clickable="false"
+                    android:checkable="false"/>
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipDept"
                     android:layout_width="wrap_content"
-                    android:layout_height="28dp"
-                    android:textSize="10sp"
-                    android:layout_marginStart="4dp"
-                    app:chipMinHeight="24dp"
-                    app:chipBackgroundColor="#1A009688"
-                    app:chipStrokeWidth="0dp"/>
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    app:chipMinHeight="32dp"
+                    android:textSize="11sp"
+                    android:textColor="@color/primary"
+                    app:chipBackgroundColor="#E0F2F1"
+                    app:chipStrokeWidth="0dp"
+                    android:clickable="false"
+                    android:checkable="false"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -104,7 +110,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_check"
+                android:src="@android:drawable/ic_menu_view"
                 app:tint="@color/primary"
                 android:contentDescription="View/Download" />
 
@@ -113,7 +119,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_shield"
+                android:src="@android:drawable/ic_menu_delete"
                 app:tint="#EF5350"
                 android:contentDescription="Delete" />
         </LinearLayout>

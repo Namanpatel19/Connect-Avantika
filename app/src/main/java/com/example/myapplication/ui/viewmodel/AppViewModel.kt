@@ -480,11 +480,13 @@ class AppViewModel : ViewModel() {
 
     fun loadStudyMaterials() {
         viewModelScope.launch {
+            _isLoading.value = true
             _studyMaterials.value = when (userRole) {
                 "faculty" -> repository.getStudyMaterialsForFaculty(userId)
                 "student" -> {
-                    val student = _currentStudent.value ?: repository.getStudentProfile(userId)
+                    val student = repository.getStudentProfile(userId)
                     if (student != null) {
+                        _currentStudent.value = student
                         repository.getStudyMaterialsForStudent(student.batch ?: "", student.department ?: "")
                     } else {
                         emptyList()
@@ -492,6 +494,7 @@ class AppViewModel : ViewModel() {
                 }
                 else -> repository.getStudyMaterials()
             }
+            _isLoading.value = false
         }
     }
 
